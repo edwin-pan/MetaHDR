@@ -3,9 +3,12 @@ import matplotlib.pyplot as plt
 from dataloader import *
 import os
 from tqdm import tqdm
+import tensorflow as tf
 
-# images,
-# k_shot=2
+
+k_shot=2
+k_shot_2 = k_shot*2 # EP: Not sure why we should do this
+
 images,labels = d.sample_batch('meta_train',8)
 b,n,k,w,h,c = images.shape
 print(b,n,k,w,h,c)
@@ -28,6 +31,7 @@ label_ts = tf.convert_to_tensor(label_ts,tf.float32)
 inp = (input_tr, input_ts, label_tr, label_ts)
 # result = model(inp, meta_batch_size=16, num_inner_updates=1)
 
+# EP: DataGenerator needs to be imported still
 d = DataGenerator(dataset_csv='/home/dataset_10_31_2020_3903_clustered.csv',
                  pano_directory='/home/data2/pano_image',
                  label_directory='/home/data2/labels',
