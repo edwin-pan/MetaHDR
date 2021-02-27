@@ -9,6 +9,21 @@ import tensorflow as tf
 k_shot=2
 k_shot_2 = k_shot*2 # EP: Not sure why we should do this
 
+# EP: DataGenerator needs to be imported still
+d = DataGenerator(dataset_csv='/home/dataset_10_31_2020_3903_clustered.csv',
+                 pano_directory='/home/data2/pano_image',
+                 label_directory='/home/data2/labels',
+                 num_classes=1,
+                 num_samples_per_class=k_shot_2,#2-shot
+                 num_meta_test_classes=1,
+                 num_meta_test_samples_per_class=3*2,#3-shot test
+                 IMG_WIDTH=48,
+                 IMG_HEIGHT=48,
+                 num_circles=2,
+                 clustered=True,
+                 country_code=None)
+
+
 images,labels = d.sample_batch('meta_train',8)
 b,n,k,w,h,c = images.shape
 print(b,n,k,w,h,c)
@@ -30,17 +45,3 @@ label_tr = tf.convert_to_tensor(label_tr,tf.float32)
 label_ts = tf.convert_to_tensor(label_ts,tf.float32)
 inp = (input_tr, input_ts, label_tr, label_ts)
 # result = model(inp, meta_batch_size=16, num_inner_updates=1)
-
-# EP: DataGenerator needs to be imported still
-d = DataGenerator(dataset_csv='/home/dataset_10_31_2020_3903_clustered.csv',
-                 pano_directory='/home/data2/pano_image',
-                 label_directory='/home/data2/labels',
-                 num_classes=1,
-                 num_samples_per_class=k_shot_2,#2-shot
-                 num_meta_test_classes=1,
-                 num_meta_test_samples_per_class=3*2,#3-shot test
-                 IMG_WIDTH=48,
-                 IMG_HEIGHT=48,
-                 num_circles=2,
-                 clustered=True,
-                 country_code=None)
