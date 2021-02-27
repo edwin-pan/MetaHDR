@@ -1,3 +1,3 @@
-from read_data import get_data
+from src.dataset.read_data import get_data
 
 imgs = get_data()
