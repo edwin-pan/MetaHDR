@@ -10,6 +10,9 @@ imgs = get_data()
 dl = DataGenerator(imgs)
 train, test = dl.sample_batch('meta_train', batch_size)
 
+# May want to delete imgs to save some space...
+#del imgs
+
 tr_imgs = train[0]
 tr_hdrs = train[1]
 
