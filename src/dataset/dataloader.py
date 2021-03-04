@@ -18,7 +18,10 @@ class DataGenerator(object):
         num_train = int(split[0] * num_datapoints)
         num_test = int(split[1] * num_datapoints)
         
+        # Seed both
         random.seed(123)
+        np.random.seed(123)
+        
         indeces = np.arange(0, num_datapoints)
         if shuffle:
             random.shuffle(indeces)
