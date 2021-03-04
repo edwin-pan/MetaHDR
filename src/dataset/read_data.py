@@ -8,52 +8,64 @@ NUM_IMGS = 450
 IMG_HEIGHT = 1024
 IMG_WIDTH = 1024
 
+def normalize_hdr(img):
+    return (img - img.min()) / (img.max() - img.min())
+
+
 def get_data(crop=True, crop_factor=0.5):
+    """
+    Reads the data into numpy arrays
+    Args:
+     crop: a boolean which says if we need to crop the input images
+     crop_factor: how much to crop by (will only be needed if crop is True)
+    """
+    
+    
     # Initialize output
     imgs = None
     if crop:
         new_height = int(IMG_HEIGHT * crop_factor)
         new_width = int(IMG_HEIGHT * crop_factor)
-        imgs = np.zeros((4, NUM_IMGS, new_height, new_width, 3))
+        imgs = np.zeros((NUM_IMGS, 4, new_height, new_width, 3))
     else:
-        imgs = np.zeros((4, NUM_IMGS, IMG_HEIGHT, IMG_WIDTH, 3))
+        imgs = np.zeros((NUM_IMGS, 4, IMG_HEIGHT, IMG_WIDTH, 3))
         
     # Define directories
-    hdr_dir = Path(__file__).parent/'data/LDR-HDR-pair_Dataset/HDR'
-    ldr_p2_dir = Path(__file__).parent/'data/LDR-HDR-pair_Dataset/LDR_exposure_+2'
-    ldr_00_dir = Path(__file__).parent/'data/LDR-HDR-pair_Dataset/LDR_exposure_0'
-    ldr_n2_dir = Path(__file__).parent/'data/LDR-HDR-pair_Dataset/LDR_exposure_-2'
+    hdr_dir = Path(__file__).parent.parent.parent/'data/LDR-HDR-pair_Dataset/HDR'
+    ldr_p2_dir = Path(__file__).parent.parent.parent/'data/LDR-HDR-pair_Dataset/LDR_exposure_+2'
+    ldr_00_dir = Path(__file__).parent.parent.parent/'data/LDR-HDR-pair_Dataset/LDR_exposure_0'
+    ldr_n2_dir = Path(__file__).parent.parent.parent/'data/LDR-HDR-pair_Dataset/LDR_exposure_-2'
     
-    print("READING IMGS")
+    print("READING IMGS...")
     time.sleep(1)
     
     # Read files
     for i in tqdm(range(NUM_IMGS)):
         index = i + 1
         
-        hdr_img = io.imread(hdr_dir/f'HDR_{index:03d}.hdr').astype(np.float64)/255
+        hdr_img = io.imread(hdr_dir/f'HDR_{index:03d}.hdr').astype(np.float64)
         ldr_p2_img = io.imread(ldr_p2_dir/f'LDR_{index:03d}.jpg').astype(np.float64)/255
         ldr_00_img = io.imread(ldr_00_dir/f'LDR_{index:03d}.jpg').astype(np.float64)/255
         ldr_n2_img = io.imread(ldr_n2_dir/f'LDR_{index:03d}.jpg').astype(np.float64)/255
-        
         if crop:
             # Define crop params
             new_height = int(IMG_HEIGHT * crop_factor)
             new_width = int(IMG_HEIGHT * crop_factor)
             center_height = IMG_HEIGHT // 2
             center_width = IMG_WIDTH // 2
-            indeces_height = np.arange(center_height-(new_height//2), center_height+(new_height//2))
-            indeces_width = np.arange(center_width-(new_width//2), center_width+(new_width//2))
             
-            imgs[0, i, ...] = hdr_img[indeces_height, indeces_width, :]
-            imgs[1, i, ...] = ldr_p2_img[indeces_height, indeces_width, :]
-            imgs[2, i, ...] = ldr_00_img[indeces_height, indeces_width, :]
-            imgs[3, i, ...] = ldr_n2_img[indeces_height, indeces_width, :]
+            h1, h2 = center_height-(new_height//2), center_height+(new_height//2)
+            w1, w2 = center_width-(new_width//2), center_width+(new_width//2)
+
+            imgs[i, 0, ...] = hdr_img[h1:h2, w1:w2, :]            
+            imgs[i, 1, ...] = ldr_p2_img[h1:h2, w1:w2, :]
+            imgs[i, 2, ...] = ldr_00_img[h1:h2, w1:w2, :]
+            imgs[i, 3, ...] = ldr_n2_img[h1:h2, w1:w2, :]
         else:
-            imgs[0, i, ...] = hdr_img
-            imgs[1, i, ...] = ldr_p2_img
-            imgs[2, i, ...] = ldr_00_img
-            imgs[3, i, ...] = ldr_n2_img
+            imgs[i, 0, ...] = hdr_img
+            imgs[i, 1, ...] = ldr_p2_img
+            imgs[i, 2, ...] = ldr_00_img
+            imgs[i, 3, ...] = ldr_n2_img
 
     
     return imgs
