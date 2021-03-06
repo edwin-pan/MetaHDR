@@ -8,18 +8,13 @@ NUM_IMGS = 450
 IMG_HEIGHT = 1024
 IMG_WIDTH = 1024
 
-def normalize_hdr(img):
-    return (img - img.min()) / (img.max() - img.min())
-
-
 def get_data(crop=True, crop_factor=0.5):
     """
-    Reads the data into numpy arrays
+    Reads the data into a numpy array
     Args:
      crop: a boolean which says if we need to crop the input images
      crop_factor: how much to crop by (will only be needed if crop is True)
     """
-    
     
     # Initialize output
     imgs = None
