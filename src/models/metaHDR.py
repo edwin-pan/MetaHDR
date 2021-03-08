@@ -2,6 +2,7 @@ import tensorflow as tf
 from functools import partial
 from segmentation_models import get_preprocessing
 from segmentation_models.metrics import iou_score
+from tensorflow.image import ssim
 
 from time import time
 
@@ -27,11 +28,11 @@ class MetaHDR(tf.keras.Model):
         self.height = img_height
         self.inner_update_lr = inner_update_lr
         self.get_preprocessing = get_preprocessing
-        self.iou_score = iou_score
+        self.ssim_score = ssim
         self.BACKBONE = backbone
         self.k_shot=1 # This won't change, because we only have 1 example per task
         self.pretrain_flag = pretrain_flag
-        self.loss_func = partial(loss_func)
+        self.loss_func = loss_func
         self.preprocess_input = get_preprocessing(self.BACKBONE)
         if self.pretrain_flag:
             print(self.width,self.height)
@@ -62,9 +63,6 @@ class MetaHDR(tf.keras.Model):
             # the inner and outer loop data
             # query set: (input_tr,label_tr)
             input_tr, input_ts, label_tr, label_ts = inp
-
-            # weights corresponds to the initial weights in MAML (i.e. the meta-parameters)
-            # weights = self.w
 
             # the predicted outputs, loss values, and accuracy for the pre-update model (with the initial weights)
             # evaluated on the inner loop training data
@@ -111,10 +109,14 @@ class MetaHDR(tf.keras.Model):
                 # print("task_outputs_ts {}".format(task_outputs_ts))#(B,5)
                 task_losses_ts.append(loss_ts)
             # Compute accuracies from output predictions
-            task_accuracy_tr_pre = self.iou_score(label_tr,task_output_tr_pre)
+
+            # # DEBUG
+            # import pdb; pdb.set_trace()
+
+            task_accuracy_tr_pre = tf.reduce_mean(self.ssim_score(label_tr,task_output_tr_pre, 1.0)).numpy()
 
             for j in range(num_inner_updates):
-                task_accuracies_ts.append(self.iou_score(label_ts,task_outputs_ts[j]))
+                task_accuracies_ts.append(self.ssim_score(label_ts,task_outputs_ts[j], 1.0).numpy())
 
             task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
 

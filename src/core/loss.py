@@ -5,13 +5,14 @@ import scipy.stats as st
 # TODO: Figure our how this loss works (https://arxiv.org/abs/1710.07480)
 
 class IRLoss():
-    def __init__(self, img_width, img_height, IR_lambda, threshold=0.05):
+    def __init__(self, img_width, img_height, lambda_ir, threshold=0.05):
     # For masked loss, only using information near saturated image regions
         self.thr = threshold # Threshold for blending
-        self.lambda_ir = IR_lambda
+        self.lambda_ir = lambda_ir
         self.sx = img_width
         self.sy = img_height
         self.separated_flag = False # TODO: Why did the authors put two versions?
+
 
     def create_mask(self, y_):
         self.msk = tf.reduce_max(y_, reduction_indices=[3])
@@ -77,6 +78,7 @@ class IRLoss():
 
         cost =              tf.reduce_mean( ( self.lambda_ir*tf.square( tf.subtract(y_ill, y_ill_) ) + (1.0-self.lambda_ir)*tf.square( tf.subtract(y_refl, y_refl_) ) )*self.msk )
         cost_input_output = tf.reduce_mean( ( self.lambda_ir*tf.square( tf.subtract(x_ill, y_ill_) ) + (1.0-self.lambda_ir)*tf.square( tf.subtract(x_refl, y_refl_) ) )*self.msk )
+
 
     def forward_combined(self, x, y, y_, eps):
         """

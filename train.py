@@ -28,7 +28,7 @@ def outer_train_step(inp, model, optim, meta_batch_size=25, num_inner_updates=1)
 
     # dont need to update self.inner_update_lr_dict,
     # since learn rate is part of the model.training_variables
-    gradients = outer_tape.gradient(total_losses_ts[-1], model.m.weights)
+    gradients = outer_tape.gradient(total_losses_ts[-1], model.m.trainable_weights)
 
     # this will update ALL PARAMETERS, including the LEARN RATE!
     # rather than manual gradient descent, Adam (adaptive grad descent) used to update params
@@ -84,7 +84,11 @@ def main(cfg):
     assert img_H == H, "Stated image height and loaded image height are not the same! How bizzare..."
     assert img_W == W, "Stated image width and loaded image width are not the same! How bizzare..."
 
+    # Define Optimizer
     meta_optimizer = tf.keras.optimizers.Adam(learning_rate=cfg.TRAIN.META_LR)
+
+    # Set Accuracy tracking
+    pre_loss, post_loss, pre_accuracies, post_accuracies = [], [], [], []
 
     for itr in tqdm(range(cfg.TRAIN.NUM_META_TR_ITER)):
         # Grab batch of data from dataloader
@@ -97,9 +101,13 @@ def main(cfg):
         if itr % cfg.SUMMARY_INTERVAL == 0:
             pre_accuracies.append(result[-2])
             post_accuracies.append(result[-1][-1])
+            pre_loss.append(result[-4])
+            post_loss.append(result[-3][-1])
+
+        import pdb; pdb.set_trace()
 
         if (itr!=0) and itr % cfg.PRINT_INTERVAL == 0:
-            print_str = 'Iteration %d: pre-inner-loop train accuracy: %.5f, post-inner-loop test accuracy: %.5f' % (itr, np.mean(pre_accuracies), np.mean(post_accuracies))
+            print_str = 'Iteration %d: pre loss: %.5f, post loss: %.5f, pre-inner-loop train accuracy: %.5f, post-inner-loop test accuracy: %.5f' % (itr, np.mean(pre_loss), np.mean(post_loss), np.mean(pre_accuracies), np.mean(post_accuracies))
             print(print_str)
             pre_accuracies, post_accuracies = [], []
 
