@@ -1,4 +1,4 @@
-from lib.models.UNet import get_unet
+from src.models.UNet import get_unet
 
 def copy_model_fn(mi,width,height):
     copied_model = get_unet(width,height)

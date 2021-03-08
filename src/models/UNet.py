@@ -1,6 +1,43 @@
 import tensorflow as tf
 
 def get_unet(img_rows,img_cols):
+    """
+        UNet architecture used.
+
+        0 input_1
+        1 separable_conv2d
+        2 separable_conv2d_1
+        3 max_pooling2d
+        4 separable_conv2d_2
+        5 separable_conv2d_3
+        6 max_pooling2d_1
+        7 separable_conv2d_4
+        8 separable_conv2d_5
+        9 max_pooling2d_2
+        10 separable_conv2d_6
+        11 separable_conv2d_7
+        12 max_pooling2d_3
+        13 separable_conv2d_8
+        14 separable_conv2d_9
+        15 conv2d_transpose
+        16 concatenate
+        17 separable_conv2d_10
+        18 separable_conv2d_11
+        19 conv2d_transpose_1
+        20 concatenate_1
+        21 separable_conv2d_12
+        22 separable_conv2d_13
+        23 conv2d_transpose_2
+        24 concatenate_2
+        25 separable_conv2d_14
+        26 separable_conv2d_15
+        27 conv2d_transpose_3
+        28 concatenate_3
+        29 separable_conv2d_16
+        30 separable_conv2d_17
+        31 separable_conv2d_18
+    """
+
     inputs = tf.keras.layers.Input((img_rows, img_cols, 3))
     # tf.keras.layers.SeparableConv2D(fil)
     conv1 = tf.keras.layers.SeparableConv2D(32, (3, 3), activation='relu', padding='same')(inputs)
@@ -38,7 +75,7 @@ def get_unet(img_rows,img_cols):
     conv9 =tf.keras.layers.SeparableConv2D(32, (3, 3), activation='relu', padding='same')(up9)
     conv9 =tf.keras.layers.SeparableConv2D(32, (3, 3), activation='relu', padding='same')(conv9)
 
-    conv10 =tf.keras.layers.SeparableConv2D(1, (1, 1), activation='sigmoid')(conv9)
+    conv10 =tf.keras.layers.SeparableConv2D(1, (1, 1), activation='relu')(conv9) # Don't use sigmoid since we are performing "regression"
 
     model = tf.keras.Model(inputs=[inputs], outputs=[conv10])
 

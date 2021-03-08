@@ -1,0 +1,22 @@
+OUTPUT_DIR: 'results'
+EXP_NAME: 'default'
+SUMMARY_INTERVAL: 10
+PRINT_INTERVAL: 10
+TEST_PRINT_INTERVAL: 50
+
+# Loss parameters
+LOSS:
+  SEP_LOSS: True
+  LAMBDA: 0.5
+
+# Training parameters
+TRAIN:
+  BATCH_SIZE: 8
+  NUM_META_TR_ITER: 1 # 
+  NUM_TASK_TR_ITER: 1 # Number of task-specific inner loops
+  META_LR: 
+  TASK_LR: 0.4
+  
+# Utility parameters
+UTILS:
+  GAMMA: 2.2
