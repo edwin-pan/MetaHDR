@@ -75,7 +75,7 @@ def get_unet(img_rows,img_cols):
     conv9 =tf.keras.layers.SeparableConv2D(32, (3, 3), activation='relu', padding='same')(up9)
     conv9 =tf.keras.layers.SeparableConv2D(32, (3, 3), activation='relu', padding='same')(conv9)
 
-    conv10 =tf.keras.layers.SeparableConv2D(3, (1, 1), activation='relu')(conv9) # Don't use sigmoid since we are performing "regression"
+    conv10 =tf.keras.layers.SeparableConv2D(3, (1, 1), activation='sigmoid')(conv9) # Don't use sigmoid since we are performing "regression"
 
     model = tf.keras.Model(inputs=[inputs], outputs=[conv10])
 

@@ -104,10 +104,8 @@ def main(cfg):
             pre_loss.append(result[-4])
             post_loss.append(result[-3][-1])
 
-        import pdb; pdb.set_trace()
-
         if (itr!=0) and itr % cfg.PRINT_INTERVAL == 0:
-            print_str = 'Iteration %d: pre loss: %.5f, post loss: %.5f, pre-inner-loop train accuracy: %.5f, post-inner-loop test accuracy: %.5f' % (itr, np.mean(pre_loss), np.mean(post_loss), np.mean(pre_accuracies), np.mean(post_accuracies))
+            print_str = 'Iteration %d: pre loss: %.5f, post loss: %.5f, pre-inner-loop train SSIM: %.5f, post-inner-loop test SSIM: %.5f' % (itr, np.mean(pre_loss), np.mean(post_loss), np.mean(pre_accuracies), np.mean(post_accuracies))
             print(print_str)
             pre_accuracies, post_accuracies = [], []
 
