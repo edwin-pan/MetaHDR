@@ -67,7 +67,7 @@ def temp_ssim_loss(y_true, y_pred):
     for i in range(N):
         loss += ssim(y_true[i].numpy(), y_pred[i].numpy(), multichannel=True)
     loss /= N
-    return 1-loss
+    return tf.convert_to_tensor(1-loss)
 
 def save_model(self, performance, epoch):
     # TODO: Edit to work with tensorflow. Unused atm
