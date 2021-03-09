@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from src.dataset.dataloader import DataGenerator
+from skimage.metrics import structural_similarity as ssim
 
 batch_size = 5
 
@@ -35,4 +36,13 @@ for index in range(batch_size):
     
 plt.show()
 
-
+total_avg = 0
+for index in range(batch_size):
+    ssim_1 = round(ssim(tr_hdrs[index][0], tr_imgs[index][0], multichannel=True),4)
+    ssim_2 = round(ssim(tr_hdrs[index][1], tr_imgs[index][1], multichannel=True), 4)
+    ssim_3 = round(ssim(ts_hdrs[index][0], ts_imgs[index][0], multichannel=True), 4)
+    avg = round((ssim_1 + ssim_2 + ssim_3) / 3, 4)
+    total_avg += avg
+    print(f"SSIM FOR INDEX {index} THREE EXPOSURES: {ssim_1}, {ssim_2}, & {ssim_3} AND AVERAGE: {avg}")
+total_avg /= batch_size
+print("TOTAL AVG SSIM:", round(total_avg, 4))
