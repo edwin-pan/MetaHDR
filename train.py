@@ -62,8 +62,12 @@ def temp_mse_loss(y_true, y_pred):
 
 def temp_ssim_loss(y_true, y_pred):
     """ Debugging SSIM loss """
-    import pdb; pdb.set_trace()
-    return 1-ssim(y_true, y_pred, multichannel=True)
+    N = y_true.shape[0]
+    loss = 0
+    for i in range(N):
+        loss += ssim(y_true[i], y_pred[i])
+    loss /= N
+    return 1-loss
 
 def save_model(self, performance, epoch):
     # TODO: Edit to work with tensorflow. Unused atm
