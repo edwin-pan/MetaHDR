@@ -107,7 +107,7 @@ def main(cfg):
 
     # Define Loss
     # loss_func = IRLoss(img_W, img_H, 0.5).forward
-    loss_func = temp_ssim_loss
+    loss_func = temp_mse_loss
 
     # Define Model 
     model = MetaHDR(loss_func, img_width=img_W, img_height=img_H, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER, inner_update_lr=cfg.TRAIN.TASK_LR)
