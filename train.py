@@ -62,6 +62,7 @@ def temp_mse_loss(y_true, y_pred):
 
 def temp_ssim_loss(y_true, y_pred):
     """ Debugging SSIM loss """
+    import pdb; pdb.set_trace()
     return 1-ssim(y_true, y_pred, multichannel=True)
 
 def save_model(self, performance, epoch):
