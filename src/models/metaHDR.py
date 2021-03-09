@@ -30,7 +30,7 @@ class MetaHDR(tf.keras.Model):
         self.height = img_height
         self.inner_update_lr = inner_update_lr
         self.get_preprocessing = get_preprocessing
-        self.ssim_score = ssim
+        self.ssim_score = partial(ssim, multichannel=True)
         self.BACKBONE = backbone
         self.k_shot=1 # This won't change, because we only have 1 example per task
         self.pretrain_flag = pretrain_flag
@@ -115,10 +115,10 @@ class MetaHDR(tf.keras.Model):
             # # DEBUG
             # import pdb; pdb.set_trace()
 
-            task_accuracy_tr_pre = np.mean(self.ssim_score(label_tr,task_output_tr_pre, multichannel=True))
+            task_accuracy_tr_pre = np.mean(self.ssim_score(label_tr,task_output_tr_pre))
 
             for j in range(num_inner_updates):
-                task_accuracies_ts.append(self.ssim_score(label_ts,task_outputs_ts[j], multichannel=True))
+                task_accuracies_ts.append(self.ssim_score(label_ts,task_outputs_ts[j]))
 
             task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
 
