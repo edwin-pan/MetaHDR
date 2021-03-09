@@ -132,7 +132,8 @@ class MetaHDR(tf.keras.Model):
             return task_output
 
         input_tr, input_ts, label_tr, label_ts = inp
-        out_dtype = [tf.float32, [tf.float32]*num_inner_updates, tf.float32, [tf.float32]*num_inner_updates]
+        # out_dtype = [tf.float32, [tf.float32]*num_inner_updates, tf.float32, [tf.float32]*num_inner_updates]
+        out_dtype = [tf.float32, [tf.float32]*num_inner_updates]
         out_dtype.extend([tf.float32, [tf.float32]*num_inner_updates])
         task_inner_loop_partial = partial(task_inner_loop, meta_batch_size=meta_batch_size, num_inner_updates=num_inner_updates)
         result = tf.map_fn(task_inner_loop_partial, elems=(input_tr, input_ts, label_tr, label_ts),
