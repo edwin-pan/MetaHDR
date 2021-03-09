@@ -5,6 +5,7 @@ import os
 
 import tensorflow as tf
 import segmentation_models as sm
+from skimage.metrics import structural_similarity as ssim
 
 from src.dataset.dataloader import DataGenerator
 from src.core.config import parse_args
@@ -56,9 +57,12 @@ def outer_eval_step(inp, model, meta_batch_size=25, num_inner_updates=1):
 
 
 def temp_mse_loss(y_true, y_pred):
-    # return tf.reduce_mean(tf.keras.losses.mean_squared_error(y_true, y_pred))
+    """ Debugging MSE loss """
     return tf.keras.losses.mean_squared_error(y_true, y_pred)
 
+def temp_ssim_loss(y_true, y_pred):
+    """ Debugging SSIM loss """
+    return 1-ssim(y_true, y_pred, multichannel=True)
 
 def save_model(self, performance, epoch):
     # TODO: Edit to work with tensorflow. Unused atm
@@ -98,7 +102,7 @@ def main(cfg):
 
     # Define Loss
     # loss_func = IRLoss(img_W, img_H, 0.5).forward
-    loss_func = temp_mse_loss
+    loss_func = temp_ssim_loss
 
     # Define Model 
     model = MetaHDR(loss_func, img_width=img_W, img_height=img_H, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER, inner_update_lr=cfg.TRAIN.TASK_LR)
@@ -126,6 +130,7 @@ def main(cfg):
         # Perform each task-specific training inner-loop
         inp = (train[0], test[0], train[1], test[1])
         result = outer_train_step(inp, model, meta_optimizer, meta_batch_size=cfg.TRAIN.BATCH_SIZE, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER)
+        del train,test,inp # Saving space
 
         if itr % cfg.SUMMARY_INTERVAL == 0:
             pre_accuracies.append(result[-2])
@@ -145,6 +150,9 @@ def main(cfg):
             train, test = dl.sample_batch('meta_val', cfg.TRAIN.BATCH_SIZE)
             inp = (train[0], test[0], train[1], test[1])
             result = outer_train_step(inp, model, meta_optimizer, meta_batch_size=cfg.TRAIN.BATCH_SIZE, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER)
+            del train,test,inp # Saving space
+
+            print('[Meta-validation] pre-inner-loop train SSIM: %.5f, meta-validation post-inner-loop test SSIM: %.5f' % (result[-2], result[-1][-1]))
 
     print("Checkpoint")
 
