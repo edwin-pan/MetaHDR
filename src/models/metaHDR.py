@@ -106,7 +106,7 @@ class MetaHDR(tf.keras.Model):
                 output_ts = copied_model(input_ts)
                 loss_ts = self.loss_func(label_ts,output_ts)
                 # tape.stop_recording()
-#                 del copied_model
+                del copied_model
                 task_outputs_ts.append(output_ts)
                 # print("task_outputs_ts {}".format(task_outputs_ts))#(B,5)
                 task_losses_ts.append(loss_ts)
