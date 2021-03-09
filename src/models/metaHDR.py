@@ -113,14 +113,14 @@ class MetaHDR(tf.keras.Model):
             # Compute accuracies from output predictions
 
             # # DEBUG
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
 
             task_accuracy_tr_pre = 0
             for i in range(label_tr.shape[0]):
                 task_accuracy_tr_pre += self.ssim_score(label_tr[0].numpy(),task_output_tr_pre[i].numpy())
 
             for j in range(num_inner_updates):
-                task_accuracies_ts.append(self.ssim_score(label_ts,task_outputs_ts[j]))
+                task_accuracies_ts.append(self.ssim_score(label_ts.numpy().squeeze(),task_outputs_ts[j].numpy().squeeze()))
 
             task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
 
