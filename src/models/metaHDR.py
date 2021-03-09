@@ -84,7 +84,7 @@ class MetaHDR(tf.keras.Model):
 
                 # copied_model.summary()
                 import pdb; pdb.set_trace()
-                
+
                 task_loss_tr_pre = self.loss_func(label_tr,task_output_tr_pre)
                 grads = tape.gradient(task_loss_tr_pre,copied_model.trainable_weights)
                 
@@ -125,7 +125,10 @@ class MetaHDR(tf.keras.Model):
             for j in range(num_inner_updates):
                 task_accuracies_ts.append(self.ssim_score(label_ts.numpy().squeeze(),task_outputs_ts[j].numpy().squeeze()))
 
-            task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
+            # task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
+
+            del task_output_tr_pre,task_outputs_ts # Save space
+            task_output = [task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
 
             return task_output
 
