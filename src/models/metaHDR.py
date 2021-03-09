@@ -54,7 +54,7 @@ class MetaHDR(tf.keras.Model):
         losses_ts_post = [[]]*num_inner_updates
         accuracies_ts = [[]]*num_inner_updates
 
-#     @tf.function
+    @tf.function
     def call(self,
              inp,
              meta_batch_size=25,
