@@ -115,7 +115,9 @@ class MetaHDR(tf.keras.Model):
             # # DEBUG
             import pdb; pdb.set_trace()
 
-            task_accuracy_tr_pre = np.mean(self.ssim_score(label_tr,task_output_tr_pre))
+            task_accuracy_tr_pre = 0
+            for i in range(label_tr.shape[0]):
+                task_accuracy_tr_pre += self.ssim_score(label_tr[0].numpy(),task_output_tr_pre[i].numpy())
 
             for j in range(num_inner_updates):
                 task_accuracies_ts.append(self.ssim_score(label_ts,task_outputs_ts[j]))
