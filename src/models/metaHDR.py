@@ -1,8 +1,10 @@
 import tensorflow as tf
+import numpy as np
 from functools import partial
 from segmentation_models import get_preprocessing
 from segmentation_models.metrics import iou_score
-from tensorflow.image import ssim
+# from tensorflow.image import ssim # Not available in tensorflow/2.1
+from skimage.metrics import structural_similarity as ssim
 
 from time import time
 
@@ -113,10 +115,10 @@ class MetaHDR(tf.keras.Model):
             # # DEBUG
             # import pdb; pdb.set_trace()
 
-            task_accuracy_tr_pre = tf.reduce_mean(self.ssim_score(label_tr,task_output_tr_pre, 1.0)).numpy()
+            task_accuracy_tr_pre = np.mean(self.ssim_score(label_tr,task_output_tr_pre))
 
             for j in range(num_inner_updates):
-                task_accuracies_ts.append(self.ssim_score(label_ts,task_outputs_ts[j], 1.0).numpy())
+                task_accuracies_ts.append(self.ssim_score(label_ts,task_outputs_ts[j]))
 
             task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
 
