@@ -65,7 +65,7 @@ def temp_ssim_loss(y_true, y_pred):
     N = y_true.shape[0]
     loss = 0
     for i in range(N):
-        loss += ssim(y_true[i], y_pred[i])
+        loss += ssim(y_true[i], y_pred[i], multichannel=True)
     loss /= N
     return 1-loss
 
