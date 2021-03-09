@@ -124,16 +124,12 @@ class MetaHDR(tf.keras.Model):
             for j in range(num_inner_updates):
                 task_accuracies_ts.append(self.ssim_score(label_ts.numpy().squeeze(),task_outputs_ts[j].numpy().squeeze()))
 
-            # task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
-
-            del task_output_tr_pre,task_outputs_ts # Save space
-            task_output = [task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
+            task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
 
             return task_output
 
         input_tr, input_ts, label_tr, label_ts = inp
-        # out_dtype = [tf.float32, [tf.float32]*num_inner_updates, tf.float32, [tf.float32]*num_inner_updates]
-        out_dtype = [tf.float32, [tf.float32]*num_inner_updates]
+        out_dtype = [tf.float32, [tf.float32]*num_inner_updates, tf.float32, [tf.float32]*num_inner_updates]
         out_dtype.extend([tf.float32, [tf.float32]*num_inner_updates])
         task_inner_loop_partial = partial(task_inner_loop, meta_batch_size=meta_batch_size, num_inner_updates=num_inner_updates)
         result = tf.map_fn(task_inner_loop_partial, elems=(input_tr, input_ts, label_tr, label_ts),

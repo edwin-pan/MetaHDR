@@ -38,7 +38,9 @@ def outer_train_step(inp, model, optim, meta_batch_size=25, num_inner_updates=1)
     total_loss_tr_pre = tf.reduce_mean(losses_tr_pre)
     total_accuracy_tr_pre = tf.reduce_mean(accuracies_tr_pre)
     total_accuracies_ts = [tf.reduce_mean(accuracy_ts) for accuracy_ts in accuracies_ts]
-    return outputs_tr, outputs_ts, total_loss_tr_pre, total_losses_ts, total_accuracy_tr_pre, total_accuracies_ts
+    
+    del outputs_tr,outputs_ts # Save space
+    return total_loss_tr_pre, total_losses_ts, total_accuracy_tr_pre, total_accuracies_ts
 
 
 def outer_eval_step(inp, model, meta_batch_size=25, num_inner_updates=1):
@@ -154,7 +156,7 @@ def main(cfg):
             # ---------------------------
             train, test = dl.sample_batch('meta_val', cfg.TRAIN.BATCH_SIZE)
             inp = (train[0], test[0], train[1], test[1])
-            result = outer_train_step(inp, model, meta_optimizer, meta_batch_size=cfg.TRAIN.BATCH_SIZE, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER)
+            result = outer_eval_step(inp, model, meta_batch_size=cfg.TRAIN.BATCH_SIZE, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER)
             del train,test,inp # Saving space
 
             print('[Meta-validation] pre-inner-loop train SSIM: %.5f, meta-validation post-inner-loop test SSIM: %.5f' % (result[-2], result[-1][-1]))
