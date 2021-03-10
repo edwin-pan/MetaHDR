@@ -1,7 +1,7 @@
-import numpy as np
 import matplotlib.pyplot as plt
 
 from src.dataset.dataloader import DataGenerator
+from src.dataset.hdr_visualization import visualize_hdr_image
 from skimage.metrics import structural_similarity as ssim
 
 batch_size = 5
@@ -17,22 +17,22 @@ tr_hdrs = train[1]
 ts_imgs = test[0]
 ts_hdrs = test[1]
 
-# # Plot a few random ones to ensure (not gamma corrected)
+# # Plot 
 fig, ax = plt.subplots(nrows=batch_size,ncols=4,figsize=(11, 17))
 for index in range(batch_size):
     ax[index, 0].imshow(tr_imgs[index][0])
     ax[index, 0].axis('off')
     ax[index, 0].set_title(f'Train Image {index*2}')
-    ax[index, 1].imshow(tr_hdrs[index][0])
+    ax[index, 1].imshow(visualize_hdr_image(tr_hdrs[index][0]))
     ax[index, 1].axis('off')
-    ax[index, 1].set_title(f'HDR Image {index*2}')
+    ax[index, 1].set_title(f'HDR Image {index*2} (GCed)')
     
     ax[index, 2].imshow(tr_imgs[index][1])
     ax[index, 2].axis('off')
     ax[index, 2].set_title(f'Train Image {index*2+1}')
-    ax[index, 3].imshow(tr_hdrs[index][1])
+    ax[index, 3].imshow(visualize_hdr_image(tr_hdrs[index][1]))
     ax[index, 3].axis('off')
-    ax[index, 3].set_title(f'HDR Image {index*2+1}')
+    ax[index, 3].set_title(f'HDR Image {index*2+1} (GCed)')
     
 plt.show()
 
