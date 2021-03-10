@@ -8,7 +8,7 @@ class DataGenerator(object):
     Data Generator capable of generating batches of data.
     """
 
-    def __init__(self, split=[0.7, 0.2, 0.1], shuffle=True):
+    def __init__(self, crop_factor=0.5, split=[0.7, 0.2, 0.1], shuffle=True):
         """
         Fetches the data and splits into meta train, test and val
         Args:
@@ -17,7 +17,7 @@ class DataGenerator(object):
         """
 
         # Fetch the data
-        data = get_data()
+        data = get_data(crop_factor=crop_factor)
         
         num_datapoints = data.shape[0]
         num_train = int(split[0] * num_datapoints)

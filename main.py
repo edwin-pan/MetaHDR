@@ -6,7 +6,7 @@ from skimage.metrics import structural_similarity as ssim
 
 batch_size = 5
 
-dl = DataGenerator()
+dl = DataGenerator(crop_factor=0.5)
 train, test = dl.sample_batch('meta_train', batch_size)
 
 # Each have shape (Batch Size, 2, 512, 512, 3)
