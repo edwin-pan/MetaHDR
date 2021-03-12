@@ -11,7 +11,7 @@ IMG_WIDTH = 1024
 
 def get_darkdetail_data(hdr_image, hdr_max_percentile, gamma_correct_flag=True):
     """
-    Assuming HDR capped at 4.0, using the range [0, hdr_max_percentile %]
+    Using the range [0, hdr_max_percentile %]
     
     """
     
@@ -30,12 +30,12 @@ def get_darkdetail_data(hdr_image, hdr_max_percentile, gamma_correct_flag=True):
 
 def get_brightdetail_data(hdr_image, hdr_min_percentile, gamma_correct_flag=True):
     """
-    Assuming HDR capped at 4.0, using the range [hdr_min_percentile % , 100%]
+    Using the range [hdr_min_percentile % , 100%]
     
     """
     
     hdr_min_val = np.percentile(hdr_image, hdr_min_percentile)
-    global_linear_mapping = interp1d([hdr_min_val,4.0],[0,1])
+    global_linear_mapping = interp1d([hdr_min_val,hdr_image.max()],[0,1])
     
     # Floor values < hdr_min_val
     copy_img = hdr_image.copy()
@@ -58,8 +58,8 @@ def get_data(crop=True, crop_factor=0.5, num_exposures=3):
     
     assert num_exposures > 2, "Should have at least 3 exposures"
     
-    sim_min = 75 # %
-    sim_max = 35 # %
+    sim_min = 65 # %
+    sim_max = 45 # %
     
     # Initialize output
     imgs = None
