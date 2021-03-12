@@ -58,8 +58,8 @@ def get_data(crop=True, crop_factor=0.5, num_exposures=3):
     
     assert num_exposures > 2, "Should have at least 3 exposures"
     
-    sim_min = 85 # %
-    sim_max = 25 # %
+    sim_min = 75 # %
+    sim_max = 35 # %
     
     # Initialize output
     imgs = None

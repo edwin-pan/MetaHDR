@@ -13,7 +13,7 @@ from src.models.metaHDR import MetaHDR, MetaHDRNOCOPY
 from src.models.metaHDR import outer_train_step, outer_eval_step
 from src.core.loss import IRLoss
 
-from src.loss import temp_mse_loss
+from src.core.loss import temp_mse_loss
 
 
 def main(cfg):
