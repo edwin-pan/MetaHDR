@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-import GPUtils
+import GPUtil
 import numpy as np
 import time
 import os
@@ -31,11 +31,11 @@ def main(cfg):
     loss_func = temp_mse_loss
 
     print("Pre-model")
-    GPUtils.showUtilization()
+    GPUtil.showUtilization()
     # Define Model 
     model = MetaHDRNOCOPY(loss_func, img_width=img_W, img_height=img_H, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER, inner_update_lr=cfg.TRAIN.TASK_LR)
     print("Post-model")
-    GPUtils.showUtilization()
+    GPUtil.showUtilization()
 
     dl = DataGenerator(num_exposures=cfg.TRAIN.NUM_EXPOSURES)
     train, test = dl.sample_batch('meta_train', cfg.TRAIN.BATCH_SIZE)
