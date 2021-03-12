@@ -13,7 +13,7 @@ LOSS:
 # Training parameters
 TRAIN:
   BATCH_SIZE: 3
-  NUM_EXPOSURES: 3
+  NUM_EXPOSURES: 5
   NUM_META_TR_ITER: 200 # 
   NUM_TASK_TR_ITER: 1 # Number of task-specific inner loops
   META_LR: 0.001

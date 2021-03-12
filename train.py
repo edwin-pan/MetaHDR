@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import numpy as np
+import time
 import os
 
 import tensorflow as tf
@@ -48,6 +49,7 @@ def main(cfg):
     pre_loss, post_loss, pre_accuracies, post_accuracies = [], [], [], []
     curr_best_performance = 0.0
 
+    time.sleep(1)
     for itr in tqdm(range(cfg.TRAIN.NUM_META_TR_ITER)):
         # Grab batch of data from dataloader
         train, test = dl.sample_batch('meta_train', cfg.TRAIN.BATCH_SIZE)
