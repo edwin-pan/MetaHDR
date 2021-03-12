@@ -10,92 +10,10 @@ from src.dataset.dataloader import DataGenerator
 from src.core.config import parse_args
 from src.core.utils import prepare_output_dir
 from src.models.metaHDR import MetaHDR, MetaHDRNOCOPY
+from src.models.metaHDR import outer_train_step, outer_eval_step
 from src.core.loss import IRLoss
 
-
-def outer_train_step(inp, model, optim, meta_batch_size=25, num_inner_updates=1):
-    """
-    MetaHDR's outer training loop handles meta-parameter adjustments, after num_inner_updates number of inner-loop task-specific 
-    model updates.
-    """
-    # note here, outer tape constructed to watch all model.trainable_variables!
-    # inner_loop is called in model(...)
-    # no need to do persistent, since only 1 outer_tape.gradient needs to be called
-    with tf.GradientTape(persistent=False) as outer_tape:
-        result = model(inp, meta_batch_size=meta_batch_size, num_inner_updates=num_inner_updates)
-        outputs_tr, outputs_ts, losses_tr_pre, losses_ts, accuracies_tr_pre, accuracies_ts = result
-        total_losses_ts = [tf.reduce_mean(loss_ts) for loss_ts in losses_ts]
-
-    # dont need to update self.inner_update_lr_dict,
-    # since learn rate is part of the model.training_variables
-    gradients = outer_tape.gradient(total_losses_ts[-1], model.m.trainable_weights)
-
-    # this will update ALL PARAMETERS, including the LEARN RATE!
-    # rather than manual gradient descent, Adam (adaptive grad descent) used to update params
-    optim.apply_gradients(zip(gradients, model.m.trainable_weights))
-
-    total_loss_tr_pre = tf.reduce_mean(losses_tr_pre)
-    total_accuracy_tr_pre = tf.reduce_mean(accuracies_tr_pre)
-    total_accuracies_ts = [tf.reduce_mean(accuracy_ts) for accuracy_ts in accuracies_ts]
-    
-    del outputs_tr,outputs_ts # Save space
-    return total_loss_tr_pre, total_losses_ts, total_accuracy_tr_pre, total_accuracies_ts
-
-
-def outer_eval_step(inp, model, meta_batch_size=25, num_inner_updates=1):
-
-    result = model(inp, meta_batch_size=meta_batch_size, num_inner_updates=num_inner_updates)
-
-    outputs_tr, outputs_ts, losses_tr_pre, losses_ts, accuracies_tr_pre, accuracies_ts = result
-
-    total_loss_tr_pre = tf.reduce_mean(losses_tr_pre)
-    total_losses_ts = [tf.reduce_mean(loss_ts) for loss_ts in losses_ts]
-
-    total_accuracy_tr_pre = tf.reduce_mean(accuracies_tr_pre)
-    total_accuracies_ts = [tf.reduce_mean(accuracy_ts) for accuracy_ts in accuracies_ts]
-    # tf.keras.backend.clear_session()
-    return outputs_tr, outputs_ts, total_loss_tr_pre, total_losses_ts, total_accuracy_tr_pre, total_accuracies_ts
-
-
-def temp_mse_loss(y_true, y_pred):
-    """ Debugging MSE loss """
-    return tf.keras.losses.mean_squared_error(y_true, y_pred)
-
-def temp_ssim_loss(y_true, y_pred):
-    """ Debugging SSIM loss """
-    N = y_true.shape[0]
-    loss = 0
-    for i in range(N):
-        loss += ssim(y_true[i].numpy(), y_pred[i].numpy(), multichannel=True)
-    loss /= N
-    return tf.convert_to_tensor(1-loss)
-
-def save_model(self, performance, epoch):
-    # TODO: Edit to work with tensorflow. Unused atm
-    save_dict = {
-        'epoch': epoch,
-        'gen_state_dict': self.generator.state_dict(),
-        'performance': performance,
-        'gen_optimizer': self.gen_optimizer.state_dict(),
-        'disc_motion_state_dict': self.motion_discriminator.state_dict(),
-        'disc_motion_optimizer': self.dis_motion_optimizer.state_dict(),
-    }
-
-    filename = osp.join(self.logdir, 'checkpoint.pth.tar')
-    torch.save(save_dict, filename)
-
-    if self.performance_type == 'min':
-        is_best = performance < self.best_performance
-    else:
-        is_best = performance > self.best_performance
-
-    if is_best:
-        logger.info('Best performance achieved, saving it!')
-        self.best_performance = performance
-        shutil.copyfile(filename, osp.join(self.logdir, 'model_best.pth.tar'))
-
-        with open(osp.join(self.logdir, 'best.txt'), 'w') as f:
-            f.write(str(float(performance)))
+from src.loss import temp_mse_loss
 
 
 def main(cfg):
@@ -111,7 +29,7 @@ def main(cfg):
     loss_func = temp_mse_loss
 
     # Define Model 
-    model = MetaHDRNOCOPY(loss_func, img_width=img_W, img_height=img_H, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER, inner_update_lr=cfg.TRAIN.TASK_LR)
+    model = MetaHDR(loss_func, img_width=img_W, img_height=img_H, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER, inner_update_lr=cfg.TRAIN.TASK_LR)
     
     dl = DataGenerator()
     train, test = dl.sample_batch('meta_train', cfg.TRAIN.BATCH_SIZE)
@@ -128,6 +46,7 @@ def main(cfg):
 
     # Set Accuracy tracking
     pre_loss, post_loss, pre_accuracies, post_accuracies = [], [], [], []
+    curr_best_performance = 0.0
 
     for itr in tqdm(range(cfg.TRAIN.NUM_META_TR_ITER)):
         # Grab batch of data from dataloader
@@ -159,6 +78,11 @@ def main(cfg):
             del train,test,inp # Saving space
 
             print('[Meta-validation] pre-inner-loop train SSIM: %.5f, meta-validation post-inner-loop test SSIM: %.5f' % (result[-2], result[-1][-1]))
+
+            if result[-1][-1] > curr_best_performance:
+                print(f"Best performance so far! Saving model to {cfg.CHECKPOINT_SAVE_PATH}")
+                model.save(cfg.CHECKPOINT_SAVE_PATH)
+                curr_best_performance = result[-1][-1]
 
     print("Checkpoint")
 

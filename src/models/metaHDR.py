@@ -116,6 +116,53 @@ class MetaHDR(tf.keras.Model):
                         dtype=out_dtype,
                         parallel_iterations=meta_batch_size)
         return result
+
+def outer_train_step(inp, model, optim, meta_batch_size=25, num_inner_updates=1):
+    """
+    MetaHDR's outer training loop handles meta-parameter adjustments, after num_inner_updates number of inner-loop task-specific 
+    model updates.
+    """
+    # note here, outer tape constructed to watch all model.trainable_variables!
+    # inner_loop is called in model(...)
+    # no need to do persistent, since only 1 outer_tape.gradient needs to be called
+    with tf.GradientTape(persistent=False) as outer_tape:
+        result = model(inp, meta_batch_size=meta_batch_size, num_inner_updates=num_inner_updates)
+        outputs_tr, outputs_ts, losses_tr_pre, losses_ts, accuracies_tr_pre, accuracies_ts = result
+        total_losses_ts = [tf.reduce_mean(loss_ts) for loss_ts in losses_ts]
+
+    # dont need to update self.inner_update_lr_dict,
+    # since learn rate is part of the model.training_variables
+    gradients = outer_tape.gradient(total_losses_ts[-1], model.m.trainable_weights)
+
+    # this will update ALL PARAMETERS, including the LEARN RATE!
+    # rather than manual gradient descent, Adam (adaptive grad descent) used to update params
+    optim.apply_gradients(zip(gradients, model.m.trainable_weights))
+
+    total_loss_tr_pre = tf.reduce_mean(losses_tr_pre)
+    total_accuracy_tr_pre = tf.reduce_mean(accuracies_tr_pre)
+    total_accuracies_ts = [tf.reduce_mean(accuracy_ts) for accuracy_ts in accuracies_ts]
+    
+    del outputs_tr,outputs_ts # Save space
+    return total_loss_tr_pre, total_losses_ts, total_accuracy_tr_pre, total_accuracies_ts
+
+
+def outer_eval_step(inp, model, meta_batch_size=25, num_inner_updates=1):
+    """
+    MetaHDR's outer evaluation step. Performs one forward pass, training the inner loop num_inner_updates number of times.
+    """
+
+    result = model(inp, meta_batch_size=meta_batch_size, num_inner_updates=num_inner_updates)
+
+    outputs_tr, outputs_ts, losses_tr_pre, losses_ts, accuracies_tr_pre, accuracies_ts = result
+
+    total_loss_tr_pre = tf.reduce_mean(losses_tr_pre)
+    total_losses_ts = [tf.reduce_mean(loss_ts) for loss_ts in losses_ts]
+
+    total_accuracy_tr_pre = tf.reduce_mean(accuracies_tr_pre)
+    total_accuracies_ts = [tf.reduce_mean(accuracy_ts) for accuracy_ts in accuracies_ts]
+    # tf.keras.backend.clear_session()
+    return outputs_tr, outputs_ts, total_loss_tr_pre, total_losses_ts, total_accuracy_tr_pre, total_accuracies_ts
+
     
 # EXPIREMENTATION FOR NO COPY MODEL!
 class MetaHDRNOCOPY(tf.keras.Model):

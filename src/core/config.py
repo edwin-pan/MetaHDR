@@ -8,6 +8,7 @@ cfg.EXP_NAME = 'default'
 cfg.SUMMARY_INTERVAL = 10
 cfg.PRINT_INTERVAL = 10
 cfg.TEST_PRINT_INTERVAL = 50
+cfg.CHECKPOINT_SAVE_PATH = 'checkpoints'
 
 # Loss parameters
 cfg.LOSS = CN()
