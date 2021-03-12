@@ -2,6 +2,7 @@ import random
 import numpy as np
 from sklearn.model_selection import train_test_split
 from src.dataset.datareader import get_data
+import GPUtil
 
 class DataGenerator(object):
     """
@@ -21,8 +22,12 @@ class DataGenerator(object):
         self.num_exposures = num_exposures
         
         # Fetch the data
+        print("pre")
+        GPUtil.showUtilization()
         data = get_data(crop_factor=crop_factor, num_exposures=num_exposures)
-        
+        print("post")
+        GPUtil.showUtilization()
+
         num_datapoints = data.shape[0]
         num_train = int(split[0] * num_datapoints)
         num_val = int(split[1] * num_datapoints)
