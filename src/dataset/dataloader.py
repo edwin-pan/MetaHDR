@@ -12,10 +12,12 @@ class DataGenerator(object):
         """
         Fetches the data and splits into meta train, test and val
         Args:
+          crop_factor: a value which says how much to crop by
+          num_exposures: the number of exposures to generate when reading in images
           split: a 3 element array which says the train, val, test split -- elements must add to 1
           shuffle: a boolean variable which tells whether we should shuffle the data
         """
-        # How many expsures we have
+        # Number of exposures
         self.num_exposures = num_exposures
         
         # Fetch the data
@@ -63,8 +65,9 @@ class DataGenerator(object):
         tr_images, ts_images = [], []
         tr_labels, ts_labels = [], []
         for image_set in cur_batch:
-            # Train and Test for each set of 3 exposures
-            tr, ts = train_test_split(np.arange(1, self.num_exposures+1), test_size=0.1)
+            # Train and Test for each set of exposures
+            tr, ts = train_test_split(np.arange(1, self.num_exposures+1), test_size=1)
+            
             cur_tr_images, cur_tr_labels = [], []
             for i in tr:
                 cur_tr_images.append(image_set[i, ...])
