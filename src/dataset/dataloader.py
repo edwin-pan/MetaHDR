@@ -8,16 +8,18 @@ class DataGenerator(object):
     Data Generator capable of generating batches of data.
     """
 
-    def __init__(self, crop_factor=0.5, split=[0.7, 0.2, 0.1], shuffle=True):
+    def __init__(self, crop_factor=0.5, num_exposures=3, split=[0.7, 0.2, 0.1], shuffle=True):
         """
         Fetches the data and splits into meta train, test and val
         Args:
           split: a 3 element array which says the train, val, test split -- elements must add to 1
           shuffle: a boolean variable which tells whether we should shuffle the data
         """
-
+        # How many expsures we have
+        self.num_exposures = num_exposures
+        
         # Fetch the data
-        data = get_data(crop_factor=crop_factor)
+        data = get_data(crop_factor=crop_factor, num_exposures=num_exposures)
         
         num_datapoints = data.shape[0]
         num_train = int(split[0] * num_datapoints)
@@ -62,7 +64,7 @@ class DataGenerator(object):
         tr_labels, ts_labels = [], []
         for image_set in cur_batch:
             # Train and Test for each set of 3 exposures
-            tr, ts = train_test_split(np.array([1, 2, 3]), test_size=0.33)
+            tr, ts = train_test_split(np.arange(1, self.num_exposures+1), test_size=0.1)
             cur_tr_images, cur_tr_labels = [], []
             for i in tr:
                 cur_tr_images.append(image_set[i, ...])
