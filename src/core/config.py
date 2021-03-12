@@ -17,6 +17,7 @@ cfg.LOSS.LAMBDA = 0.5
 
 # Training parameters
 cfg.TRAIN = CN()
+cfg.TRAIN.NUM_EXPOSURES = 3
 cfg.TRAIN.BATCH_SIZE = 8
 cfg.TRAIN.NUM_META_TR_ITER = 200
 cfg.TRAIN.NUM_TASK_TR_ITER = 1

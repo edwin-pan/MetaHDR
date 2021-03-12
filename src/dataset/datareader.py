@@ -9,50 +9,42 @@ NUM_IMGS = 450
 IMG_HEIGHT = 1024
 IMG_WIDTH = 1024
 
-def get_darkdetail_data(hdr_image, hdr_max_val):
+def get_darkdetail_data(hdr_image, hdr_max_percentile, gamma_correct_flag=True):
     """
-    Assuming HDR capped at 4.0
+    Assuming HDR capped at 4.0, using the range [0, hdr_max_percentile %]
     
     """
     
+    hdr_max_val = np.percentile(hdr_image, hdr_max_percentile)
     global_linear_mapping = interp1d([0,hdr_max_val],[0,1])
     
     # Ceiling values > hdr_max_val
     copy_img = hdr_image.copy()
     copy_img[copy_img>hdr_max_val] = hdr_max_val
     
-    return global_linear_mapping(copy_img)
+    if gamma_correct_flag:
+        return global_linear_mapping(copy_img)**(1/2.2)
+    else:
+        return global_linear_mapping(copy_img)
 
 
-def get_brightdetail_data(hdr_image, hdr_min_val):
+def get_brightdetail_data(hdr_image, hdr_min_percentile, gamma_correct_flag=True):
     """
-    Assuming HDR capped at 4.0
+    Assuming HDR capped at 4.0, using the range [hdr_min_percentile % , 100%]
     
     """
     
+    hdr_min_val = np.percentile(hdr_image, hdr_min_percentile)
     global_linear_mapping = interp1d([hdr_min_val,4.0],[0,1])
     
     # Floor values < hdr_min_val
     copy_img = hdr_image.copy()
     copy_img[copy_img<hdr_min_val] = hdr_min_val
     
-    return global_linear_mapping(copy_img)
-
-
-def get_middetail_data(hdr_image, hdr_min_val, hdr_max_val):
-    """
-    Assuming HDR capped at 4.0
-    
-    """
-    
-    global_linear_mapping = interp1d([hdr_min_val,hdr_max_val],[0,1])
-    
-    # Clipping
-    copy_img = hdr_image.copy()
-    copy_img[copy_img<hdr_min_val] = hdr_min_val
-    copy_img[copy_img>hdr_max_val] = hdr_max_val
-    
-    return global_linear_mapping(copy_img)
+    if gamma_correct_flag:
+        return global_linear_mapping(copy_img)**(1/2.2)
+    else:
+        return global_linear_mapping(copy_img)
 
 
 def get_data(crop=True, crop_factor=0.5, num_exposures=3):
@@ -66,8 +58,8 @@ def get_data(crop=True, crop_factor=0.5, num_exposures=3):
     
     assert num_exposures > 2, "Should have at least 3 exposures"
     
-    sim_min = 0.75 # -> 4.0
-    sim_max = 0.5
+    sim_min = 85 # %
+    sim_max = 25 # %
     
     # Initialize output
     imgs = None
@@ -116,9 +108,9 @@ def get_data(crop=True, crop_factor=0.5, num_exposures=3):
             if num_exposures > 3:
                 for j in range(4,num_exposures+1):
                     if j%2:
-                        imgs[i,j, ...] = get_brightdetail_data(hdr_img, hdr_min_val=sim_min)[h1:h2, w1:w2, :]
+                        imgs[i,j, ...] = get_brightdetail_data(hdr_img, hdr_min_percentile=sim_min)[h1:h2, w1:w2, :]
                     else:
-                        imgs[i,j, ...] = get_darkdetail_data(hdr_img, hdr_max_val=sim_max)[h1:h2, w1:w2, :]
+                        imgs[i,j, ...] = get_darkdetail_data(hdr_img, hdr_max_percentile=sim_max)[h1:h2, w1:w2, :]
                         
         else:
             imgs[i, 0, ...] = hdr_img
@@ -129,9 +121,9 @@ def get_data(crop=True, crop_factor=0.5, num_exposures=3):
             if num_exposures > 3:
                 for j in range(4,num_exposures+1):
                     if j%2:
-                        imgs[i,j, ...] = get_brightdetail_data(hdr_img, hdr_min_val=sim_min)
+                        imgs[i,j, ...] = get_brightdetail_data(hdr_img, hdr_min_percentile=sim_min)
                     else:
-                        imgs[i,j, ...] = get_darkdetail_data(hdr_img, hdr_max_val=sim_max)
+                        imgs[i,j, ...] = get_darkdetail_data(hdr_img, hdr_max_percentile=sim_max)
     
     return imgs
 
