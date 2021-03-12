@@ -33,7 +33,7 @@ def main(cfg):
     print("Pre-model")
     GPUtil.showUtilization()
     # Define Model 
-    model = MetaHDRNOCOPY(loss_func, img_width=img_W, img_height=img_H, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER, inner_update_lr=cfg.TRAIN.TASK_LR)
+    model = MetaHDR(loss_func, img_width=img_W, img_height=img_H, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER, inner_update_lr=cfg.TRAIN.TASK_LR)
     print("Post-model")
     GPUtil.showUtilization()
 
