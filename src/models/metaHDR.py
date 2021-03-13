@@ -79,7 +79,7 @@ class MetaHDR(tf.keras.Model):
 
             conv10 =tf.keras.layers.SeparableConv2D(3, (1, 1), activation='sigmoid')(conv9)
 
-            model = tf.keras.Model(inputs=[inputs], outputs=[conv5])
+            model = tf.keras.Model(inputs=[inputs], outputs=[conv1])
             self.m = model
 
     # @tf.function
