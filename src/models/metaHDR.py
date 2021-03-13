@@ -269,7 +269,7 @@ class MetaHDRNOCOPY(tf.keras.Model):
 
             del task_output_tr_pre, task_outputs_ts, label_tr, label_ts
             # task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
-            task_output = [tf.zeros([1],dtype=tf.float32), tf.zeros([1],dtype=tf.float32), task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
+            task_output = [tf.zeros([1],dtype=tf.float32), [tf.zeros([1],dtype=tf.float32)], task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
 
             return task_output
 
