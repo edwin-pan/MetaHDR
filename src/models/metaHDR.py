@@ -149,7 +149,7 @@ def outer_eval_step(inp, model, meta_batch_size=25, num_inner_updates=1):
     # tf.keras.backend.clear_session()
     return outputs_tr, outputs_ts, total_loss_tr_pre, total_losses_ts, total_accuracy_tr_pre, total_accuracies_ts
 
-\# EXPIREMENTATION FOR NO COPY MODEL!
+# EXPIREMENTATION FOR NO COPY MODEL!
 class MetaHDRNOCOPY(tf.keras.Model):
     def __init__(self,
                  loss_func,
@@ -181,7 +181,7 @@ class MetaHDRNOCOPY(tf.keras.Model):
         else:
             self.m = get_unet(self.width,self.height)
 
-    @tf.function
+    # @tf.function
     def call(self,
              inp,
              meta_batch_size=25,
