@@ -70,7 +70,6 @@ def main(cfg):
         result = outer_train_step(inp, model, meta_optimizer, meta_batch_size=cfg.TRAIN.BATCH_SIZE, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER)
 
         if itr % cfg.SUMMARY_INTERVAL == 0:
-            model.summary()
             pre_accuracies.append(result[-2])
             post_accuracies.append(result[-1][-1])
             pre_loss.append(result[-4])
