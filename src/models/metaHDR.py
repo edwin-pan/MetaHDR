@@ -207,20 +207,16 @@ class MetaHDRNOCOPY(tf.keras.Model):
             # after i+1 inner gradient updates
             task_outputs_ts, task_losses_ts, task_accuracies_ts = [], [], []
 
-            get_GPU_usage("task_inner pre")
             ######################################
             ############### MAML #################
             with tf.GradientTape(persistent=True) as tape:
 
                 task_output_tr_pre = self.m(input_tr)
-                get_GPU_usage("task_inner post self.m forward pass")
 
                 inner_task_weights = [item for item in self.m.trainable_weights]
 
                 task_loss_tr_pre = self.loss_func(label_tr,task_output_tr_pre)
                 grads = tape.gradient(task_loss_tr_pre,inner_task_weights)
-
-                get_GPU_usage("task_inner post gradient calc")
 
                 # Apply the gradients
                 k=0
@@ -262,10 +258,10 @@ class MetaHDRNOCOPY(tf.keras.Model):
                             self.m.layers[j].trainable=True
                 
             # Compute accuracies from output predictions
-            task_accuracy_tr_pre = tf.reduce_mean(self.ssim_score(label_tr,task_output_tr_pre, 1.0))
+            task_accuracy_tr_pre = tf.reduce_mean(self.ssim_score(label_tr,task_output_tr_pre, 1.0)).numpy()
             
             for j in range(num_inner_updates):
-                task_accuracies_ts.append(self.ssim_score(label_ts,task_outputs_ts[j], 1.0))
+                task_accuracies_ts.append(self.ssim_score(label_ts,task_outputs_ts[j], 1.0).numpy())
 
             task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
 
