@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 import scipy.stats as st
 
-
+@tf.function
 def temp_mse_loss(y_true, y_pred):
     """ Debugging MSE loss """
     return tf.keras.losses.mean_squared_error(y_true, y_pred)
@@ -15,7 +15,7 @@ def temp_ssim_loss(y_true, y_pred):
         loss += ssim(y_true[i].numpy(), y_pred[i].numpy(), multichannel=True)
     loss /= N
     return tf.convert_to_tensor(1-loss)
-    
+
 
 # TODO: Figure our how this loss works (https://arxiv.org/abs/1710.07480)
 class IRLoss():
