@@ -42,8 +42,8 @@ class MetaHDR(tf.keras.Model):
             # self.m = get_unet(self.width,self.height)
             inputs = tf.keras.layers.Input((img_height, img_width, 3))
             # tf.keras.layers.SeparableConv2D(fil)
-            conv1 = tf.keras.layers.SeparableConv2D(8, (3, 3), activation='relu', padding='same')(inputs)
-            conv1 = tf.keras.layers.SeparableConv2D(8, (3, 3), activation='relu', padding='same')(conv1)
+            conv1 = tf.keras.layers.Conv2D(8, (3, 3), activation='relu', padding='same')(inputs)
+            conv1 = tf.keras.layers.Conv2D(8, (3, 3), activation='relu', padding='same')(conv1)
             pool1 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2))(conv1)
 
             # conv2 = tf.keras.layers.SeparableConv2D(16, (3, 3), activation='relu', padding='same')(pool1)
