@@ -261,7 +261,7 @@ class MetaHDRNOCOPY(tf.keras.Model):
             for j in range(num_inner_updates):
                 task_accuracies_ts.append(self.ssim_score(label_ts,task_outputs_ts[j], 1.0))
 
-            print(tf.keras.backend.eval(loss_ts))
+            print(loss_ts)
 
             task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
 
