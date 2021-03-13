@@ -185,7 +185,7 @@ class MetaHDRNOCOPY(tf.keras.Model):
         else:
             self.m = get_unet(self.width,self.height)
 
-    # @tf.function
+    @tf.function
     def call(self,
              inp,
              meta_batch_size=25,
@@ -210,7 +210,7 @@ class MetaHDRNOCOPY(tf.keras.Model):
             get_GPU_usage("task_inner pre")
             ######################################
             ############### MAML #################
-            with tf.GradientTape(persistent=False) as tape:
+            with tf.GradientTape(persistent=True) as tape:
 
                 task_output_tr_pre = self.m(input_tr)
                 get_GPU_usage("task_inner post self.m forward pass")

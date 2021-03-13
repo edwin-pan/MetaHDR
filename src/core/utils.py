@@ -43,3 +43,4 @@ def save_to_file(obj, filename, mode='w'):
 def get_GPU_usage(print_statement):
     print(print_statement)
     GPUtil.showUtilization(all=True)
+    print(" ")
