@@ -31,6 +31,8 @@ class MetaHDR(tf.keras.Model):
         self.k_shot=1 # This won't change, because we only have 1 example per task
         self.pretrain_flag = pretrain_flag
         self.loss_func = loss_func
+        self.non_trainable_layers =  [0,3,6,9,12,16,20,24,28]
+        self.up_conv_layers =  [15,19,23,27]
         if self.pretrain_flag:
             print(self.width,self.height)
             self.m = get_unet(self.width,self.height)
@@ -47,21 +49,11 @@ class MetaHDR(tf.keras.Model):
         def task_inner_loop(inp,reuse=True,meta_batch_size=25,num_inner_updates=1):
             '''
             '''
-            # the inner and outer loop data
             # query set: (input_tr,label_tr)
             input_tr, input_ts, label_tr, label_ts = inp
-
-            # the predicted outputs, loss values, and accuracy for the pre-update model (with the initial weights)
-            # evaluated on the inner loop training data
             task_output_tr_pre, task_loss_tr_pre, task_accuracy_tr_pre = None, None, None
-
-            # lists to keep track of outputs, losses, and accuracies of test data for each inner_update
-            # where task_outputs_ts[i], task_losses_ts[i], task_accuracies_ts[i] are the output, loss, and accuracy
-            # after i+1 inner gradient updates
             task_outputs_ts, task_losses_ts, task_accuracies_ts = [], [], []
 
-            ######################################
-            ############### MAML #################
             with tf.GradientTape(persistent=True) as tape:
 
                 copied_model = copy_model_fn(self.m,self.width,self.height)
@@ -74,8 +66,8 @@ class MetaHDR(tf.keras.Model):
                 k=0
                 for j in range(len(self.m.layers)):
                     # print(j,self.m.layers[j].name)
-                    if j not in [0,3,6,9,12,16,20,24,28]: # Layers w/ no trainable parameters
-                        if j in [15,19,23,27]: # Up-conv layers
+                    if j not in self.non_trainable_layers: # Layers w/ no trainable parameters
+                        if j in self.up_conv_layers: # Up-conv layers
                             copied_model.layers[j].kernel=self.m.layers[j].kernel - self.inner_update_lr*grads[k]
                             copied_model.layers[j].bias=self.m.layers[j].bias - self.inner_update_lr*grads[k+1]
                             k+=2
