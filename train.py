@@ -31,11 +31,11 @@ def main(cfg):
     loss_func = temp_mse_loss
 
     print("Pre-model")
-    GPUtil.showUtilization()
+    GPUtil.showUtilization(all=True)
     # Define Model 
     model = MetaHDR(loss_func, img_width=img_W, img_height=img_H, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER, inner_update_lr=cfg.TRAIN.TASK_LR)
     print("Post-model")
-    GPUtil.showUtilization()
+    GPUtil.showUtilization(all=True)
 
     dl = DataGenerator(num_exposures=cfg.TRAIN.NUM_EXPOSURES)
     train, test = dl.sample_batch('meta_train', cfg.TRAIN.BATCH_SIZE)
