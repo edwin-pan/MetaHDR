@@ -111,7 +111,6 @@ class MetaHDR(tf.keras.Model):
                         parallel_iterations=meta_batch_size)
         return result
 
-@tf.function
 def outer_train_step(inp, model, optim, meta_batch_size=25, num_inner_updates=1):
     """
     MetaHDR's outer training loop handles meta-parameter adjustments, after num_inner_updates number of inner-loop task-specific 
@@ -184,7 +183,7 @@ class MetaHDRNOCOPY(tf.keras.Model):
         else:
             self.m = get_unet(self.width,self.height)
 
-    @tf.function
+    # @tf.function
     def call(self,
              inp,
              meta_batch_size=25,
@@ -210,7 +209,9 @@ class MetaHDRNOCOPY(tf.keras.Model):
             ############### MAML #################
             with tf.GradientTape(persistent=True) as tape:
 
+                get_GPU_usage("inner pre")
                 task_output_tr_pre = unet_forward(self.m, input_tr)
+                get_GPU_usage("inner post")
 
                 inner_task_weights = [item for item in self.m.trainable_weights]
 
@@ -261,8 +262,6 @@ class MetaHDRNOCOPY(tf.keras.Model):
             
             for j in range(num_inner_updates):
                 task_accuracies_ts.append(self.ssim_score(label_ts,task_outputs_ts[j], 1.0))
-
-            print(loss_ts)
 
             task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
 
