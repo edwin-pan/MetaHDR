@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 from functools import partial
+import GPUtil
 
 # from tensorflow.image import ssim # Not available in tensorflow/2.1
 from skimage.metrics import structural_similarity as ssim
@@ -115,10 +116,14 @@ def outer_train_step(inp, model, optim, meta_batch_size=25, num_inner_updates=1)
     model updates.
     """
 
+    print("outer_train pre")
+    GPUtil.showUtilization(all=True)
     with tf.GradientTape(persistent=False) as outer_tape:
         result = model(inp, meta_batch_size=meta_batch_size, num_inner_updates=num_inner_updates)
         outputs_tr, outputs_ts, losses_tr_pre, losses_ts, accuracies_tr_pre, accuracies_ts = result
         total_losses_ts = [tf.reduce_mean(loss_ts) for loss_ts in losses_ts]
+    print("outer_train post")
+    GPUtil.showUtilization(all=True)
 
     gradients = outer_tape.gradient(total_losses_ts[-1], model.m.trainable_weights)
 
