@@ -8,7 +8,7 @@ from skimage.metrics import structural_similarity as ssim
 
 from time import time
 
-from src.models.UNet import get_unet
+from src.models.UNet import get_unet, unet_forward
 from src.models.utils import copy_model_fn
 from src.core.utils import get_GPU_usage
 
@@ -209,7 +209,7 @@ class MetaHDRNOCOPY(tf.keras.Model):
             ############### MAML #################
             with tf.GradientTape(persistent=True) as tape:
 
-                task_output_tr_pre = self.m(input_tr)
+                task_output_tr_pre = unet_forward(self.m, input_tr)
 
                 inner_task_weights = [item for item in self.m.trainable_weights]
 

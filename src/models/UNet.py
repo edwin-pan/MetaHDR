@@ -1,6 +1,5 @@
 import tensorflow as tf
 
-@tf.function
 def get_unet(img_cols,img_rows):
     """
         UNet architecture used.
@@ -152,3 +151,7 @@ def get_unet(img_cols,img_rows):
     model = tf.keras.Model(inputs=[inputs], outputs=[conv10])
     
     return model
+
+@tf.function
+def unet_forward(model, inputs):
+    return model(inputs)
