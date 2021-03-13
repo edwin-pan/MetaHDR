@@ -40,7 +40,7 @@ class MetaHDR(tf.keras.Model):
             print("Loaded weights from: {}".format(model_weights))
         else:
             # self.m = get_unet(self.width,self.height)
-            inputs = tf.keras.layers.Input((img_rows, img_cols, 3))
+            inputs = tf.keras.layers.Input((img_height, img_width, 3))
             # tf.keras.layers.SeparableConv2D(fil)
             conv1 = tf.keras.layers.SeparableConv2D(8, (3, 3), activation='relu', padding='same')(inputs)
             conv1 = tf.keras.layers.SeparableConv2D(8, (3, 3), activation='relu', padding='same')(conv1)
