@@ -210,7 +210,7 @@ class MetaHDRNOCOPY(tf.keras.Model):
             get_GPU_usage("task_inner pre")
             ######################################
             ############### MAML #################
-            with tf.GradientTape(persistent=True) as tape:
+            with tf.GradientTape(persistent=False) as tape:
 
                 task_output_tr_pre = self.m(input_tr)
                 get_GPU_usage("task_inner post self.m forward pass")
