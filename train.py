@@ -33,7 +33,7 @@ def main(cfg):
         # Invalid device or cannot modify virtual devices once initialized.
         pass
 
-    tf.compat.v1.disable_eager_execution()
+    # tf.compat.v1.disable_eager_execution()
 
     # Define Loss
     # loss_func = IRLoss(img_W, img_H, 0.5).forward

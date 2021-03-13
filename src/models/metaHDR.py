@@ -183,7 +183,7 @@ class MetaHDRNOCOPY(tf.keras.Model):
         else:
             self.m = get_unet(self.width,self.height)
 
-    # @tf.function
+    @tf.function
     def call(self,
              inp,
              meta_batch_size=25,
