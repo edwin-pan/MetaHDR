@@ -111,6 +111,7 @@ class MetaHDR(tf.keras.Model):
                         parallel_iterations=meta_batch_size)
         return result
 
+@tf.function
 def outer_train_step(inp, model, optim, meta_batch_size=25, num_inner_updates=1):
     """
     MetaHDR's outer training loop handles meta-parameter adjustments, after num_inner_updates number of inner-loop task-specific 
