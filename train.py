@@ -37,12 +37,8 @@ def main(cfg):
     # loss_func = IRLoss(img_W, img_H, 0.5).forward
     loss_func = temp_mse_loss
 
-    print("Pre-model")
-    GPUtil.showUtilization(all=True)
     # Define Model 
     model = MetaHDR(loss_func, img_width=img_W, img_height=img_H, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER, inner_update_lr=cfg.TRAIN.TASK_LR)
-    print("Post-model")
-    GPUtil.showUtilization(all=True)
 
     dl = DataGenerator(num_exposures=cfg.TRAIN.NUM_EXPOSURES)
     train, test = dl.sample_batch('meta_train', cfg.TRAIN.BATCH_SIZE)
@@ -69,7 +65,6 @@ def main(cfg):
         # Perform each task-specific training inner-loop
         inp = (train[0], test[0], train[1], test[1])
         result = outer_train_step(inp, model, meta_optimizer, meta_batch_size=cfg.TRAIN.BATCH_SIZE, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER)
-        del train,test,inp # Saving space
 
         if itr % cfg.SUMMARY_INTERVAL == 0:
             model.summary()
@@ -90,10 +85,13 @@ def main(cfg):
             train, test = dl.sample_batch('meta_val', cfg.TRAIN.BATCH_SIZE)
             inp = (train[0], test[0], train[1], test[1])
             result = outer_eval_step(inp, model, meta_batch_size=cfg.TRAIN.BATCH_SIZE, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER)
-            del train,test,inp # Saving space
 
             print('[Meta-validation] pre-inner-loop train SSIM: %.5f, meta-validation post-inner-loop test SSIM: %.5f' % (result[-2], result[-1][-1]))
 
+            # Check GPU-Usage
+            GPUtil.showUtilization(all=True)
+
+            # Save model if it's our best so far
             if result[-1][-1] > curr_best_performance:
                 print(f"Best performance so far! Saving model to {cfg.CHECKPOINT_SAVE_PATH}")
                 model.save(cfg.CHECKPOINT_SAVE_PATH)

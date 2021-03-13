@@ -22,11 +22,7 @@ class DataGenerator(object):
         self.num_exposures = num_exposures
         
         # Fetch the data
-        print("pre")
-        GPUtil.showUtilization(all=True)
         data = get_data(crop_factor=crop_factor, num_exposures=num_exposures)
-        print("post")
-        GPUtil.showUtilization(all=True)
 
         num_datapoints = data.shape[0]
         num_train = int(split[0] * num_datapoints)
