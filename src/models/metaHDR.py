@@ -236,7 +236,7 @@ class MetaHDRNOCOPY(tf.keras.Model):
                 output_ts = self.m(input_ts)
                 loss_ts = self.loss_func(label_ts,output_ts)
                 task_outputs_ts.append(output_ts)
-                task_losses_ts.append(loss_ts.eval())
+                task_losses_ts.append(loss_ts)
                 
                 # Now revert the gradients
                 k=0
@@ -256,12 +256,14 @@ class MetaHDRNOCOPY(tf.keras.Model):
                             self.m.layers[j].trainable=True
                 
             # Compute accuracies from output predictions
-            task_accuracy_tr_pre = tf.reduce_mean(self.ssim_score(label_tr,task_output_tr_pre, 1.0)).eval()
+            task_accuracy_tr_pre = tf.reduce_mean(self.ssim_score(label_tr,task_output_tr_pre, 1.0))
             
             for j in range(num_inner_updates):
-                task_accuracies_ts.append(self.ssim_score(label_ts,task_outputs_ts[j], 1.0).eval())
+                task_accuracies_ts.append(self.ssim_score(label_ts,task_outputs_ts[j], 1.0))
 
-            task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre.eval(), task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
+            print(tf.keras.backend.eval(loss_ts))
+
+            task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
 
             return task_output
 
