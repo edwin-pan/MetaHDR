@@ -185,7 +185,7 @@ class MetaHDRNOCOPY(tf.keras.Model):
         else:
             self.m = get_unet(self.width,self.height)
 
-    @tf.function
+    # @tf.function
     def call(self,
              inp,
              meta_batch_size=25,
@@ -207,20 +207,20 @@ class MetaHDRNOCOPY(tf.keras.Model):
             # after i+1 inner gradient updates
             task_outputs_ts, task_losses_ts, task_accuracies_ts = [], [], []
 
-            # get_GPU_usage("task_inner pre")
+            get_GPU_usage("task_inner pre")
             ######################################
             ############### MAML #################
             with tf.GradientTape(persistent=True) as tape:
 
                 task_output_tr_pre = self.m(input_tr)
-                # get_GPU_usage("task_inner post self.m forward pass")
+                get_GPU_usage("task_inner post self.m forward pass")
 
                 inner_task_weights = [item for item in self.m.trainable_weights]
 
                 task_loss_tr_pre = self.loss_func(label_tr,task_output_tr_pre)
                 grads = tape.gradient(task_loss_tr_pre,inner_task_weights)
 
-                # get_GPU_usage("task_inner post gradient calc")
+                get_GPU_usage("task_inner post gradient calc")
 
                 # Apply the gradients
                 k=0
@@ -267,7 +267,9 @@ class MetaHDRNOCOPY(tf.keras.Model):
             for j in range(num_inner_updates):
                 task_accuracies_ts.append(self.ssim_score(label_ts,task_outputs_ts[j], 1.0))
 
-            task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
+            del task_output_tr_pre, task_outputs_ts, label_tr, label_ts
+            # task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
+            task_output = [tf.zeros([1],dtype=tf.float32), tf.zeros([1],dtype=tf.float32), task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
 
             return task_output
 
