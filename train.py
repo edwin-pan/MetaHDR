@@ -11,7 +11,7 @@ from skimage.metrics import structural_similarity as ssim
 from src.dataset.dataloader import DataGenerator
 from src.core.config import parse_args
 from src.core.utils import prepare_output_dir
-from src.models.metaHDR import MetaHDR
+from src.models.metaHDR import MetaHDR, MetaHDRNOCOPY
 from src.models.metaHDR import outer_train_step, outer_eval_step
 from src.core.loss import IRLoss
 
@@ -38,7 +38,8 @@ def main(cfg):
     loss_func = temp_mse_loss
 
     # Define Model 
-    model = MetaHDR(loss_func, img_width=img_W, img_height=img_H, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER, inner_update_lr=cfg.TRAIN.TASK_LR)
+    model = MetaHDRNOCOPY(loss_func, img_width=img_W, img_height=img_H, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER, inner_update_lr=cfg.TRAIN.TASK_LR)
+    GPUtil.showUtilization(all=True)
 
     dl = DataGenerator(num_exposures=cfg.TRAIN.NUM_EXPOSURES)
     train, test = dl.sample_batch('meta_train', cfg.TRAIN.BATCH_SIZE)
