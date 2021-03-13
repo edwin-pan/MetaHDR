@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-def get_unet(img_rows,img_cols):
+def get_unet(img_cols,img_rows):
     """
         UNet architecture used.
 
