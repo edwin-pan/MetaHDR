@@ -117,12 +117,10 @@ def outer_train_step(inp, model, optim, meta_batch_size=25, num_inner_updates=1)
     model updates.
     """
 
-    get_GPU_usage("outer_train pre")
     with tf.GradientTape(persistent=False) as outer_tape:
         result = model(inp, meta_batch_size=meta_batch_size, num_inner_updates=num_inner_updates)
         outputs_tr, outputs_ts, losses_tr_pre, losses_ts, accuracies_tr_pre, accuracies_ts = result
         total_losses_ts = [tf.reduce_mean(loss_ts) for loss_ts in losses_ts]
-    get_GPU_usage("outer_train pre")
 
     gradients = outer_tape.gradient(total_losses_ts[-1], model.m.trainable_weights)
 
