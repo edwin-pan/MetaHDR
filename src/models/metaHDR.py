@@ -10,6 +10,7 @@ from time import time
 
 from src.models.UNet import get_unet
 from src.models.utils import copy_model_fn
+from src.core.utils import get_GPU_usage
 
 class MetaHDR(tf.keras.Model):
     def __init__(self,
@@ -116,14 +117,12 @@ def outer_train_step(inp, model, optim, meta_batch_size=25, num_inner_updates=1)
     model updates.
     """
 
-    print("outer_train pre")
-    GPUtil.showUtilization(all=True)
+    get_GPU_usage("outer_train pre")
     with tf.GradientTape(persistent=False) as outer_tape:
         result = model(inp, meta_batch_size=meta_batch_size, num_inner_updates=num_inner_updates)
         outputs_tr, outputs_ts, losses_tr_pre, losses_ts, accuracies_tr_pre, accuracies_ts = result
         total_losses_ts = [tf.reduce_mean(loss_ts) for loss_ts in losses_ts]
-    print("outer_train post")
-    GPUtil.showUtilization(all=True)
+    get_GPU_usage("outer_train pre")
 
     gradients = outer_tape.gradient(total_losses_ts[-1], model.m.trainable_weights)
 
