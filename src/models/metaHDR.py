@@ -66,7 +66,7 @@ class MetaHDR(tf.keras.Model):
 
                 copied_model = copy_model_fn(self.m,self.width,self.height)
                 task_output_tr_pre = copied_model(input_tr)# logits
-                # copied_model.summary()
+                copied_model.summary()
 
                 task_loss_tr_pre = self.loss_func(label_tr,task_output_tr_pre)
                 grads = tape.gradient(task_loss_tr_pre,copied_model.trainable_weights)
