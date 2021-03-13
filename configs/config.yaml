@@ -2,8 +2,8 @@ OUTPUT_DIR: 'results'
 EXP_NAME: 'default'
 CHECKPOINT_SAVE_PATH: 'checkpoints'
 SUMMARY_INTERVAL: 1
-PRINT_INTERVAL: 3
-TEST_PRINT_INTERVAL: 5
+PRINT_INTERVAL: 2
+TEST_PRINT_INTERVAL: 3
 
 # Loss parameters
 LOSS:
@@ -12,7 +12,7 @@ LOSS:
 
 # Training parameters
 TRAIN:
-  BATCH_SIZE: 3
+  BATCH_SIZE: 7
   NUM_EXPOSURES: 5
   NUM_META_TR_ITER: 200 # 
   NUM_TASK_TR_ITER: 1 # Number of task-specific inner loops
