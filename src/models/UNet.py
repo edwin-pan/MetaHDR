@@ -154,4 +154,5 @@ def get_unet(img_cols,img_rows):
 
 @tf.function
 def unet_forward(model, inputs):
+    print(tf.executing_eagerly())
     return model(inputs)
