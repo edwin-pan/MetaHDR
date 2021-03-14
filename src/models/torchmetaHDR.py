@@ -15,7 +15,7 @@ class UNet(nn.Module):
         super(UNet, self).__init__()
         activation_function = torch.nn.ReLU(inplace=True)
 
-        self.contract1 = contract_block(3, num_filters, activation_function)
+        self.contract1 = contract_block(in_size, num_filters, activation_function)
         
         self.contract2 = contract_block(num_filters, 2*num_filters, activation_function)
         
@@ -32,7 +32,7 @@ class UNet(nn.Module):
         
         self.expand2 = expand_block(4*num_filters, 2*num_filters, activation_function)
         
-        self.top = top_block(2*num_filters, 3, activation_function)
+        self.top = top_block(2*num_filters, out_size, activation_function)
 
         # Define Pooling Operator
         self.pool = torch.nn.MaxPool2d((2,2), stride=2)
@@ -93,6 +93,7 @@ def train_maml(cfg):
     opt = optim.Adam(meta_model.parameters(), lr=lr)
     loss_func = nn.MSELoss()
     
+    # I believe this is num_inner_updates (?) in the cfg -- may want change it from 1 and just use that directly :P
     fas=3
     iterations = 100
     
@@ -117,14 +118,17 @@ def train_maml(cfg):
             adaptation_data, adaptation_labels = train[0, batch_index, ...].permute(0, 3, 1, 2), train[1, batch_index, ...].permute(0, 3, 1, 2)
             evaluation_data, evaluation_labels = test[0, batch_index, ...].permute(0, 3, 1, 2), test[1, batch_index, ...].permute(0, 3, 1, 2)
 
+            # If just calling a forward (i.e on adaptation data and don't want gradients to save space
+            #, create a new func w decortor @torch.no_grad)            
+
             # Fast Adaptation
             for step in range(fas):
-                train_error = loss_func(learner(adaptation_data), adaptation_labels)
+                train_error = loss_func(learner(adaptation_data), torch.clip(adaptation_labels, 0, 1))
                 learner.adapt(train_error)
     
             # Compute validation loss
             predictions = learner(evaluation_data)
-            valid_error = loss_func(predictions, evaluation_labels)
+            valid_error = loss_func(predictions, torch.clip(evaluation_labels, 0, 1))
             valid_error /= len(evaluation_data)
             
             # Will return avg ssim 
