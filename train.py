@@ -34,6 +34,7 @@ def main(cfg):
         pass
 
     # tf.compat.v1.disable_eager_execution()
+    # gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.333)
 
     # Define Loss
     # loss_func = IRLoss(img_W, img_H, 0.5).forward
