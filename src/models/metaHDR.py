@@ -157,8 +157,9 @@ class MetaHDR(tf.keras.Model):
 
         task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
 
-        tf.keras.backend.clear_session()
         del m
+        tf.keras.backend.clear_session()
+        gc.collect()
         return task_output
 
     # @tf.function
