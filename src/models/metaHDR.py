@@ -212,7 +212,6 @@ class MetaHDRNOCOPY(tf.keras.Model):
                 get_GPU_usage("inner pre")
                 task_output_tr_pre = unet_forward(self.m, input_tr)
                 get_GPU_usage("inner post")
-                tf.compat.v1.set_random_seed(1)
 
                 inner_task_weights = [item for item in self.m.trainable_weights]
 
