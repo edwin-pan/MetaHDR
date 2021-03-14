@@ -8,6 +8,7 @@ from src.models.utils import convolution_block, transpose_convolution_block, \
     
 from src.dataset.dataloader import DataGenerator
 from piqa import SSIM
+from src.core.utils import get_GPU_usage
 
 
 class UNet(nn.Module):
@@ -111,7 +112,8 @@ def train_maml(cfg):
         test = torch.from_numpy(test).to(device)
         
         for batch_index in range(cfg.TRAIN.BATCH_SIZE):
-            print("Batch", batch_index)
+            #get_GPU_usage(f'Index {batch_index}')
+            print("Index", batch_index)
             learner = meta_model.clone()
             
             # Separate data into adaptation/evalutation sets
