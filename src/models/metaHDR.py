@@ -183,12 +183,12 @@ class MetaHDRNOCOPY(tf.keras.Model):
         else:
             self.m = get_unet(self.width,self.height)
 
-    @tf.function
+    # @tf.function
     def call(self,
              inp,
              meta_batch_size=25,
              num_inner_updates=1):
-        @tf.function
+        # @tf.function
         def task_inner_loop(inp,reuse=True,meta_batch_size=25,num_inner_updates=1):
             '''
             '''

@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 import scipy.stats as st
 
-@tf.function
+# @tf.function
 def temp_mse_loss(y_true, y_pred):
     """ Debugging MSE loss """
     return tf.keras.losses.mean_squared_error(y_true, y_pred)
