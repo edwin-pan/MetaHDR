@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 from functools import partial
 import GPUtil
+import gc
 
 # from tensorflow.image import ssim # Not available in tensorflow/2.1
 from skimage.metrics import structural_similarity as ssim
@@ -96,6 +97,7 @@ class MetaHDR(tf.keras.Model):
 
             get_GPU_usage("inner pre")
             tf.keras.backend.clear_session()
+            gc.collect()
             get_GPU_usage("intermediate post")
             task_output_tr_pre = unet_forward(self.m, input_tr)
             get_GPU_usage("inner post")
