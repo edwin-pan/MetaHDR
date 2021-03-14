@@ -1,4 +1,66 @@
+import torch
+from torch import nn
 from src.models.UNet import get_unet
+
+
+# Define Network Blocks
+def convolution_block(in_dim, out_dim):
+    return nn.Conv2d(in_dim,out_dim, kernel_size=3, stride=1, padding=1)
+
+def transpose_convolution_block(in_dim, out_dim):
+    return torch.nn.ConvTranspose2d(in_dim,out_dim,kernel_size=3, stride=2, padding=1,output_padding=1)
+
+def contract_block(in_dim,out_dim,activation):
+    block = nn.Sequential(convolution_block(in_dim, out_dim),
+                            nn.BatchNorm2d(out_dim),
+                            activation,
+                            convolution_block(out_dim, out_dim),
+                            nn.BatchNorm2d(out_dim),
+                            activation)
+    return block
+
+def bottom_block(in_dim, out_dim, activation):
+    bottom = torch.nn.Sequential(convolution_block(in_dim, out_dim),
+                                 nn.BatchNorm2d(out_dim),
+                                 activation,
+                                 convolution_block(out_dim, out_dim),
+                                 nn.BatchNorm2d(out_dim),
+                                 activation,
+                                 transpose_convolution_block(out_dim, in_dim),
+                                 nn.BatchNorm2d(in_dim),
+                                 activation)
+    return bottom
+
+def expand_block(in_dim, out_dim, activation):
+    expand = torch.nn.Sequential(convolution_block(in_dim, out_dim),
+                                 nn.BatchNorm2d(out_dim),
+                                 activation,
+                                 convolution_block(out_dim, out_dim),
+                                 nn.BatchNorm2d(out_dim),
+                                 activation,
+                                 transpose_convolution_block(out_dim, out_dim//2),
+                                 nn.BatchNorm2d(out_dim//2),
+                                 activation)
+    return expand
+
+def top_block(in_dim, out_dim, activation):
+    top = torch.nn.Sequential(convolution_block(in_dim, out_dim),
+                              nn.BatchNorm2d(out_dim),
+                              activation,
+                              convolution_block(out_dim, out_dim),
+                              # nn.BatchNorm2d(out_dim),
+                              # activation,
+                              # convolution_block(out_dim,NUM_CLASSES),
+                              # nn.BatchNorm2d(NUM_CLASSES),
+                              # activation
+                              )
+    return top
+
+
+
+
+
+
 
 def copy_model_fn(mi,width,height):
     copied_model = get_unet(width,height)
