@@ -183,11 +183,12 @@ class MetaHDRNOCOPY(tf.keras.Model):
         else:
             self.m = get_unet(self.width,self.height)
 
-    # @tf.function
+    @tf.function
     def call(self,
              inp,
              meta_batch_size=25,
              num_inner_updates=1):
+        @tf.function
         def task_inner_loop(inp,reuse=True,meta_batch_size=25,num_inner_updates=1):
             '''
             '''
@@ -209,9 +210,9 @@ class MetaHDRNOCOPY(tf.keras.Model):
             ############### MAML #################
             with tf.GradientTape(persistent=True) as tape:
 
-                get_GPU_usage("inner pre")
+                # get_GPU_usage("inner pre")
                 task_output_tr_pre = unet_forward(self.m, input_tr)
-                get_GPU_usage("inner post")
+                # get_GPU_usage("inner post")
 
                 inner_task_weights = [item for item in self.m.trainable_weights]
 
