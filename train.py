@@ -11,7 +11,7 @@ from skimage.metrics import structural_similarity as ssim
 from src.dataset.dataloader import DataGenerator
 from src.core.config import parse_args
 from src.core.utils import prepare_output_dir
-from src.models.metaHDR import MetaHDR, MetaHDRNOCOPY
+from src.models.metaHDR import MetaHDR
 from src.models.metaHDR import outer_train_step, outer_eval_step
 from src.core.loss import IRLoss
 
@@ -26,23 +26,22 @@ def main(cfg):
     # Check compute method
     print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
     print("Tensorflow Version: ", tf.__version__)
-    # physical_devices = tf.config.list_physical_devices('GPU')
-    # try:
-    #     print("Preventing TF pre-allocation of GPU mem")
-    #     tf.config.experimental.set_memory_growth(physical_devices[0], True)
-    # except:
-    #     # Invalid device or cannot modify virtual devices once initialized.
-    #     pass
+    physical_devices = tf.config.list_physical_devices('GPU')
+    try:
+        print("Preventing TF pre-allocation of GPU mem")
+        tf.config.experimental.set_memory_growth(physical_devices[0], True)
+    except:
+        # Invalid device or cannot modify virtual devices once initialized.
+        pass
 
     # # tf.compat.v1.disable_eager_execution()
-    # tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.333)
 
     # Define Loss
     # loss_func = IRLoss(img_W, img_H, 0.5).forward
     loss_func = temp_mse_loss
 
     # Define Model 
-    model = MetaHDRNOCOPY(loss_func, img_width=img_W, img_height=img_H, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER, inner_update_lr=cfg.TRAIN.TASK_LR)
+    model = MetaHDR(loss_func, img_width=img_W, img_height=img_H, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER, inner_update_lr=cfg.TRAIN.TASK_LR)
     GPUtil.showUtilization(all=True)
 
     dl = DataGenerator(num_exposures=cfg.TRAIN.NUM_EXPOSURES)
@@ -99,7 +98,7 @@ def main(cfg):
             # Save model if it's our best so far
             if result[-1][-1] > curr_best_performance:
                 print(f"Best performance so far! Saving model to {cfg.CHECKPOINT_SAVE_PATH}")
-                model.save(cfg.CHECKPOINT_SAVE_PATH)
+                # model.save(cfg.CHECKPOINT_SAVE_PATH)
                 curr_best_performance = result[-1][-1]
 
     print("Checkpoint")
