@@ -97,8 +97,8 @@ class MetaHDR(tf.keras.Model):
         with tf.GradientTape(persistent=True) as tape:
 
             get_GPU_usage("inner pre")
-            # tf.keras.backend.clear_session()
-            # gc.collect()
+            tf.keras.backend.clear_session()
+            gc.collect()
             # get_GPU_usage("intermediate post")
             task_output_tr_pre = unet_forward(self.m, input_tr)
             get_GPU_usage("inner post")
