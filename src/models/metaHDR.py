@@ -27,8 +27,8 @@ def outer_train_step(inp, model, optim, meta_batch_size=25, num_inner_updates=1)
     gradients = outer_tape.gradient(total_losses_ts[-1], model.m.trainable_weights)
 
     optim.apply_gradients(zip(gradients, model.m.trainable_weights))
-    tf.keras.backend.clear_session()
-    gc.collect()
+    # tf.keras.backend.clear_session()
+    # gc.collect()
     total_loss_tr_pre = tf.reduce_mean(losses_tr_pre)
     total_accuracy_tr_pre = tf.reduce_mean(accuracies_tr_pre)
     total_accuracies_ts = [tf.reduce_mean(accuracy_ts) for accuracy_ts in accuracies_ts]
@@ -128,7 +128,7 @@ class MetaHDR(tf.keras.Model):
 
             # output_ts = unet_forward(self.m, input_ts)
             output_ts = self.m.predict_on_batch(input_ts)
-            
+
             loss_ts = self.loss_func(label_ts,output_ts)
             task_outputs_ts.append(output_ts)
             task_losses_ts.append(loss_ts)
