@@ -24,7 +24,8 @@ def main(cfg):
     img_W = 512
 
     # Check compute method
-    # print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
+    print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
+    print("Tensorflow Version: ", tf.__version__)
     # physical_devices = tf.config.list_physical_devices('GPU')
     # try:
     #     print("Preventing TF pre-allocation of GPU mem")
