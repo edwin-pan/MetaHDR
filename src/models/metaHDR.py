@@ -27,7 +27,8 @@ def outer_train_step(inp, model, optim, meta_batch_size=25, num_inner_updates=1)
     gradients = outer_tape.gradient(total_losses_ts[-1], model.m.trainable_weights)
 
     optim.apply_gradients(zip(gradients, model.m.trainable_weights))
-
+    tf.keras.backend.clear_session()
+    gc.collect()
     total_loss_tr_pre = tf.reduce_mean(losses_tr_pre)
     total_accuracy_tr_pre = tf.reduce_mean(accuracies_tr_pre)
     total_accuracies_ts = [tf.reduce_mean(accuracy_ts) for accuracy_ts in accuracies_ts]
@@ -76,15 +77,15 @@ class MetaHDR(tf.keras.Model):
         self.loss_func = loss_func
         self.non_trainable_layers =  [0,3,6,9,12,16,20,24,28]
         self.up_conv_layers =  [15,19,23,27]
-        # if self.pretrain_flag:
-        #     print(self.width,self.height)
-        #     self.m = inner_model
-        #     self.m.load_weights(model_weights)
-        #     self.m.build((self.height, self.width, 3))
-        #     print("Loaded weights from: {}".format(model_weights))
-        # else:
-        #     self.m = inner_model
-        #     self.m.build((self.height, self.width, 3))
+        if self.pretrain_flag:
+            print(self.width,self.height)
+            self.m = get_unet(self.height, self.width)
+            self.m.load_weights(model_weights)
+            self.m.build((self.height, self.width, 3))
+            print("Loaded weights from: {}".format(model_weights))
+        else:
+            self.m = get_unet(self.height, self.width)
+            self.m.build((self.height, self.width, 3))
 
     # @tf.function
     def task_inner_loop(self, inp,reuse=True,meta_batch_size=25,num_inner_updates=1):
@@ -92,9 +93,6 @@ class MetaHDR(tf.keras.Model):
         input_tr, input_ts, label_tr, label_ts = inp[0], inp[1], inp[2], inp[3]
         task_output_tr_pre, task_loss_tr_pre, task_accuracy_tr_pre = None, None, None
         task_outputs_ts, task_losses_ts, task_accuracies_ts = [], [], []
-
-        # Define a temp model
-        m = get_unet(self.height, self.width)
 
         with tf.GradientTape(persistent=True) as tape:
 
@@ -105,27 +103,27 @@ class MetaHDR(tf.keras.Model):
             task_output_tr_pre = unet_forward(m, input_tr)
             get_GPU_usage("inner post")
 
-            inner_task_weights = [item for item in m.trainable_weights]
+            inner_task_weights = [item for item in self.m.trainable_weights]
 
             task_loss_tr_pre = self.loss_func(label_tr,task_output_tr_pre)
             grads = tape.gradient(task_loss_tr_pre,inner_task_weights)
 
             # Apply the gradients
             k=0
-            for j in range(len(m.layers)):
-                # print(j,m.layers[j].name)
+            for j in range(len(self.m.layers)):
+                # print(j,self.m.layers[j].name)
                 if j not in self.non_trainable_layers: # Layers w/ no trainable parameters
                     if j in self.up_conv_layers: # Up-conv layers
-                        m.layers[j].kernel=m.layers[j].kernel - self.inner_update_lr*grads[k]
-                        m.layers[j].bias=m.layers[j].bias - self.inner_update_lr*grads[k+1]
+                        self.m.layers[j].kernel=self.m.layers[j].kernel - self.inner_update_lr*grads[k]
+                        self.m.layers[j].bias=self.m.layers[j].bias - self.inner_update_lr*grads[k+1]
                         k+=2
-                        m.layers[j].trainable=True
+                        self.m.layers[j].trainable=True
                     else: # Regular conv layers
-                        m.layers[j].depthwise_kernel=m.layers[j].depthwise_kernel - self.inner_update_lr*grads[k]
-                        m.layers[j].pointwise_kernel=m.layers[j].pointwise_kernel - self.inner_update_lr*grads[k+1]
-                        m.layers[j].bias=m.layers[j].bias - self.inner_update_lr*grads[k+2]
+                        self.m.layers[j].depthwise_kernel=self.m.layers[j].depthwise_kernel - self.inner_update_lr*grads[k]
+                        self.m.layers[j].pointwise_kernel=self.m.layers[j].pointwise_kernel - self.inner_update_lr*grads[k+1]
+                        self.m.layers[j].bias=self.m.layers[j].bias - self.inner_update_lr*grads[k+2]
                         k+=3
-                        m.layers[j].trainable=True
+                        self.m.layers[j].trainable=True
 
             output_ts = unet_forward(m, input_ts)
             loss_ts = self.loss_func(label_ts,output_ts)
@@ -134,20 +132,20 @@ class MetaHDR(tf.keras.Model):
             
             # Now revert the gradients
             k=0
-            for j in range(len(m.layers)):
-                # print(j,m.layers[j].name)
+            for j in range(len(self.m.layers)):
+                # print(j,self.m.layers[j].name)
                 if j not in self.non_trainable_layers: # Layers w/ no trainable parameters
                     if j in self.up_conv_layers: # Up-conv layers
-                        m.layers[j].kernel=inner_task_weights[k]
-                        m.layers[j].bias=inner_task_weights[k+1]
+                        self.m.layers[j].kernel=inner_task_weights[k]
+                        self.m.layers[j].bias=inner_task_weights[k+1]
                         k+=2
-                        m.layers[j].trainable=True
+                        self.m.layers[j].trainable=True
                     else: # Regular conv layers
-                        m.layers[j].depthwise_kernel=inner_task_weights[k]
-                        m.layers[j].pointwise_kernel=inner_task_weights[k+1]
-                        m.layers[j].bias=inner_task_weights[k+2]
+                        self.m.layers[j].depthwise_kernel=inner_task_weights[k]
+                        self.m.layers[j].pointwise_kernel=inner_task_weights[k+1]
+                        self.m.layers[j].bias=inner_task_weights[k+2]
                         k+=3
-                        m.layers[j].trainable=True
+                        self.m.layers[j].trainable=True
             
         # Compute accuracies from output predictions
         task_accuracy_tr_pre = tf.reduce_mean(self.ssim_score(label_tr,task_output_tr_pre, 1.0))
@@ -157,9 +155,6 @@ class MetaHDR(tf.keras.Model):
 
         task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
 
-        del m
-        tf.keras.backend.clear_session()
-        gc.collect()
         return task_output
 
     # @tf.function
