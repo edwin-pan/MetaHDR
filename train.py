@@ -44,9 +44,9 @@ def main(cfg):
 
     # Define inner-model
     inner_model = get_unet(img_H, img_W)
-    
+
     # Define Model 
-    model = MetaHDR(loss_func, img_width=img_W, img_height=img_H, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER, inner_update_lr=cfg.TRAIN.TASK_LR)
+    model = MetaHDR(loss_func, inner_model, img_width=img_W, img_height=img_H, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER, inner_update_lr=cfg.TRAIN.TASK_LR)
     GPUtil.showUtilization(all=True)
 
     dl = DataGenerator(num_exposures=cfg.TRAIN.NUM_EXPOSURES)
