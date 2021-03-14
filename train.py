@@ -77,7 +77,7 @@ def main(cfg):
             post_loss.append(result[-3][-1])
 
         if (itr!=0) and itr % cfg.PRINT_INTERVAL == 0:
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
             print_str = 'Iteration %d: pre loss: %.5f, post loss: %.5f, pre-inner-loop train SSIM: %.5f, post-inner-loop test SSIM: %.5f' % (itr, tf.reduce_mean(pre_loss), tf.reduce_mean(post_loss), tf.reduce_mean(pre_accuracies), tf.reduce_mean(post_accuracies))
             print(print_str)
             pre_accuracies, post_accuracies = [], []
