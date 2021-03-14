@@ -105,27 +105,27 @@ class MetaHDR(tf.keras.Model):
             task_output_tr_pre = unet_forward(m, input_tr)
             get_GPU_usage("inner post")
 
-            inner_task_weights = [item for item in self.m.trainable_weights]
+            inner_task_weights = [item for item in m.trainable_weights]
 
             task_loss_tr_pre = self.loss_func(label_tr,task_output_tr_pre)
             grads = tape.gradient(task_loss_tr_pre,inner_task_weights)
 
             # Apply the gradients
             k=0
-            for j in range(len(self.m.layers)):
-                # print(j,self.m.layers[j].name)
+            for j in range(len(m.layers)):
+                # print(j,m.layers[j].name)
                 if j not in self.non_trainable_layers: # Layers w/ no trainable parameters
                     if j in self.up_conv_layers: # Up-conv layers
-                        self.m.layers[j].kernel=self.m.layers[j].kernel - self.inner_update_lr*grads[k]
-                        self.m.layers[j].bias=self.m.layers[j].bias - self.inner_update_lr*grads[k+1]
+                        m.layers[j].kernel=m.layers[j].kernel - self.inner_update_lr*grads[k]
+                        m.layers[j].bias=m.layers[j].bias - self.inner_update_lr*grads[k+1]
                         k+=2
-                        self.m.layers[j].trainable=True
+                        m.layers[j].trainable=True
                     else: # Regular conv layers
-                        self.m.layers[j].depthwise_kernel=self.m.layers[j].depthwise_kernel - self.inner_update_lr*grads[k]
-                        self.m.layers[j].pointwise_kernel=self.m.layers[j].pointwise_kernel - self.inner_update_lr*grads[k+1]
-                        self.m.layers[j].bias=self.m.layers[j].bias - self.inner_update_lr*grads[k+2]
+                        m.layers[j].depthwise_kernel=m.layers[j].depthwise_kernel - self.inner_update_lr*grads[k]
+                        m.layers[j].pointwise_kernel=m.layers[j].pointwise_kernel - self.inner_update_lr*grads[k+1]
+                        m.layers[j].bias=m.layers[j].bias - self.inner_update_lr*grads[k+2]
                         k+=3
-                        self.m.layers[j].trainable=True
+                        m.layers[j].trainable=True
 
             output_ts = unet_forward(m, input_ts)
             loss_ts = self.loss_func(label_ts,output_ts)
@@ -134,20 +134,20 @@ class MetaHDR(tf.keras.Model):
             
             # Now revert the gradients
             k=0
-            for j in range(len(self.m.layers)):
-                # print(j,self.m.layers[j].name)
+            for j in range(len(m.layers)):
+                # print(j,m.layers[j].name)
                 if j not in self.non_trainable_layers: # Layers w/ no trainable parameters
                     if j in self.up_conv_layers: # Up-conv layers
-                        self.m.layers[j].kernel=inner_task_weights[k]
-                        self.m.layers[j].bias=inner_task_weights[k+1]
+                        m.layers[j].kernel=inner_task_weights[k]
+                        m.layers[j].bias=inner_task_weights[k+1]
                         k+=2
-                        self.m.layers[j].trainable=True
+                        m.layers[j].trainable=True
                     else: # Regular conv layers
-                        self.m.layers[j].depthwise_kernel=inner_task_weights[k]
-                        self.m.layers[j].pointwise_kernel=inner_task_weights[k+1]
-                        self.m.layers[j].bias=inner_task_weights[k+2]
+                        m.layers[j].depthwise_kernel=inner_task_weights[k]
+                        m.layers[j].pointwise_kernel=inner_task_weights[k+1]
+                        m.layers[j].bias=inner_task_weights[k+2]
                         k+=3
-                        self.m.layers[j].trainable=True
+                        m.layers[j].trainable=True
             
         # Compute accuracies from output predictions
         task_accuracy_tr_pre = tf.reduce_mean(self.ssim_score(label_tr,task_output_tr_pre, 1.0))
