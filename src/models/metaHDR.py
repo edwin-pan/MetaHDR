@@ -28,8 +28,7 @@ def outer_train_step(inp, model, optim, meta_batch_size=25, num_inner_updates=1)
     gradients = outer_tape.gradient(total_losses_ts[-1], model.m.trainable_weights)
 
     optim.apply_gradients(zip(gradients, model.m.trainable_weights))
-    cuda.select_device(0)
-    cuda.close()
+
     # tf.keras.backend.clear_session()
     # gc.collect()
     total_loss_tr_pre = tf.reduce_mean(losses_tr_pre)

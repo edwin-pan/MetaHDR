@@ -96,12 +96,11 @@ def train_maml(cfg):
     
     # I believe this is num_inner_updates (?) in the cfg -- may want change it from 1 and just use that directly :P
     fas=3
-    iterations = 100
     
     ssim = SSIM().double().cuda() if device == 'cuda' else SSIM().double()
     
     # Reference https://github.com/learnables/learn2learn/blob/master/examples/vision/meta_mnist.py
-    for iteration in range(iterations):
+    for iteration in range(cfg.TRAIN.NUM_META_TR_ITER):
         print("ITERATION #", iteration)
         iteration_error = 0.0
         # iteration_acc = 0.0
