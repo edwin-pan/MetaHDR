@@ -3,6 +3,7 @@ import numpy as np
 from functools import partial
 import GPUtil
 import gc
+from numba import cuda
 
 # from tensorflow.image import ssim # Not available in tensorflow/2.1
 from skimage.metrics import structural_similarity as ssim
@@ -27,6 +28,8 @@ def outer_train_step(inp, model, optim, meta_batch_size=25, num_inner_updates=1)
     gradients = outer_tape.gradient(total_losses_ts[-1], model.m.trainable_weights)
 
     optim.apply_gradients(zip(gradients, model.m.trainable_weights))
+    cuda.select_device(0)
+    cuda.close()
     # tf.keras.backend.clear_session()
     # gc.collect()
     total_loss_tr_pre = tf.reduce_mean(losses_tr_pre)
@@ -101,7 +104,7 @@ class MetaHDR(tf.keras.Model):
             # gc.collect()
             # get_GPU_usage("intermediate post")
             # task_output_tr_pre = unet_forward(self.m, input_tr)
-            task_output_tr_pre = self.m.predict_on_batch(input_tr)
+            task_output_tr_pre = self.m.train_on_batch(input_tr)
             get_GPU_usage("inner post")
 
             inner_task_weights = [item for item in self.m.trainable_weights]
