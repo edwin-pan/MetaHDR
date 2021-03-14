@@ -24,18 +24,18 @@ def main(cfg):
     img_W = 512
 
     # Check compute method
-    print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
-    physical_devices = tf.config.list_physical_devices('GPU')
-    try:
-        print("Preventing TF pre-allocation of GPU mem")
-        tf.config.experimental.set_memory_growth(physical_devices[0], True)
-    except:
-        # Invalid device or cannot modify virtual devices once initialized.
-        pass
+    # print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
+    # physical_devices = tf.config.list_physical_devices('GPU')
+    # try:
+    #     print("Preventing TF pre-allocation of GPU mem")
+    #     tf.config.experimental.set_memory_growth(physical_devices[0], True)
+    # except:
+    #     # Invalid device or cannot modify virtual devices once initialized.
+    #     pass
 
-    # tf.compat.v1.disable_eager_execution()
-    tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.333)
-    
+    # # tf.compat.v1.disable_eager_execution()
+    # tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.333)
+
     # Define Loss
     # loss_func = IRLoss(img_W, img_H, 0.5).forward
     loss_func = temp_mse_loss
