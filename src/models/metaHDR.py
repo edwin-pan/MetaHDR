@@ -103,8 +103,7 @@ class MetaHDR(tf.keras.Model):
             # tf.keras.backend.clear_session()
             # gc.collect()
             # get_GPU_usage("intermediate post")
-            # task_output_tr_pre = unet_forward(self.m, input_tr)
-            task_output_tr_pre = self.m.train_on_batch(input_tr)
+            task_output_tr_pre = unet_forward(self.m, input_tr)
             get_GPU_usage("inner post")
 
             inner_task_weights = [item for item in self.m.trainable_weights]
@@ -129,8 +128,8 @@ class MetaHDR(tf.keras.Model):
                         k+=3
                         self.m.layers[j].trainable=True
 
-            # output_ts = unet_forward(self.m, input_ts)
-            output_ts = self.m.predict_on_batch(input_ts)
+            output_ts = unet_forward(self.m, input_ts)
+            # output_ts = self.m.predict_on_batch(input_ts)
 
             loss_ts = self.loss_func(label_ts,output_ts)
             task_outputs_ts.append(output_ts)
