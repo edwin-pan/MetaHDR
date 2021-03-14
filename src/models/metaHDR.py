@@ -81,7 +81,8 @@ class MetaHDR(tf.keras.Model):
             self.m.load_weights(model_weights)
             print("Loaded weights from: {}".format(model_weights))
         else:
-            self.m = get_unet(self.width,self.height)
+            self.m = get_unet(self.height,self.width)
+            self.m.build(self.height, self.width, 3)
 
     # @tf.function
     def task_inner_loop(self, inp,reuse=True,meta_batch_size=25,num_inner_updates=1):
