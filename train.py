@@ -13,6 +13,8 @@ from src.core.config import parse_args
 from src.core.utils import prepare_output_dir
 from src.models.metaHDR import MetaHDR
 from src.models.metaHDR import outer_train_step, outer_eval_step
+from src.models.UNet import get_unet, unet_forward
+
 from src.core.loss import IRLoss
 
 from src.core.loss import temp_mse_loss
@@ -40,6 +42,9 @@ def main(cfg):
     # loss_func = IRLoss(img_W, img_H, 0.5).forward
     loss_func = temp_mse_loss
 
+    # Define inner-model
+    inner_model = get_unet(img_H, img_W)
+    
     # Define Model 
     model = MetaHDR(loss_func, img_width=img_W, img_height=img_H, num_inner_updates=cfg.TRAIN.NUM_TASK_TR_ITER, inner_update_lr=cfg.TRAIN.TASK_LR)
     GPUtil.showUtilization(all=True)

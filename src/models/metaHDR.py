@@ -56,6 +56,7 @@ def outer_eval_step(inp, model, meta_batch_size=25, num_inner_updates=1):
 class MetaHDR(tf.keras.Model):
     def __init__(self,
                  loss_func,
+                 inner_model,
                  img_width=1,
                  img_height=1,
                  num_inner_updates=1,
@@ -78,12 +79,12 @@ class MetaHDR(tf.keras.Model):
         self.up_conv_layers =  [15,19,23,27]
         if self.pretrain_flag:
             print(self.width,self.height)
-            self.m = get_unet(self.width,self.height)
+            self.m = inner_model
             self.m.load_weights(model_weights)
             self.m.build((self.height, self.width, 3))
             print("Loaded weights from: {}".format(model_weights))
         else:
-            self.m = get_unet(self.height,self.width)
+            self.m = inner_model
             self.m.build((self.height, self.width, 3))
 
     # @tf.function
@@ -96,9 +97,9 @@ class MetaHDR(tf.keras.Model):
         with tf.GradientTape(persistent=True) as tape:
 
             get_GPU_usage("inner pre")
-            tf.keras.backend.clear_session()
-            gc.collect()
-            get_GPU_usage("intermediate post")
+            # tf.keras.backend.clear_session()
+            # gc.collect()
+            # get_GPU_usage("intermediate post")
             task_output_tr_pre = unet_forward(self.m, input_tr)
             get_GPU_usage("inner post")
 
