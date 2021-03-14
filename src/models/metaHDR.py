@@ -56,7 +56,6 @@ def outer_eval_step(inp, model, meta_batch_size=25, num_inner_updates=1):
 class MetaHDR(tf.keras.Model):
     def __init__(self,
                  loss_func,
-                 inner_model,
                  img_width=1,
                  img_height=1,
                  num_inner_updates=1,
@@ -77,15 +76,15 @@ class MetaHDR(tf.keras.Model):
         self.loss_func = loss_func
         self.non_trainable_layers =  [0,3,6,9,12,16,20,24,28]
         self.up_conv_layers =  [15,19,23,27]
-        if self.pretrain_flag:
-            print(self.width,self.height)
-            self.m = inner_model
-            self.m.load_weights(model_weights)
-            self.m.build((self.height, self.width, 3))
-            print("Loaded weights from: {}".format(model_weights))
-        else:
-            self.m = inner_model
-            self.m.build((self.height, self.width, 3))
+        # if self.pretrain_flag:
+        #     print(self.width,self.height)
+        #     self.m = inner_model
+        #     self.m.load_weights(model_weights)
+        #     self.m.build((self.height, self.width, 3))
+        #     print("Loaded weights from: {}".format(model_weights))
+        # else:
+        #     self.m = inner_model
+        #     self.m.build((self.height, self.width, 3))
 
     # @tf.function
     def task_inner_loop(self, inp,reuse=True,meta_batch_size=25,num_inner_updates=1):
@@ -94,13 +93,16 @@ class MetaHDR(tf.keras.Model):
         task_output_tr_pre, task_loss_tr_pre, task_accuracy_tr_pre = None, None, None
         task_outputs_ts, task_losses_ts, task_accuracies_ts = [], [], []
 
+        # Define a temp model
+        m = get_unet(self.height, self.width)
+
         with tf.GradientTape(persistent=True) as tape:
 
             get_GPU_usage("inner pre")
-            tf.keras.backend.clear_session()
-            gc.collect()
+            # tf.keras.backend.clear_session()
+            # gc.collect()
             # get_GPU_usage("intermediate post")
-            task_output_tr_pre = unet_forward(self.m, input_tr)
+            task_output_tr_pre = unet_forward(m, input_tr)
             get_GPU_usage("inner post")
 
             inner_task_weights = [item for item in self.m.trainable_weights]
@@ -125,7 +127,7 @@ class MetaHDR(tf.keras.Model):
                         k+=3
                         self.m.layers[j].trainable=True
 
-            output_ts = unet_forward(self.m, input_ts)
+            output_ts = unet_forward(m, input_ts)
             loss_ts = self.loss_func(label_ts,output_ts)
             task_outputs_ts.append(output_ts)
             task_losses_ts.append(loss_ts)
@@ -155,6 +157,8 @@ class MetaHDR(tf.keras.Model):
 
         task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
 
+        tf.keras.backend.clear_session()
+        del m
         return task_output
 
     # @tf.function
