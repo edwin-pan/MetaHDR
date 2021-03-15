@@ -16,11 +16,8 @@ from src.models.utils import save_model
 
 logger = logging.getLogger(__name__)
 
-def eval_maml(learner, loss_func, val_train, val_test, batch_size, num_inner_updates, curr_meta_iter, ssim=None, device=None, log_dir=None):
+def eval_maml(learner, loss_func, train, test, batch_size, num_inner_updates, curr_meta_iter, ssim=None, device=None, log_dir=None):
     model = learner.clone()
-    train = torch.from_numpy(val_train).to(device)
-    test = torch.from_numpy(val_test).to(device)
-
     test_error, test_ssim = 0, 0
     for batch_idx in range(batch_size):
         adaptation_data, adaptation_labels = train[0, batch_idx, ...].permute(0, 3, 1, 2), train[1, batch_idx, ...].permute(0, 3, 1, 2)
@@ -83,7 +80,6 @@ def train_maml(cfg, log_dir):
         iteration_ssim = 0
         
         train, test = dg.sample_batch('meta_train', cfg.TRAIN.BATCH_SIZE)
-        val_train, val_test = dg.sample_batch('meta_val', cfg.TRAIN.BATCH_SIZE)
         train = torch.from_numpy(train).to(device)
         test = torch.from_numpy(test).to(device)
 
