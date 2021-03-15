@@ -10,6 +10,7 @@ from src.dataset.dataloader import DataGenerator
 from src.core.utils import get_GPU_usage
 from src.core.loss import ExpandNetLoss, HaarLoss, LPIPSLoss, SSIMLoss
 from src.models.UNet import UNet
+from src.dataset.hdr_visualization import visualize_hdr_image
 
 def train_maml(cfg):    
     dg = DataGenerator(num_exposures=cfg.TRAIN.NUM_EXPOSURES)
@@ -68,13 +69,13 @@ def train_maml(cfg):
             # Plot the first batch index
             if not batch_index:
               fig, ax = plt.subplots(nrows=1,ncols=3)
-              ax[0].imshow(predictions[0].detach().cpu().permute(1, 2, 0).numpy() ** (1/2.2))
+              ax[0].imshow(visualize_hdr_image(predictions[0].detach().cpu().permute(1, 2, 0).numpy()))
               ax[0].axis('off')
               ax[0].set_title('Predicted (GCed)')
               ax[1].imshow(evaluation_data[0].detach().cpu().permute(1, 2, 0).numpy())
               ax[1].axis('off')
               ax[1].set_title('Original Exposure Shot')
-              ax[2].imshow(torch.clip(adaptation_labels[0], 0, 1).detach().cpu().permute(1, 2, 0).numpy() ** (1/2.2))
+              ax[2].imshow(visualize_hdr_image(torch.clip(adaptation_labels[0], 0, 1).detach().cpu().permute(1, 2, 0).numpy()))
               ax[2].axis('off')
               ax[2].set_title('HDR (GCed)')
               fig.savefig(f'test{iteration}_{batch_index}.png', bbox_inches='tight')
