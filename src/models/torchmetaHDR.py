@@ -59,7 +59,7 @@ def train_maml(cfg, log_dir):
     lr=cfg.TRAIN.META_LR
     maml_lr=cfg.TRAIN.TASK_LR
     
-    model = UNet(in_size=3, out_size=3, num_filters=6).double()
+    model = UNet(in_size=3, out_size=3, num_filters=8).double()
     model.to(device)
     meta_model = l2l.algorithms.MAML(model, lr=maml_lr)
     opt = optim.Adam(meta_model.parameters(), lr=lr)
@@ -155,7 +155,7 @@ def train_maml(cfg, log_dir):
         # Meta-validation
         # if (iteration!=0) and iteration % cfg.TEST_PRINT_INTERVAL == 0:
         if iteration==0:
-            val_train, val_test = dg.sample_batch('meta_val', cfg.TRAIN.BATCH_SIZE)
+            val_train, val_test = dg.sample_batch('meta_val', 1)
             val_train = torch.from_numpy(val_train).to(device)
             val_test = torch.from_numpy(val_test).to(device)
 
