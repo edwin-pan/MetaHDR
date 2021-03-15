@@ -45,7 +45,7 @@ def eval_maml(learner, loss_func, train, test, batch_size, num_inner_updates, cu
     ax[1].imshow(evaluation_data[0].detach().cpu().permute(1, 2, 0).numpy())
     ax[1].axis('off')
     ax[1].set_title('Original Exposure Shot')
-    ax[2].imshow(visualize_hdr_image(torch.clip(adaptation_labels[0], 0, 1)))
+    ax[2].imshow(visualize_hdr_image(np.clip(adaptation_labels[0], 0, 1)))
     ax[2].axis('off')
     ax[2].set_title('HDR')
     fig.savefig(f'{log_dir}/meta_val_{curr_meta_iter}.png', bbox_inches='tight')
