@@ -17,7 +17,7 @@ from src.models.utils import save_model
 logger = logging.getLogger(__name__)
 
 @torch.no_grad
-def eval_maml(learner, loss_func, train, test, batch_size, num_inner_updates, curr_meta_iter, ssim=None, device=None, log_dir=None):
+def eval_maml(learner, loss_func, test, batch_size, num_inner_updates, curr_meta_iter, ssim=None, device=None, log_dir=None):
     model = learner.clone()
     test_error, test_ssim = 0, 0
     for batch_idx in range(batch_size):
@@ -160,7 +160,7 @@ def train_maml(cfg, log_dir):
             # val_train = torch.from_numpy(val_train).to(device)
             val_test = torch.from_numpy(val_test).to(device)
 
-            _, meta_val_ssim = eval_maml(learner, loss_func, val_train, val_test, cfg.TRAIN.BATCH_SIZE, cfg.TRAIN.NUM_TASK_TR_ITER, iteration, ssim=ssim, device=device, log_dir=log_dir)
+            _, meta_val_ssim = eval_maml(learner, loss_func, val_test, cfg.TRAIN.BATCH_SIZE, cfg.TRAIN.NUM_TASK_TR_ITER, iteration, ssim=ssim, device=device, log_dir=log_dir)
 
             if meta_val_ssim > best_performance:
                 logger.info('Best performance achieved, saving it!')
