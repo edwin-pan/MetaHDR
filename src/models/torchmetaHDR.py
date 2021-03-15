@@ -111,7 +111,7 @@ def train_maml(cfg):
         test = torch.from_numpy(test).to(device)
         
         for batch_index in range(cfg.TRAIN.BATCH_SIZE):
-            #get_GPU_usage(f'Index {batch_index}')
+            get_GPU_usage(f'Index {batch_index}')
             print("Index", batch_index)
             learner = meta_model.clone()
             

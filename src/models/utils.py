@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-# from src.models.UNet import get_unet
+from src.models.UNet import get_unet
 
 
 # Define Network Blocks
@@ -62,10 +62,10 @@ def top_block(in_dim, out_dim, activation):
 
 
 
-# def copy_model_fn(mi,width,height):
-#     copied_model = get_unet(width,height)
-#     copied_model.set_weights(mi.get_weights())
-#     return copied_model
+def copy_model_fn(mi,width,height):
+    copied_model = get_unet(width,height)
+    copied_model.set_weights(mi.get_weights())
+    return copied_model
 
 def save_model(self, performance, epoch):
     # TODO: Edit to work with tensorflow. Unused atm
