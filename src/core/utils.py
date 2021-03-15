@@ -4,6 +4,7 @@ import os
 import yaml
 import GPUtil
 from os import path as osp
+import logging
 
 def prepare_output_dir(cfg, cfg_file):
     # ==== create logdir
@@ -19,7 +20,7 @@ def prepare_output_dir(cfg, cfg_file):
     # save config
     save_dict_to_yaml(cfg, osp.join(cfg.LOGDIR, 'config.yaml'))
 
-    return cfg
+    return cfg, logdir
 
     
 def read_yaml(filename):
@@ -44,3 +45,18 @@ def get_GPU_usage(print_statement):
     print(print_statement)
     GPUtil.showUtilization(all=True)
     print(" ")
+
+def create_logger(logdir, phase='train'):
+    os.makedirs(logdir, exist_ok=True)
+
+    log_file = osp.join(logdir, f'{phase}_log.txt')
+
+    head = '%(asctime)-15s %(message)s'
+    logging.basicConfig(filename=log_file,
+                        format=head)
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    console = logging.StreamHandler()
+    logging.getLogger('').addHandler(console)
+
+    return logger

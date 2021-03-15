@@ -1,0 +1,13 @@
+torch==1.8.0+cu111
+torchvision==0.9.0+cu111
+torchaudio==0.8.0
+matplotlib
+tqdm
+GPUtil
+scikit-image
+sklearn
+yacs==0.1.8
+wheel==0.36.2
+learn2learn==0.1.5
+piqa==1.1.3
+numba==0.53.0
