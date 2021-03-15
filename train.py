@@ -5,7 +5,7 @@ import numpy as np
 import time
 import os
 
-import tensorflow as tf
+# import tensorflow as tf
 from skimage.metrics import structural_similarity as ssim
 
 from src.dataset.dataloader import DataGenerator
