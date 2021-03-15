@@ -16,16 +16,17 @@ from src.models.utils import save_model
 
 logger = logging.getLogger(__name__)
 
+@torch.no_grad
 def eval_maml(learner, loss_func, train, test, batch_size, num_inner_updates, curr_meta_iter, ssim=None, device=None, log_dir=None):
     model = learner.clone()
     test_error, test_ssim = 0, 0
     for batch_idx in range(batch_size):
-        adaptation_data, adaptation_labels = train[0, batch_idx, ...].permute(0, 3, 1, 2), train[1, batch_idx, ...].permute(0, 3, 1, 2)
+        # adaptation_data, adaptation_labels = train[0, batch_idx, ...].permute(0, 3, 1, 2), train[1, batch_idx, ...].permute(0, 3, 1, 2)
         evaluation_data, evaluation_labels = test[0, batch_idx, ...].permute(0, 3, 1, 2), test[1, batch_idx, ...].permute(0, 3, 1, 2)
 
-        for _ in range(num_inner_updates):
-            train_error = loss_func(model(adaptation_data), torch.clip(adaptation_labels, 0, 1))
-            model.adapt(train_error)
+        # for _ in range(num_inner_updates):
+        #     train_error = loss_func(model(adaptation_data), torch.clip(adaptation_labels, 0, 1))
+        #     model.adapt(train_error)
 
         test_predictions = model(evaluation_data)
         test_error += loss_func(test_predictions, torch.clip(evaluation_labels, 0, 1))/len(test_predictions)
@@ -156,7 +157,7 @@ def train_maml(cfg, log_dir):
         # if (iteration!=0) and iteration % cfg.TEST_PRINT_INTERVAL == 0:
         if iteration==0:
             val_train, val_test = dg.sample_batch('meta_val', 1)
-            val_train = torch.from_numpy(val_train).to(device)
+            # val_train = torch.from_numpy(val_train).to(device)
             val_test = torch.from_numpy(val_test).to(device)
 
             _, meta_val_ssim = eval_maml(learner, loss_func, val_train, val_test, cfg.TRAIN.BATCH_SIZE, cfg.TRAIN.NUM_TASK_TR_ITER, iteration, ssim=ssim, device=device, log_dir=log_dir)
