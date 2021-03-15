@@ -71,6 +71,7 @@ def train_maml(cfg, log_dir):
     
     ssim = SSIM().double().cuda() if device == 'cuda' else SSIM().double()
     
+    pre_ssims = []
     ssims = []
     losses = []
     
@@ -153,7 +154,7 @@ def train_maml(cfg, log_dir):
         logger.info('[Post-Train {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, iteration_error.item(), valid_ssim))
 
         ssims.append(iteration_ssim)
-        losses.append(iteration_error)
+        losses.append(iteration_error.item())
 
         # Meta-validation
         if (iteration!=0) and iteration % cfg.TEST_PRINT_INTERVAL == 0:
@@ -186,4 +187,4 @@ def train_maml(cfg, log_dir):
     plt.xlabel("Iteration")
     plt.ylabel("SSIM")
     plt.title("SSIM Across Iterations")
-    plt.savefig(f'{log_dir}ssim_iterations.png')
+    plt.savefig(f'{log_dir}/ssim_iterations.png')
