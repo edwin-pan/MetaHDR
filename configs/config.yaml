@@ -1,4 +1,4 @@
-OUTPUT_DIR: '$SCRATCH/results'
+OUTPUT_DIR: '/scratch/users/edwinpan/results'
 EXP_NAME: 'default'
 CHECKPOINT_SAVE_PATH: 'checkpoints'
 SUMMARY_INTERVAL: 1
