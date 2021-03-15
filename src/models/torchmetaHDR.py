@@ -101,8 +101,8 @@ def train_maml(cfg, log_dir):
             # Fast Adaptation -- first iter
             if not batch_index:
                 first_train_pred = learner(adaptation_data)
-                train_error = loss_func(first_train_pred, torch.clip(adaptation_labels[0].unsqueeze(0), 0, 1))
-                pre_train_ssim = ssim(first_train_pred, torch.clip(adaptation_labels[0].unsqueeze(0), 0, 1)).item()
+                train_error = loss_func(first_train_pred, torch.clip(adaptation_labels, 0, 1))
+                pre_train_ssim = ssim(first_train_pred, torch.clip(adaptation_labels, 0, 1)).item()
                 # print('[Pre-Train {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, train_error.item(), pre_train_ssim))
                 logger.info('[Pre-Train {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, train_error.item(), pre_train_ssim))
 
