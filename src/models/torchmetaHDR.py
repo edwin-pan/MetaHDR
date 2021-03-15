@@ -59,7 +59,7 @@ def train_maml(cfg, log_dir):
     lr=cfg.TRAIN.META_LR
     maml_lr=cfg.TRAIN.TASK_LR
     
-    model = UNet(in_size=3, out_size=3, num_filters=8).double()
+    model = UNet(in_size=3, out_size=3, num_filters=6).double()
     model.to(device)
     meta_model = l2l.algorithms.MAML(model, lr=maml_lr)
     opt = optim.Adam(meta_model.parameters(), lr=lr)
