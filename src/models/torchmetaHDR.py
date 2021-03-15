@@ -21,7 +21,7 @@ def eval_maml(learner, loss_func, train, test, batch_size, num_inner_updates, cu
     model = learner.clone()
     test_error, test_ssim = 0, 0
     for batch_idx in range(batch_size):
-        # adaptation_data, adaptation_labels = train[0, batch_idx, ...].permute(0, 3, 1, 2), train[1, batch_idx, ...].permute(0, 3, 1, 2)
+        adaptation_data, adaptation_labels = train[0, batch_idx, ...].permute(0, 3, 1, 2), train[1, batch_idx, ...].permute(0, 3, 1, 2)
         evaluation_data, evaluation_labels = test[0, batch_idx, ...].permute(0, 3, 1, 2), test[1, batch_idx, ...].permute(0, 3, 1, 2)
 
         # for _ in range(num_inner_updates):
@@ -45,7 +45,7 @@ def eval_maml(learner, loss_func, train, test, batch_size, num_inner_updates, cu
     ax[1].imshow(evaluation_data[0].detach().cpu().permute(1, 2, 0).numpy())
     ax[1].axis('off')
     ax[1].set_title('Original Exposure Shot')
-    ax[2].imshow(visualize_hdr_image(torch.clip(adaptation_labels[0], 0, 1).detach().cpu().permute(1, 2, 0).numpy()))
+    ax[2].imshow(visualize_hdr_image(torch.clip(adaptation_labels[0], 0, 1).transpose(1, 2, 0)))
     ax[2].axis('off')
     ax[2].set_title('HDR')
     fig.savefig(f'{log_dir}/meta_val_{curr_meta_iter}.png', bbox_inches='tight')
@@ -160,7 +160,7 @@ def train_maml(cfg, log_dir):
             # val_train = torch.from_numpy(val_train).to(device)
             val_test = torch.from_numpy(val_test).to(device)
 
-            _, meta_val_ssim = eval_maml(learner, loss_func, val_train, val_test, cfg.TRAIN.BATCH_SIZE, cfg.TRAIN.NUM_TASK_TR_ITER, iteration, ssim=ssim, device=device, log_dir=log_dir)
+            _, meta_val_ssim = eval_maml(learner, loss_func, val_train, val_test, 1, cfg.TRAIN.NUM_TASK_TR_ITER, iteration, ssim=ssim, device=device, log_dir=log_dir)
 
             if meta_val_ssim > best_performance:
                 logger.info('Best performance achieved, saving it!')
