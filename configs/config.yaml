@@ -13,7 +13,7 @@ LOSS:
 # Training parameters
 TRAIN:
   LOSS_FUNC: 'LPIPSLoss_L2' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
-  BATCH_SIZE: 5
+  BATCH_SIZE: 3
   NUM_EXPOSURES: 3
   NUM_META_TR_ITER: 200 # 
   NUM_TASK_TR_ITER: 3 # Number of task-specific inner loops
