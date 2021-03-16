@@ -5,7 +5,7 @@ from tqdm import tqdm
 import time
 from scipy.interpolate import interp1d
 
-NUM_IMGS = 50 
+NUM_IMGS = 450 
 IMG_HEIGHT = 1024
 IMG_WIDTH = 1024
 
