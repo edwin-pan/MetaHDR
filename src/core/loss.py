@@ -12,14 +12,19 @@ def get_loss_func(chosen_loss_name):
 
     """
     if chosen_loss_name == 'ExpandNetLoss':
+        print("Using ExpandNetLoss")
         return ExpandNetLoss()
     elif chosen_loss_name == 'HaarLoss':
+        print("Using HaarLoss")
         return HaarLoss()
     elif chosen_loss_name == 'LPIPSLoss':
+        print("Using LPIPSLoss")
         return LPIPSLoss()
     elif chosen_loss_name == 'LPIPSLoss_L2':
+        print("Using LPIPSLoss_L2")
         return LPIPSLoss_L2()
     elif chosen_loss_name == 'SSIMLoss':
+        print("Using SSIMLoss")
         return SSIMLoss()
     else:
         print("[ERROR] Specified loss not found...")
