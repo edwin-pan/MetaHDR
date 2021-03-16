@@ -10,7 +10,7 @@ from src.dataset.dataloader import DataGenerator
 from src.core.loss import get_loss_func
 
 def main(args):
-    print("--- Evaluating on held-out portion of dataset ---")
+    print("--- Evaluating on meta-test set ---")
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     source_directory = args.model_dir
@@ -39,7 +39,7 @@ def main(args):
 
     # Define blank model to load weights into
     model = UNet(in_size=3, out_size=3, num_filters=8).double().to(device)
-    meta_model = l2l.algorithms.MAML(model)
+    meta_model = l2l.algorithms.MAML(model, lr=cfg.EVAL.TASK_LR)
     print(f"Loading pre-trained model from --> {model_path}")
     meta_model.load_state_dict(checkpoint['unet_state_dict'])
     print(f"Successfully loaded pre-trained model from --> {model_path}")

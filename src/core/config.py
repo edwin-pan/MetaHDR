@@ -31,6 +31,7 @@ cfg.EVAL.LOSS_FUNC = 'ExpandNetLoss'
 cfg.EVAL.NUM_EXPOSURES = 3
 cfg.EVAL.BATCH_SIZE = 8
 cfg.EVAL.NUM_TASK_TR_ITER = 1
+cfg.EVAL.TASK_LR = 0.4
 
 # Utilities
 cfg.UTILS = CN()
