@@ -154,8 +154,8 @@ def train_maml(cfg, log_dir):
         losses.append(iteration_error.item())
 
         # Meta-validation
-        # if (iteration!=0) and iteration % cfg.TEST_PRINT_INTERVAL == 0:
-        if iteration==0:
+        if (iteration!=0) and iteration % cfg.TEST_PRINT_INTERVAL == 0:
+        # if iteration==0:
             val_train, val_test = dg.sample_batch('meta_val', 1)
             # val_train = torch.from_numpy(val_train).to(device)
             val_test = torch.from_numpy(val_test).to(device)
