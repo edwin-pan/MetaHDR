@@ -130,7 +130,6 @@ def train_maml(cfg, log_dir):
 
         for batch_index in range(cfg.TRAIN.BATCH_SIZE):
             # get_GPU_usage(f'Index {batch_index}')
-            # print("Index", batch_index)
             learner = meta_model.clone()
             # get_GPU_usage(f'post clone {batch_index}')
 
@@ -149,7 +148,7 @@ def train_maml(cfg, log_dir):
                 learner.adapt(train_error)
                 pre_train_ssim = ssim(first_train_pred, torch.clip(adaptation_labels, 0, 1)).item()
 
-                logger.info('[Pre-Train {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, train_error.item(), pre_train_ssim))
+                logger.info('[Pre-Train  {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, train_error.item(), pre_train_ssim))
                 pre_ssims.append(pre_train_ssim)
 
                 # Fast Adaptation -- rest of the iters
@@ -230,7 +229,7 @@ def train_maml(cfg, log_dir):
     plt.plot(np.arange(1, len(pre_ssims)+1), pre_ssims)
     plt.xlabel("Iteration")
     plt.ylabel("SSIM")
-    plt.legend(['pre-ssim', 'post-ssim'])
+    plt.legend(['post-ssim', 'pre-ssim'])
     plt.title("SSIM Across Iterations")
     plt.savefig(f'{log_dir}/ssim_iterations.png')
 
