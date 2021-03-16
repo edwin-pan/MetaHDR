@@ -1,5 +1,5 @@
 OUTPUT_DIR: '/scratch/users/edwinpan/results'
-EXP_NAME: 'b3_ne5_ExpandNetLoss_redo'
+EXP_NAME: 'b5_ne3_ExpandNetLoss'
 CHECKPOINT_SAVE_PATH: 'checkpoints'
 SUMMARY_INTERVAL: 1
 PRINT_INTERVAL: 2
@@ -24,10 +24,10 @@ TRAIN:
 # Evaluation parameters
 EVAL:
   LOSS_FUNC: 'ExpandNetLoss' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
-  BATCH_SIZE: 3
-  NUM_EXPOSURES: 5
+  BATCH_SIZE: 25
+  NUM_EXPOSURES: 3
   NUM_TASK_TR_ITER: 3
-  TASK_LR: 0.01
+  TASK_LR: 0.1
 
 # Utility parameters
 UTILS:
