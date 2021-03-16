@@ -16,7 +16,7 @@ from src.models.utils import save_best_model, save_last_model
 
 logger = logging.getLogger(__name__)
 
-def evaluate_maml(model, loss_func, train, test, batch_size, num_inner_updates, device=None):
+def evaluate_maml(model, loss_func, train, test, batch_size, num_inner_updates, device=None, visualize_flag=False, visualize_dir=None):
     # Cast as torch tensor & send data to device
     train = torch.from_numpy(train).to(device)
     test = torch.from_numpy(test).to(device)
@@ -37,11 +37,28 @@ def evaluate_maml(model, loss_func, train, test, batch_size, num_inner_updates, 
         test_predictions = model(evaluation_data)
         test_error += loss_func(test_predictions, torch.clip(evaluation_labels, 0, 1))/len(test_predictions)
         test_ssim += ssim(test_predictions, torch.clip(evaluation_labels, 0, 1)).item()
-    
+
+        if visualize_flag:
+            fig, ax = plt.subplots(nrows=1,ncols=3)
+            ax[0].imshow(visualize_hdr_image(test_predictions.detach().cpu().permute(1, 2, 0).numpy()))
+            ax[0].axis('off')
+            ax[0].set_title('Predicted')
+            ax[1].imshow(evaluation_data[0].detach().cpu().permute(1, 2, 0).numpy())
+            ax[1].axis('off')
+            ax[1].set_title('Original Exposure Shot')
+            ax[2].imshow(visualize_hdr_image(torch.clip(adaptation_labels[0], 0, 1).detach().cpu().permute(1, 2, 0).numpy()))
+            ax[2].axis('off')
+            ax[2].set_title('HDR')
+            fig.savefig(f'{visualize_dir}/evaluation{batch_index:03d}.png', bbox_inches='tight')
+            plt.close()
     test_error /= batch_size
     test_ssim /= batch_size
 
     print("[Evaluation Results] Average Evaluation SSIM : {:.3f}".format(test_ssim))
+
+
+
+
     return
 
 @torch.no_grad()
@@ -151,20 +168,20 @@ def train_maml(cfg, log_dir):
             valid_error = loss_func(predictions, torch.clip(evaluation_labels, 0, 1))
             valid_error /= len(evaluation_data)
             
-            # Plot the first batch index
+            # Plot the last batch index
             if batch_index == cfg.TRAIN.BATCH_SIZE-1:
-              fig, ax = plt.subplots(nrows=1,ncols=3)
-              ax[0].imshow(visualize_hdr_image(predictions[0].detach().cpu().permute(1, 2, 0).numpy()))
-              ax[0].axis('off')
-              ax[0].set_title('Predicted')
-              ax[1].imshow(evaluation_data[0].detach().cpu().permute(1, 2, 0).numpy())
-              ax[1].axis('off')
-              ax[1].set_title('Original Exposure Shot')
-              ax[2].imshow(visualize_hdr_image(torch.clip(adaptation_labels[0], 0, 1).detach().cpu().permute(1, 2, 0).numpy()))
-              ax[2].axis('off')
-              ax[2].set_title('HDR')
-              fig.savefig(f'{log_dir}/test{iteration:03d}.png', bbox_inches='tight')
-              plt.close()
+                fig, ax = plt.subplots(nrows=1,ncols=3)
+                ax[0].imshow(visualize_hdr_image(predictions[0].detach().cpu().permute(1, 2, 0).numpy()))
+                ax[0].axis('off')
+                ax[0].set_title('Predicted')
+                ax[1].imshow(evaluation_data[0].detach().cpu().permute(1, 2, 0).numpy())
+                ax[1].axis('off')
+                ax[1].set_title('Original Exposure Shot')
+                ax[2].imshow(visualize_hdr_image(torch.clip(adaptation_labels[0], 0, 1).detach().cpu().permute(1, 2, 0).numpy()))
+                ax[2].axis('off')
+                ax[2].set_title('HDR')
+                fig.savefig(f'{log_dir}/test{iteration:03d}.png', bbox_inches='tight')
+                plt.close()
             
             # Will return avg ssim 
             valid_ssim = ssim(predictions, torch.clip(evaluation_labels, 0, 1)).item()

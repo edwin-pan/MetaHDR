@@ -1,6 +1,7 @@
 import torch
 import argparse
 from os import path as osp
+import os
 import learn2learn as l2l
 
 from src.core.config import update_cfg, get_cfg_defaults
@@ -15,6 +16,10 @@ def main(args):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     source_directory = args.model_dir
     use_best_flag = args.use_best
+
+    # Make evaluation folder for test images
+    evaluation_figure_output_dir = osp.join(source_directory, 'evaluation_output')
+    os.makedirs(evaluation_figure_output_dir, exist_ok=True)
 
     # Grab config
     if args.cfg is not None:
@@ -48,7 +53,7 @@ def main(args):
     dg = DataGenerator(num_exposures=cfg.EVAL.NUM_EXPOSURES)
     eval_train, eval_test = dg.sample_batch('meta_test', cfg.EVAL.BATCH_SIZE)
 
-    evaluate_maml(meta_model, loss_func, eval_train, eval_test, cfg.EVAL.BATCH_SIZE, cfg.EVAL.NUM_TASK_TR_ITER, device=device)
+    evaluate_maml(meta_model, loss_func, eval_train, eval_test, cfg.EVAL.BATCH_SIZE, cfg.EVAL.NUM_TASK_TR_ITER, device=device, visualize_flag=True, visualize_dir=evaluation_figure_output_dir)
 
     return
 
