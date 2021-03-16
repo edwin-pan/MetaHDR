@@ -39,10 +39,10 @@ def evaluate_maml(model, loss_func, train, test, batch_size, num_inner_updates, 
         test_ssim += ssim(test_predictions, torch.clip(evaluation_labels, 0, 1)).item()
 
         import pdb; pdb.set_trace()
-        
+
         if visualize_flag:
             fig, ax = plt.subplots(nrows=1,ncols=3)
-            ax[0].imshow(visualize_hdr_image(test_predictions.detach().cpu().permute(1, 2, 0).numpy()))
+            ax[0].imshow(visualize_hdr_image(test_predictions[0].detach().cpu().permute(1, 2, 0).numpy()))
             ax[0].axis('off')
             ax[0].set_title('Predicted')
             ax[1].imshow(evaluation_data[0].detach().cpu().permute(1, 2, 0).numpy())
