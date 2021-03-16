@@ -200,11 +200,11 @@ def train_maml(cfg, log_dir):
         # Meta-validation
         if (iteration!=0) and iteration % cfg.TEST_PRINT_INTERVAL == 0:
         # if iteration==0:
-            val_train, val_test = dg.sample_batch('meta_val', 1)
+            val_train, val_test = dg.sample_batch('meta_val', cfg.TRAIN.VAL_BATCH_SIZE)
             # val_train = torch.from_numpy(val_train).to(device)
             val_test = torch.from_numpy(val_test).to(device)
 
-            _, meta_val_ssim = validate_maml(learner, loss_func, val_train, val_test, 3, cfg.TRAIN.NUM_TASK_TR_ITER, iteration, ssim=ssim, device=device, log_dir=log_dir)
+            _, meta_val_ssim = validate_maml(learner, loss_func, val_train, val_test, cfg.TRAIN.VAL_BATCH_SIZE, cfg.TRAIN.NUM_TASK_TR_ITER, iteration, ssim=ssim, device=device, log_dir=log_dir)
 
             if meta_val_ssim > best_performance:
                 logger.info('Best performance achieved, saving it!')
