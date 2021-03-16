@@ -3,6 +3,28 @@ from piqa import SSIM, LPIPS, HaarPSI
 from torch import nn
 import torch
 
+['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
+
+def get_loss_func(chosen_loss_name):
+    """
+    Grab the corresponding loss from below. Valid options: 
+    ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
+
+    """
+    if chosen_loss_name == 'ExpandNetLoss':
+        return ExpandNetLoss()
+    elif chosen_loss_name == 'HaarLoss':
+        return HaarLoss()
+    elif chosen_loss_name == 'LPIPSLoss':
+        return LPIPSLoss()
+    elif chosen_loss_name == 'LPIPSLoss_L2':
+        return LPIPSLoss_L2()
+    elif chosen_loss_name == 'SSIMLoss':
+        return SSIMLoss()
+    else:
+        print("[ERROR] Specified loss not found...")
+
+    return
 
 class ExpandNetLoss(nn.Module):
     def __init__(self, loss_lambda=5):

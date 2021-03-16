@@ -10,14 +10,42 @@ from piqa import SSIM
 from src.dataset.dataloader import DataGenerator
 from src.dataset.hdr_visualization import visualize_hdr_image
 from src.core.utils import get_GPU_usage
-from src.core.loss import ExpandNetLoss, HaarLoss, LPIPSLoss, SSIMLoss
+from src.core.loss import get_loss_func
 from src.models.UNet import UNet
-from src.models.utils import save_model
+from src.models.utils import save_best_model, save_last_model
 
 logger = logging.getLogger(__name__)
 
+def evaluate_maml(model, loss_func, train, test, batch_size, num_inner_updates, device=None):
+    # Cast as torch tensor & send data to device
+    train = torch.from_numpy(train).to(device)
+    test = torch.from_numpy(test).to(device)
+
+    # Instantiate evaluation metric (ssim)
+    ssim = SSIM().double().cuda() if device == 'cuda' else SSIM().double()
+
+    # Pass each batch through
+    test_error, test_ssim = 0.0, 0.0
+    for batch_idx in range(batch_size):
+        adaptation_data, adaptation_labels = train[0, batch_idx, ...], train[1, batch_idx, ...]
+        evaluation_data, evaluation_labels = test[0, batch_idx, ...].permute(0, 3, 1, 2), test[1, batch_idx, ...].permute(0, 3, 1, 2)
+
+        for _ in range(num_inner_updates):
+            train_error = loss_func(model(adaptation_data), torch.clip(adaptation_labels, 0, 1))
+            model.adapt(train_error)
+
+        test_predictions = model(evaluation_data)
+        test_error += loss_func(test_predictions, torch.clip(evaluation_labels, 0, 1))/len(test_predictions)
+        test_ssim += ssim(test_predictions, torch.clip(evaluation_labels, 0, 1)).item()
+    
+    test_error /= batch_size
+    test_ssim /= batch_size
+
+    print("[Evaluation Results] Average Evaluation SSIM : {:.3f}".format(test_ssim))
+    return
+
 @torch.no_grad()
-def eval_maml(learner, loss_func, train, test, batch_size, num_inner_updates, curr_meta_iter, ssim=None, device=None, log_dir=None):
+def validate_maml(learner, loss_func, train, test, batch_size, num_inner_updates, curr_meta_iter, ssim=None, device=None, log_dir=None):
     model = learner.clone()
     test_error, test_ssim = 0, 0
     for batch_idx in range(batch_size):
@@ -35,7 +63,6 @@ def eval_maml(learner, loss_func, train, test, batch_size, num_inner_updates, cu
     test_error /= batch_size
     test_ssim /= batch_size
 
-    # print('[Meta-Validation {}] Validation Loss : {:.3f} Validation SSIM : {:.3f}'.format(curr_meta_iter, test_error.item(), test_ssim))
     logger.info('[Meta-Validation {}] Validation Loss : {:.3f} Validation SSIM : {:.3f}'.format(curr_meta_iter, test_error.item(), test_ssim))
 
     fig, ax = plt.subplots(nrows=1,ncols=3)
@@ -48,7 +75,7 @@ def eval_maml(learner, loss_func, train, test, batch_size, num_inner_updates, cu
     ax[2].imshow(visualize_hdr_image(np.clip(adaptation_labels[0], 0, 1)))
     ax[2].axis('off')
     ax[2].set_title('HDR')
-    fig.savefig(f'{log_dir}/meta_val_{curr_meta_iter}.png', bbox_inches='tight')
+    fig.savefig(f'{log_dir}/meta_val_{curr_meta_iter:03d}.png', bbox_inches='tight')
     plt.close()
 
     return test_error, test_ssim
@@ -64,8 +91,8 @@ def train_maml(cfg, log_dir):
     model.to(device)
     meta_model = l2l.algorithms.MAML(model, lr=maml_lr)
     opt = optim.Adam(meta_model.parameters(), lr=lr)
-    # loss_func = nn.MSELoss()
-    loss_func = ExpandNetLoss()
+
+    loss_func = get_loss_func(cfg.TRAIN.LOSS_FUNC)
     
     ssim = SSIM().double().cuda() if device == 'cuda' else SSIM().double()
     
@@ -136,7 +163,7 @@ def train_maml(cfg, log_dir):
               ax[2].imshow(visualize_hdr_image(torch.clip(adaptation_labels[0], 0, 1).detach().cpu().permute(1, 2, 0).numpy()))
               ax[2].axis('off')
               ax[2].set_title('HDR')
-              fig.savefig(f'{log_dir}/test{iteration}.png', bbox_inches='tight')
+              fig.savefig(f'{log_dir}/test{iteration:03d}.png', bbox_inches='tight')
               plt.close()
             
             # Will return avg ssim 
@@ -161,11 +188,11 @@ def train_maml(cfg, log_dir):
             # val_train = torch.from_numpy(val_train).to(device)
             val_test = torch.from_numpy(val_test).to(device)
 
-            _, meta_val_ssim = eval_maml(learner, loss_func, val_train, val_test, 3, cfg.TRAIN.NUM_TASK_TR_ITER, iteration, ssim=ssim, device=device, log_dir=log_dir)
+            _, meta_val_ssim = validate_maml(learner, loss_func, val_train, val_test, 3, cfg.TRAIN.NUM_TASK_TR_ITER, iteration, ssim=ssim, device=device, log_dir=log_dir)
 
             if meta_val_ssim > best_performance:
                 logger.info('Best performance achieved, saving it!')
-                save_model(learner, iteration, meta_val_ssim, log_dir)
+                save_best_model(learner, iteration, meta_val_ssim, log_dir)
                 best_performance = meta_val_ssim
 
         # Take the meta-learning step
@@ -183,9 +210,12 @@ def train_maml(cfg, log_dir):
 
     plt.figure()
     plt.plot(np.arange(1, len(ssims)+1), ssims)
-    plt.plot(np.arange(1, len(ssims)+1), pre_ssims)
+    plt.plot(np.arange(1, len(pre_ssims)+1), pre_ssims)
     plt.xlabel("Iteration")
     plt.ylabel("SSIM")
     plt.legend(['pre-ssim', 'post-ssim'])
     plt.title("SSIM Across Iterations")
     plt.savefig(f'{log_dir}/ssim_iterations.png')
+
+    logger.info('Saving last model for reference.')
+    save_last_model(learner, cfg.TRAIN.NUM_META_TR_ITER, ssims[-1], log_dir)

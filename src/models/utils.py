@@ -60,9 +60,9 @@ def top_block(in_dim, out_dim, activation):
     return top
 
 
-def save_model(model, epoch, performance, logdir):
+def save_best_model(model, epoch, performance, logdir):
     """
-    Save the model. 
+    Save the best model (so-far). 
     """
     save_dict = {
         'epoch': epoch,
@@ -75,3 +75,18 @@ def save_model(model, epoch, performance, logdir):
 
     with open(osp.join(logdir, 'best.txt'), 'w') as f:
         f.write(str(float(performance)))
+
+
+def save_last_model(model, epoch, performance, logdir):
+    """
+    Save the last model in training loop.
+    """
+
+    save_dict = {
+        'epoch': epoch,
+        'unet_state_dict': model.state_dict(),
+        'performance': performance
+    }
+
+    filename = osp.join(logdir, 'model_last.pth.tar')
+    torch.save(save_dict, filename)

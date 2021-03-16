@@ -17,12 +17,20 @@ cfg.LOSS.LAMBDA = 0.5
 
 # Training parameters
 cfg.TRAIN = CN()
+cfg.TRAIN.LOSS_FUNC = 'ExpandNetLoss'
 cfg.TRAIN.NUM_EXPOSURES = 3
 cfg.TRAIN.BATCH_SIZE = 8
 cfg.TRAIN.NUM_META_TR_ITER = 200
 cfg.TRAIN.NUM_TASK_TR_ITER = 1
 cfg.TRAIN.META_LR = 0.001
 cfg.TRAIN.TASK_LR = 0.4
+
+# Evaluation parameters
+cfg.EVAL = CN()
+cfg.EVAL.LOSS_FUNC = 'ExpandNetLoss'
+cfg.EVAL.NUM_EXPOSURES = 3
+cfg.EVAL.BATCH_SIZE = 8
+cfg.EVAL.NUM_TASK_TR_ITER = 1
 
 # Utilities
 cfg.UTILS = CN()

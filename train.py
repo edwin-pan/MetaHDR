@@ -12,6 +12,9 @@ def main(cfg, log_dir):
     logger.info(f'GPU name -> {torch.cuda.get_device_name()}')
     logger.info(f'GPU feat -> {torch.cuda.get_device_properties("cuda")}')
 
+    # Make sure loss_func from config is valid
+    assert cfg.TRAIN.LOSS_FUNC in ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss'], f"[CONFIG] training loss function '{cfg.TRAIN.LOSS_FUNC}' not valid"
+
     train_maml(cfg, log_dir)
 
 if __name__ == '__main__':
