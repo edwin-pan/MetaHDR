@@ -26,9 +26,9 @@ def evaluate_maml(model, loss_func, train, test, batch_size, num_inner_updates, 
 
     # Pass each batch through
     test_error, test_ssim = 0.0, 0.0
-    for batch_idx in range(batch_size):
-        adaptation_data, adaptation_labels = train[0, batch_idx, ...], train[1, batch_idx, ...]
-        evaluation_data, evaluation_labels = test[0, batch_idx, ...].permute(0, 3, 1, 2), test[1, batch_idx, ...].permute(0, 3, 1, 2)
+    for batch_index in range(batch_size):
+        adaptation_data, adaptation_labels = train[0, batch_index, ...].permute(0, 3, 1, 2), train[1, batch_index, ...].permute(0, 3, 1, 2)
+        evaluation_data, evaluation_labels = test[0, batch_index, ...].permute(0, 3, 1, 2), test[1, batch_index, ...].permute(0, 3, 1, 2)
 
         for _ in range(num_inner_updates):
             train_error = loss_func(model(adaptation_data), torch.clip(adaptation_labels, 0, 1))
