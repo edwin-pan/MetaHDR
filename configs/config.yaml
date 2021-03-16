@@ -1,5 +1,5 @@
 OUTPUT_DIR: '/scratch/users/edwinpan/results'
-EXP_NAME: 'b5_ne3_expandnet'
+EXP_NAME: 'b5_ne3_LPIPSLoss_L2'
 CHECKPOINT_SAVE_PATH: 'checkpoints'
 SUMMARY_INTERVAL: 1
 PRINT_INTERVAL: 2
@@ -12,7 +12,7 @@ LOSS:
 
 # Training parameters
 TRAIN:
-  LOSS_FUNC: 'ExpandNetLoss' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
+  LOSS_FUNC: 'LPIPSLoss_L2' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
   BATCH_SIZE: 5
   NUM_EXPOSURES: 3
   NUM_META_TR_ITER: 200 # 
@@ -22,11 +22,11 @@ TRAIN:
   
 # Evaluation parameters
 EVAL:
-  LOSS_FUNC: 'ExpandNetLoss' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
-  BATCH_SIZE: 3
-  NUM_EXPOSURES: 5
+  LOSS_FUNC: 'LPIPSLoss_L2' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
+  BATCH_SIZE: 5
+  NUM_EXPOSURES: 3
   NUM_TASK_TR_ITER: 3
-  TASK_LR: 0.01
+  TASK_LR: 0.1
 
 # Utility parameters
 UTILS:
