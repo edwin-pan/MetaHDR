@@ -27,9 +27,20 @@ class HaarLoss(nn.Module):
         return (1 - self.loss_lambda) * self.l2_loss(x, y) + self.loss_lambda * (1 - sim)
 
 class LPIPSLoss(nn.Module):
-    def __init__(self, loss_lambda=0.8):
+    def __init__(self, loss_lambda=0.5):
         super(LPIPSLoss, self).__init__()
-        self.similarity = LPIPS().cuda()
+        self.similarity = LPIPS(network='vgg').cuda()
+        self.l2_loss = nn.MSELoss()
+        self.loss_lambda = loss_lambda
+
+    def forward(self, x, y):
+        sim = self.similarity(x.float(), y.float())
+        return sim
+
+class LPIPSLoss_L2(nn.Module):
+    def __init__(self, loss_lambda=0.5):
+        super(LPIPSLoss_L2, self).__init__()
+        self.similarity = LPIPS(network='vgg').cuda()
         self.l2_loss = nn.MSELoss()
         self.loss_lambda = loss_lambda
 

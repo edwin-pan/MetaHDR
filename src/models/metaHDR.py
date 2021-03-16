@@ -1,176 +1,191 @@
-# # import tensorflow as tf
-# import numpy as np
-# from functools import partial
-# import GPUtil
-# import gc
-# from numba import cuda
+import numpy as np
+import torch
+import logging
+from torch import nn, optim
+from torch.nn import functional as F
+import learn2learn as l2l
+import matplotlib.pyplot as plt
+from piqa import SSIM
 
-# # from tensorflow.image import ssim # Not available in tensorflow/2.1
-# from skimage.metrics import structural_similarity as ssim
+from src.dataset.dataloader import DataGenerator
+from src.dataset.hdr_visualization import visualize_hdr_image
+from src.core.utils import get_GPU_usage
+from src.core.loss import ExpandNetLoss, HaarLoss, LPIPSLoss, SSIMLoss
+from src.models.UNet import UNet
+from src.models.utils import save_model
 
-# from time import time
+logger = logging.getLogger(__name__)
 
-# from src.models.UNet import get_unet, unet_forward
-# from src.models.utils import copy_model_fn
-# from src.core.utils import get_GPU_usage
+@torch.no_grad()
+def eval_maml(learner, loss_func, train, test, batch_size, num_inner_updates, curr_meta_iter, ssim=None, device=None, log_dir=None):
+    model = learner.clone()
+    test_error, test_ssim = 0, 0
+    for batch_idx in range(batch_size):
+        adaptation_data, adaptation_labels = train[0, batch_idx, ...], train[1, batch_idx, ...]
+        evaluation_data, evaluation_labels = test[0, batch_idx, ...].permute(0, 3, 1, 2), test[1, batch_idx, ...].permute(0, 3, 1, 2)
 
-# def outer_train_step(inp, model, optim, meta_batch_size=25, num_inner_updates=1):
-#     """
-#     MetaHDR's outer training loop handles meta-parameter adjustments, after num_inner_updates number of inner-loop task-specific 
-#     model updates.
-#     """
+        # for _ in range(num_inner_updates):
+        #     train_error = loss_func(model(adaptation_data), torch.clip(adaptation_labels, 0, 1))
+        #     model.adapt(train_error)
 
-#     with tf.GradientTape(persistent=False) as outer_tape:
-#         result = model(inp, meta_batch_size=meta_batch_size, num_inner_updates=num_inner_updates)
-#         outputs_tr, outputs_ts, losses_tr_pre, losses_ts, accuracies_tr_pre, accuracies_ts = result
-#         total_losses_ts = [tf.reduce_mean(loss_ts) for loss_ts in losses_ts]
-
-#     gradients = outer_tape.gradient(total_losses_ts[-1], model.m.trainable_weights)
-
-#     optim.apply_gradients(zip(gradients, model.m.trainable_weights))
-
-#     # tf.keras.backend.clear_session()
-#     # gc.collect()
-#     total_loss_tr_pre = tf.reduce_mean(losses_tr_pre)
-#     total_accuracy_tr_pre = tf.reduce_mean(accuracies_tr_pre)
-#     total_accuracies_ts = [tf.reduce_mean(accuracy_ts) for accuracy_ts in accuracies_ts]
+        test_predictions = model(evaluation_data)
+        test_error += loss_func(test_predictions, torch.clip(evaluation_labels, 0, 1))/len(test_predictions)
+        test_ssim += ssim(test_predictions, torch.clip(evaluation_labels, 0, 1)).item()
     
-#     del outputs_tr,outputs_ts # Save space
-#     return total_loss_tr_pre, total_losses_ts, total_accuracy_tr_pre, total_accuracies_ts
+    test_error /= batch_size
+    test_ssim /= batch_size
+
+    # print('[Meta-Validation {}] Validation Loss : {:.3f} Validation SSIM : {:.3f}'.format(curr_meta_iter, test_error.item(), test_ssim))
+    logger.info('[Meta-Validation {}] Validation Loss : {:.3f} Validation SSIM : {:.3f}'.format(curr_meta_iter, test_error.item(), test_ssim))
+
+    fig, ax = plt.subplots(nrows=1,ncols=3)
+    ax[0].imshow(visualize_hdr_image(test_predictions[0].detach().cpu().permute(1, 2, 0).numpy()))
+    ax[0].axis('off')
+    ax[0].set_title('Predicted')
+    ax[1].imshow(evaluation_data[0].detach().cpu().permute(1, 2, 0).numpy())
+    ax[1].axis('off')
+    ax[1].set_title('Original Exposure Shot')
+    ax[2].imshow(visualize_hdr_image(np.clip(adaptation_labels[0], 0, 1)))
+    ax[2].axis('off')
+    ax[2].set_title('HDR')
+    fig.savefig(f'{log_dir}/meta_val_{curr_meta_iter}.png', bbox_inches='tight')
+    plt.close()
+
+    return test_error, test_ssim
 
 
-# def outer_eval_step(inp, model, meta_batch_size=25, num_inner_updates=1):
-#     """
-#     MetaHDR's outer evaluation step. Performs one forward pass, training the inner loop num_inner_updates number of times.
-#     """
-
-#     result = model(inp, meta_batch_size=meta_batch_size, num_inner_updates=num_inner_updates)
-
-#     outputs_tr, outputs_ts, losses_tr_pre, losses_ts, accuracies_tr_pre, accuracies_ts = result
-
-#     total_loss_tr_pre = tf.reduce_mean(losses_tr_pre)
-#     total_losses_ts = [tf.reduce_mean(loss_ts) for loss_ts in losses_ts]
-
-#     total_accuracy_tr_pre = tf.reduce_mean(accuracies_tr_pre)
-#     total_accuracies_ts = [tf.reduce_mean(accuracy_ts) for accuracy_ts in accuracies_ts]
-#     # tf.keras.backend.clear_session()
-#     return outputs_tr, outputs_ts, total_loss_tr_pre, total_losses_ts, total_accuracy_tr_pre, total_accuracies_ts
-
-# class MetaHDR(tf.keras.Model):
-#     def __init__(self,
-#                  loss_func,
-#                  img_width=1,
-#                  img_height=1,
-#                  num_inner_updates=1,
-#                  inner_update_lr=0.4,
-#                  pretrain_flag=False,
-#                  model_weights=None):
-#         """
-#         Main definition of MetaHDR model. MetaHDR consists of a core UNet architecture wrapped with the MAML framework. The inner loop is
-#         defined within the MetaHDR class. The outerloop meta-parameter tuning is handled outside (see train.py)
-#         """
-#         super(MetaHDR, self).__init__()
-#         self.width = img_width
-#         self.height = img_height
-#         self.inner_update_lr = inner_update_lr
-#         self.ssim_score = tf.image.ssim
-#         self.k_shot=1 # This won't change, because we only have 1 example per task
-#         self.pretrain_flag = pretrain_flag
-#         self.loss_func = loss_func
-#         self.non_trainable_layers =  [0,3,6,9,12,16,20,24,28]
-#         self.up_conv_layers =  [15,19,23,27]
-#         if self.pretrain_flag:
-#             print(self.width,self.height)
-#             self.m = get_unet(self.height, self.width)
-#             self.m.load_weights(model_weights)
-#             self.m.build((self.height, self.width, 3))
-#             print("Loaded weights from: {}".format(model_weights))
-#         else:
-#             self.m = get_unet(self.height, self.width)
-#             self.m.build((self.height, self.width, 3))
-
-#     # @tf.function
-#     def task_inner_loop(self, inp,reuse=True,meta_batch_size=25,num_inner_updates=1):
-#         # the inner and outer loop data, query set: (input_tr,label_tr)
-#         input_tr, input_ts, label_tr, label_ts = inp[0], inp[1], inp[2], inp[3]
-#         task_output_tr_pre, task_loss_tr_pre, task_accuracy_tr_pre = None, None, None
-#         task_outputs_ts, task_losses_ts, task_accuracies_ts = [], [], []
-
-#         with tf.GradientTape(persistent=True) as tape:
-
-#             get_GPU_usage("inner pre")
-#             # tf.keras.backend.clear_session()
-#             # gc.collect()
-#             # get_GPU_usage("intermediate post")
-#             task_output_tr_pre = unet_forward(self.m, input_tr)
-#             get_GPU_usage("inner post")
-
-#             inner_task_weights = [item for item in self.m.trainable_weights]
-
-#             task_loss_tr_pre = self.loss_func(label_tr,task_output_tr_pre)
-#             grads = tape.gradient(task_loss_tr_pre,inner_task_weights)
-
-#             # Apply the gradients
-#             k=0
-#             for j in range(len(self.m.layers)):
-#                 # print(j,self.m.layers[j].name)
-#                 if j not in self.non_trainable_layers: # Layers w/ no trainable parameters
-#                     if j in self.up_conv_layers: # Up-conv layers
-#                         self.m.layers[j].kernel=self.m.layers[j].kernel - self.inner_update_lr*grads[k]
-#                         self.m.layers[j].bias=self.m.layers[j].bias - self.inner_update_lr*grads[k+1]
-#                         k+=2
-#                         self.m.layers[j].trainable=True
-#                     else: # Regular conv layers
-#                         self.m.layers[j].depthwise_kernel=self.m.layers[j].depthwise_kernel - self.inner_update_lr*grads[k]
-#                         self.m.layers[j].pointwise_kernel=self.m.layers[j].pointwise_kernel - self.inner_update_lr*grads[k+1]
-#                         self.m.layers[j].bias=self.m.layers[j].bias - self.inner_update_lr*grads[k+2]
-#                         k+=3
-#                         self.m.layers[j].trainable=True
-
-#             output_ts = unet_forward(self.m, input_ts)
-#             # output_ts = self.m.predict_on_batch(input_ts)
-
-#             loss_ts = self.loss_func(label_ts,output_ts)
-#             task_outputs_ts.append(output_ts)
-#             task_losses_ts.append(loss_ts)
-            
-#             # Now revert the gradients
-#             k=0
-#             for j in range(len(self.m.layers)):
-#                 # print(j,self.m.layers[j].name)
-#                 if j not in self.non_trainable_layers: # Layers w/ no trainable parameters
-#                     if j in self.up_conv_layers: # Up-conv layers
-#                         self.m.layers[j].kernel=inner_task_weights[k]
-#                         self.m.layers[j].bias=inner_task_weights[k+1]
-#                         k+=2
-#                         self.m.layers[j].trainable=True
-#                     else: # Regular conv layers
-#                         self.m.layers[j].depthwise_kernel=inner_task_weights[k]
-#                         self.m.layers[j].pointwise_kernel=inner_task_weights[k+1]
-#                         self.m.layers[j].bias=inner_task_weights[k+2]
-#                         k+=3
-#                         self.m.layers[j].trainable=True
-            
-#         # Compute accuracies from output predictions
-#         task_accuracy_tr_pre = tf.reduce_mean(self.ssim_score(label_tr,task_output_tr_pre, 1.0))
+def train_maml(cfg, log_dir):    
+    dg = DataGenerator(num_exposures=cfg.TRAIN.NUM_EXPOSURES)
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    lr=cfg.TRAIN.META_LR
+    maml_lr=cfg.TRAIN.TASK_LR
+    
+    model = UNet(in_size=3, out_size=3, num_filters=8).double()
+    model.to(device)
+    meta_model = l2l.algorithms.MAML(model, lr=maml_lr)
+    opt = optim.Adam(meta_model.parameters(), lr=lr)
+    # loss_func = nn.MSELoss()
+    loss_func = ExpandNetLoss()
+    
+    ssim = SSIM().double().cuda() if device == 'cuda' else SSIM().double()
+    
+    pre_ssims = []
+    ssims = []
+    losses = []
+    
+    best_performance = 0.0 # for tracking model progress
+    # Reference https://github.com/learnables/learn2learn/blob/master/examples/vision/meta_mnist.py
+    for iteration in range(cfg.TRAIN.NUM_META_TR_ITER):
+        # print("ITERATION #", iteration)
+        iteration_error = 0.0
+        iteration_ssim = 0
         
-#         for j in range(num_inner_updates):
-#             task_accuracies_ts.append(self.ssim_score(label_ts,task_outputs_ts[j], 1.0))
+        train, test = dg.sample_batch('meta_train', cfg.TRAIN.BATCH_SIZE)
+        train = torch.from_numpy(train).to(device)
+        test = torch.from_numpy(test).to(device)
 
-#         task_output = [task_output_tr_pre, task_outputs_ts, task_loss_tr_pre, task_losses_ts, task_accuracy_tr_pre, task_accuracies_ts]
+        for batch_index in range(cfg.TRAIN.BATCH_SIZE):
+            # get_GPU_usage(f'Index {batch_index}')
+            # print("Index", batch_index)
+            learner = meta_model.clone()
+            # get_GPU_usage(f'post clone {batch_index}')
 
-#         return task_output
+            # Separate data into adaptation/evalutation sets
+            adaptation_data, adaptation_labels = train[0, batch_index, ...].permute(0, 3, 1, 2), train[1, batch_index, ...].permute(0, 3, 1, 2)
+            evaluation_data, evaluation_labels = test[0, batch_index, ...].permute(0, 3, 1, 2), test[1, batch_index, ...].permute(0, 3, 1, 2)
+            # get_GPU_usage(f'post data split {batch_index}')
 
-#     # @tf.function
-#     def call(self,
-#              inp,
-#              meta_batch_size=25,
-#              num_inner_updates=1):
-#         input_tr, input_ts, label_tr, label_ts = inp
-#         out_dtype = [tf.float32, [tf.float32]*num_inner_updates, tf.float32, [tf.float32]*num_inner_updates]
-#         out_dtype.extend([tf.float32, [tf.float32]*num_inner_updates])
-#         task_inner_loop_partial = partial(self.task_inner_loop, meta_batch_size=meta_batch_size, num_inner_updates=num_inner_updates)
-#         result = tf.map_fn(task_inner_loop_partial, elems=(input_tr, input_ts, label_tr, label_ts),
-#                         dtype=out_dtype,
-#                         parallel_iterations=meta_batch_size)
-#         return result
+            # If just calling a forward (i.e on adaptation data and don't want gradients to save space
+            #, create a new func w decortor @torch.no_grad)            
+
+            # Fast Adaptation -- first iter
+            if not batch_index:
+                first_train_pred = learner(adaptation_data)
+                train_error = loss_func(first_train_pred, torch.clip(adaptation_labels, 0, 1))
+                learner.adapt(train_error)
+                pre_train_ssim = ssim(first_train_pred, torch.clip(adaptation_labels, 0, 1)).item()
+
+                logger.info('[Pre-Train {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, train_error.item(), pre_train_ssim))
+                pre_ssims.append(pre_train_ssim)
+
+                # Fast Adaptation -- rest of the iters
+                for step in range(cfg.TRAIN.NUM_TASK_TR_ITER-1):
+                    train_error = loss_func(learner(adaptation_data), torch.clip(adaptation_labels, 0, 1))
+                    learner.adapt(train_error)
+            else:
+                # Fast Adaptation -- all iters
+                for step in range(cfg.TRAIN.NUM_TASK_TR_ITER):
+                    train_error = loss_func(learner(adaptation_data), torch.clip(adaptation_labels, 0, 1))
+                    learner.adapt(train_error)
+            # get_GPU_usage(f'post fast adapt {batch_index}')
+
+            # Compute validation loss
+            predictions = learner(evaluation_data)
+            valid_error = loss_func(predictions, torch.clip(evaluation_labels, 0, 1))
+            valid_error /= len(evaluation_data)
+            
+            # Plot the first batch index
+            if batch_index == cfg.TRAIN.BATCH_SIZE-1:
+              fig, ax = plt.subplots(nrows=1,ncols=3)
+              ax[0].imshow(visualize_hdr_image(predictions[0].detach().cpu().permute(1, 2, 0).numpy()))
+              ax[0].axis('off')
+              ax[0].set_title('Predicted')
+              ax[1].imshow(evaluation_data[0].detach().cpu().permute(1, 2, 0).numpy())
+              ax[1].axis('off')
+              ax[1].set_title('Original Exposure Shot')
+              ax[2].imshow(visualize_hdr_image(torch.clip(adaptation_labels[0], 0, 1).detach().cpu().permute(1, 2, 0).numpy()))
+              ax[2].axis('off')
+              ax[2].set_title('HDR')
+              fig.savefig(f'{log_dir}/test{iteration}.png', bbox_inches='tight')
+              plt.close()
+            
+            # Will return avg ssim 
+            valid_ssim = ssim(predictions, torch.clip(evaluation_labels, 0, 1)).item()
+            
+            iteration_error += valid_error
+            iteration_ssim += valid_ssim
+
+    
+        iteration_error /= cfg.TRAIN.BATCH_SIZE
+        iteration_ssim /= cfg.TRAIN.BATCH_SIZE
+
+        logger.info('[Post-Train {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, iteration_error.item(), valid_ssim))
+
+        ssims.append(iteration_ssim)
+        losses.append(iteration_error.item())
+
+        # Meta-validation
+        if (iteration!=0) and iteration % cfg.TEST_PRINT_INTERVAL == 0:
+        # if iteration==0:
+            val_train, val_test = dg.sample_batch('meta_val', 1)
+            # val_train = torch.from_numpy(val_train).to(device)
+            val_test = torch.from_numpy(val_test).to(device)
+
+            _, meta_val_ssim = eval_maml(learner, loss_func, val_train, val_test, 3, cfg.TRAIN.NUM_TASK_TR_ITER, iteration, ssim=ssim, device=device, log_dir=log_dir)
+
+            if meta_val_ssim > best_performance:
+                logger.info('Best performance achieved, saving it!')
+                save_model(learner, iteration, meta_val_ssim, log_dir)
+                best_performance = meta_val_ssim
+
+        # Take the meta-learning step
+        opt.zero_grad()
+        iteration_error.backward()
+        opt.step()
+        plt.figure()
+        
+    # Plot losses and ssims
+    plt.plot(np.arange(1, len(losses)+1), losses)
+    plt.xlabel("Iteration")
+    plt.ylabel("Loss")
+    plt.title("Loss Across Iterations")
+    plt.savefig(f'{log_dir}/loss_iterations.png')
+
+    plt.figure()
+    plt.plot(np.arange(1, len(ssims)+1), ssims)
+    plt.plot(np.arange(1, len(ssims)+1), pre_ssims)
+    plt.xlabel("Iteration")
+    plt.ylabel("SSIM")
+    plt.legend(['pre-ssim', 'post-ssim'])
+    plt.title("SSIM Across Iterations")
+    plt.savefig(f'{log_dir}/ssim_iterations.png')
