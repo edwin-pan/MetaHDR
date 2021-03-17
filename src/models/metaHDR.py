@@ -136,6 +136,8 @@ def validate_maml(learner, loss_func, train, test, batch_size, num_inner_updates
 
 def train_maml(cfg, log_dir):    
     dg = DataGenerator(num_exposures=cfg.TRAIN.NUM_EXPOSURES, include_unet_outputs=cfg.TRAIN.INCLUDE_UNET_OUTPUTS)
+    print("[DEBUG]: meta_train_data.shape=", dg.meta_train_data.shape)
+
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     lr=cfg.TRAIN.META_LR
     maml_lr=cfg.TRAIN.TASK_LR
