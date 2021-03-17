@@ -36,11 +36,6 @@ def main(args):
     os.makedirs(adapt_hdrcnn_dir, exist_ok=True)
     os.makedirs(evaluation_figure_output_dir, exist_ok=True)
 
-    logger = create_logger(evaluation_figure_output_dir, phase='eval', level=logging.CRITICAL)
-
-    logger.critical(f'GPU name -> {torch.cuda.get_device_name()}')
-    logger.critical(f'GPU feat -> {torch.cuda.get_device_properties("cuda")}')
-
     # Grab config
     if args.cfg is not None:
         cfg = update_cfg(args.cfg)
@@ -51,6 +46,15 @@ def main(args):
     assert cfg.EVAL.LOSS_FUNC in ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss'], f"[CONFIG] evaluation loss function '{cfg.EVAL.LOSS_FUNC}' not valid"
     loss_func = get_loss_func(cfg.EVAL.LOSS_FUNC)
 
+    # Grad test data -- all of it
+    dg = DataGenerator(num_exposures=cfg.EVAL.NUM_EXPOSURES)
+    all_test_data = dg.meta_test_data
+
+    # Create logger
+    logger = create_logger(evaluation_figure_output_dir, phase='eval', level=logging.CRITICAL)
+    logger.critical(f'GPU name -> {torch.cuda.get_device_name()}')
+    logger.critical(f'GPU feat -> {torch.cuda.get_device_properties("cuda")}')
+
     # Grab model checkpoint
     if use_best_flag:
         model_path = osp.join(source_directory, 'model_best.pth.tar')
@@ -60,22 +64,17 @@ def main(args):
     checkpoint = torch.load(model_path)
     best_performance = checkpoint['performance']
     best_epoch = checkpoint['epoch']
-    print(f"During training: Best Epoch: {best_epoch}, Best SSIM: {best_performance}")
+    logger.critical(f"During training: Best Epoch: {best_epoch}, Best SSIM: {best_performance}")
 
     # Define blank model to load weights into
     model = UNet(in_size=3, out_size=3, num_filters=8).double().to(device)
     meta_model = l2l.algorithms.MAML(model, lr=cfg.EVAL.TASK_LR)
-    print(f"Loading pre-trained model from --> {model_path}")
+    logger.critical(f"Loading pre-trained model from --> {model_path}")
     meta_model.load_state_dict(checkpoint['unet_state_dict'])
-    print(f"Successfully loaded pre-trained model from --> {model_path}")
-
-    # Grad test data -- all of it
-    dg = DataGenerator(num_exposures=cfg.EVAL.NUM_EXPOSURES)
-
-    all_test_data = dg.meta_test_data
+    logger.critical(f"Successfully loaded pre-trained model from --> {model_path}")
 
     # Perform single-shot evaluation
-    print("Performing Single-Shot Evaluation")
+    logger.critical("Performing Single-Shot Evaluation")
     eval_single_ssim = 0.0
     eval_single_psnr = 0.0
     idx = 0
@@ -92,7 +91,7 @@ def main(args):
     eval_single_psnr /= (all_test_data.shape[0]*(all_test_data.shape[1]-1))
 
     # Perform adaptive evaluation
-    print("Performing Adaptive Evaluation using Debevec labels")
+    logger.critical("Performing Adaptive Evaluation using Debevec labels")
     eval_adaptive_ssim = 0.0
     eval_adaptive_psnr = 0.0
     idx = 0
@@ -137,7 +136,7 @@ def main(args):
     eval_adaptive_psnr /= all_test_data.shape[0]
 
     # Perform adaptive evaluation
-    print("Performing Adaptive Evaluation using HDRCNN labels")
+    logger.critical("Performing Adaptive Evaluation using HDRCNN labels")
     eval_adaptive_hdrcnn_ssim = 0.0
     eval_adaptive_hdrcnn_psnr = 0.0
     # cur_indices = [1,   4,  11,  20,  23,  27,  36,  45,  48,  \
