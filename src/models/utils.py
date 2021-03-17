@@ -88,6 +88,9 @@ def top_block_resnet(in_dim, out_dim, resnet_out_dim, activation):
     return top
 
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+    
 def save_best_model(model, epoch, performance, logdir):
     """
     Save the best model (so-far). 

@@ -14,7 +14,7 @@ from src.dataset.hdr_visualization import visualize_hdr_image
 from src.core.utils import get_GPU_usage
 from src.core.loss import get_loss_func
 from src.models.UNet import UNet, Resnet
-from src.models.utils import save_best_model, save_last_model
+from src.models.utils import save_best_model, save_last_model, count_parameters
 
 logger = logging.getLogger(__name__)
 
@@ -181,7 +181,8 @@ def train_maml(cfg, log_dir):
             # get_GPU_usage(f'Index {batch_index}')
             learner = meta_model.clone()
             # get_GPU_usage(f'post clone {batch_index}')
-
+            print("Num trainable parameters: ", count_parameters(learner))
+            
             # Separate data into adaptation/evalutation sets
             adaptation_data, adaptation_labels = train[0, batch_index, ...].permute(0, 3, 1, 2), train[1, batch_index, ...].permute(0, 3, 1, 2)
             evaluation_data, evaluation_labels = test[0, batch_index, ...].permute(0, 3, 1, 2), test[1, batch_index, ...].permute(0, 3, 1, 2)
