@@ -57,20 +57,20 @@ def main(args):
 
     all_test_data = dg.meta_test_data
 
-    # # Perform single-shot evaluation
-    # print("Performing Single-Shot Evaluation")
-    # eval_single_ssim = 0.0
-    # idx = 0
-    # for i in tqdm(range(all_test_data.shape[0])):
-    #     for j in range(1, all_test_data.shape[1]):
-    #         input_test_image = all_test_data[np.newaxis, i, j]
-    #         input_test_label = all_test_data[np.newaxis, i, 0]
-    #         _, test_ssim = evaluate_single_maml(meta_model, loss_func, input_test_image, input_test_label, idx, device=device, visualize_flag=True, visualize_dir=evaluation_figure_output_dir)
+    # Perform single-shot evaluation
+    print("Performing Single-Shot Evaluation")
+    eval_single_ssim = 0.0
+    idx = 0
+    for i in tqdm(range(all_test_data.shape[0])):
+        for j in range(1, all_test_data.shape[1]):
+            input_test_image = all_test_data[np.newaxis, i, j]
+            input_test_label = all_test_data[np.newaxis, i, 0]
+            _, test_ssim = evaluate_single_maml(meta_model, loss_func, input_test_image, input_test_label, idx, device=device, visualize_flag=True, visualize_dir=evaluation_figure_output_dir)
 
-    #         eval_single_ssim+=test_ssim
-    #         idx += 1
-    # eval_single_ssim /= (all_test_data.shape[0]*(all_test_data.shape[1]-1))
-    # print("[Evaluation Results] Average Single-Shot Evaluation SSIM : {:.3f}".format(eval_single_ssim))
+            eval_single_ssim+=test_ssim
+            idx += 1
+    eval_single_ssim /= (all_test_data.shape[0]*(all_test_data.shape[1]-1))
+    print("[Evaluation Results] Average Single-Shot Evaluation SSIM : {:.3f}".format(eval_single_ssim))
 
     # Perform adaptive evaluation
     print("Performing Adaptive Evaluation using Debevec labels")
