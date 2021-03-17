@@ -74,11 +74,10 @@ def main(args):
 
     eval_single_ssim /= (all_test_data.shape[0]*(all_test_data.shape[1]-1))
 
-    print("[Evaluation Results] Average Evaluation SSIM : {:.3f}".format(eval_single_ssim))
-    return
+    print("[Evaluation Results] Average Single-Shot Evaluation SSIM : {:.3f}".format(eval_single_ssim))
 
     # Perform adaptive evaluation
-    print("Performing Adaptive Evaluation")
+    print("Performing Adaptive Evaluation using Debevec labels")
     eval_adaptive_ssim = 0.0
     for i in range(all_test_data.shape[0]):
         cur_batch = all_test_data[np.newaxis, i]
@@ -117,7 +116,7 @@ def main(args):
     
     eval_adaptive_ssim /= all_test_data.shape[0]
 
-    print("[Evaluation Results] Average Evaluation SSIM : {:.3f}".format(eval_adaptive_ssim))
+    print("[Evaluation Results] Average Adapted Evaluation SSIM : {:.3f}".format(eval_adaptive_ssim))
 
     # eval_train, eval_test = dg.sample_batch('meta_test', cfg.EVAL.BATCH_SIZE)
 
