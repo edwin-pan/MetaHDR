@@ -1,5 +1,5 @@
 OUTPUT_DIR: '/scratch/users/edwinpan/results'
-EXP_NAME: 'debugging_resnet' # 'b5_ne3_lr0p01_HDRCNN_ExpandNetLoss'
+EXP_NAME: 'b5_ne3_lr0p01_HDRCNN_Resnet_ExpandNetLoss'
 CHECKPOINT_SAVE_PATH: 'checkpoints'
 SUMMARY_INTERVAL: 1
 PRINT_INTERVAL: 2

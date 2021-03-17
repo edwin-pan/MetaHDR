@@ -148,8 +148,10 @@ def train_maml(cfg, log_dir):
     maml_lr=cfg.TRAIN.TASK_LR
     
     if cfg.TRAIN.MODEL == 'Unet':
+        logger.info("Using Unet model for MAML inner")
         model = UNet(in_size=3, out_size=3, num_filters=8).double()
     elif cfg.TRAIN.MODEL == 'Resnet':
+        logger.info("Using Unet model w/ Resnet contract for MAML inner")
         model = Resnet(in_size=3, out_size=3).double()
 
     model.to(device)
