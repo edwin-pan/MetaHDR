@@ -44,7 +44,7 @@ def evaluate_single_maml(model, loss_func, image, label, idx, device=None, visua
         ax[2].imshow(visualize_hdr_image(torch.clip(input_label[0], 0, 1).detach().cpu().permute(1, 2, 0).numpy()))
         ax[2].axis('off')
         ax[2].set_title('HDR')
-        fig.savefig(f'{visualize_dir}/evaluation_adapt{batch_index:03d}.png', bbox_inches='tight')
+        fig.savefig(f'{visualize_dir}/evaluation_adapt{idx:03d}.png', bbox_inches='tight')
         plt.close()
 
     return test_error, test_ssim
