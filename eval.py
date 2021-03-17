@@ -64,7 +64,6 @@ def main(args):
     idx = 0
     for i in tqdm(range(all_test_data.shape[0])):
         for j in range(1, all_test_data.shape[1]):
-            print(idx)
             input_test_image = all_test_data[np.newaxis, i, j]
             input_test_label = all_test_data[np.newaxis, i, 0]
             _, test_ssim, test_psnr = evaluate_single_maml(meta_model, loss_func, input_test_image, input_test_label, idx, device=device, visualize_flag=True, visualize_dir=evaluation_figure_output_dir)
@@ -115,7 +114,6 @@ def main(args):
         # import pdb; pdb.set_trace()
         _, test_ssim, test_psnr = evaluate_maml(meta_model, loss_func, eval_train, eval_test, idx, cfg.EVAL.NUM_TASK_TR_ITER, device=device, visualize_flag=True, visualize_dir=evaluation_figure_output_dir)
         idx += 1
-        print(idx)
         
         eval_adaptive_ssim += test_ssim
         eval_adaptive_psnr += test_psnr

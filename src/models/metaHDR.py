@@ -94,9 +94,6 @@ def evaluate_maml(model, loss_func, train, test, idx, num_inner_updates, device=
             ax[2].set_title('HDR')
             fig.savefig(f'{visualize_dir}/evaluation_adapt{idx:03d}.png', bbox_inches='tight')
             plt.close()
-    test_error /= batch_size
-    test_ssim /= batch_size
-    test_psnr /= batch_size
 
     return test_error, test_ssim, test_psnr
 
