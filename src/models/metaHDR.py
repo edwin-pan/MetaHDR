@@ -71,7 +71,7 @@ def evaluate_maml(model, loss_func, train, test, batch_size, num_inner_updates, 
 
         for _ in range(num_inner_updates):
             train_error = loss_func(learner(adaptation_data), torch.clip(adaptation_labels, 0, 1))
-            model.adapt(train_error)
+            learner.adapt(train_error)
 
         test_predictions = learner(evaluation_data)
         test_error += loss_func(test_predictions, torch.clip(evaluation_labels, 0, 1))/len(test_predictions)
