@@ -2,7 +2,7 @@ import torch
 import argparse
 from os import path as osp
 import os
-import tqdm
+from tqdm import tqdm
 import numpy as np
 import learn2learn as l2l
 from sklearn.model_selection import train_test_split
@@ -61,7 +61,7 @@ def main(args):
     print("Performing Single-Shot Evaluation")
     eval_single_ssim = 0.0
 
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     idx = 0
     for i in tqdm(range(all_test_data.shape[0])):
         for j in range(1, all_test_data.shape[1]):
