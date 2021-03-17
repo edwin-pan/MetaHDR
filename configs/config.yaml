@@ -1,5 +1,5 @@
 OUTPUT_DIR: '/scratch/users/edwinpan/results'
-EXP_NAME: 'b5_ne3_lr0p01_HDRCNN_ExpandNetLoss'
+EXP_NAME: 'debugging_resnet' # 'b5_ne3_lr0p01_HDRCNN_ExpandNetLoss'
 CHECKPOINT_SAVE_PATH: 'checkpoints'
 SUMMARY_INTERVAL: 1
 PRINT_INTERVAL: 2
@@ -13,6 +13,7 @@ LOSS:
 # Training parameters
 TRAIN:
   LOSS_FUNC: 'ExpandNetLoss' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
+  MODEL: 'Resnet' # [Unet, Resnet]
   INCLUDE_UNET_OUTPUTS: True
   BATCH_SIZE: 5
   VAL_BATCH_SIZE: 3

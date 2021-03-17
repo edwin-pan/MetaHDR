@@ -12,7 +12,7 @@ from src.dataset.dataloader import DataGenerator
 from src.dataset.hdr_visualization import visualize_hdr_image
 from src.core.utils import get_GPU_usage
 from src.core.loss import get_loss_func
-from src.models.UNet import UNet
+from src.models.UNet import UNet, Resnet
 from src.models.utils import save_best_model, save_last_model
 
 logger = logging.getLogger(__name__)
@@ -147,7 +147,11 @@ def train_maml(cfg, log_dir):
     lr=cfg.TRAIN.META_LR
     maml_lr=cfg.TRAIN.TASK_LR
     
-    model = UNet(in_size=3, out_size=3, num_filters=8).double()
+    if cfg.TRAIN.MODEL == 'Unet':
+        model = UNet(in_size=3, out_size=3, num_filters=8).double()
+    elif cfg.TRAIN.MODEL == 'Resnet':
+        model = Resnet(in_size=3, out_size=3).double()
+
     model.to(device)
     meta_model = l2l.algorithms.MAML(model, lr=maml_lr)
     opt = optim.Adam(meta_model.parameters(), lr=lr)
