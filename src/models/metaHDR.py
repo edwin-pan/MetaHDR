@@ -17,6 +17,9 @@ from src.models.utils import save_best_model, save_last_model
 logger = logging.getLogger(__name__)
 
 def evaluate_maml(model, loss_func, train, test, batch_size, num_inner_updates, device=None, visualize_flag=False, visualize_dir=None):
+    """
+    Evaluate 1 test task using task-specific adaptation.
+    """
     # Cast as torch tensor & send data to device
     train = torch.from_numpy(train).to(device)
     test = torch.from_numpy(test).to(device)
@@ -54,8 +57,8 @@ def evaluate_maml(model, loss_func, train, test, batch_size, num_inner_updates, 
     test_error /= batch_size
     test_ssim /= batch_size
 
-    print("[Evaluation Results] Average Evaluation SSIM : {:.3f}".format(test_ssim))
 
+    return test_error, test_ssim
 
 
 

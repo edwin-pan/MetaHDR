@@ -2,7 +2,9 @@ import torch
 import argparse
 from os import path as osp
 import os
+import numpy as np
 import learn2learn as l2l
+from sklearn.model_selection import train_test_split
 
 from src.core.config import update_cfg, get_cfg_defaults
 from src.models.UNet import UNet
@@ -49,11 +51,53 @@ def main(args):
     meta_model.load_state_dict(checkpoint['unet_state_dict'])
     print(f"Successfully loaded pre-trained model from --> {model_path}")
 
-    # Grad test data
+    # Grad test data -- all of it
     dg = DataGenerator(num_exposures=cfg.EVAL.NUM_EXPOSURES)
-    eval_train, eval_test = dg.sample_batch('meta_test', cfg.EVAL.BATCH_SIZE)
 
-    evaluate_maml(meta_model, loss_func, eval_train, eval_test, cfg.EVAL.BATCH_SIZE, cfg.EVAL.NUM_TASK_TR_ITER, device=device, visualize_flag=True, visualize_dir=evaluation_figure_output_dir)
+    all_test_data = dg.meta_test_data
+
+    eval_ssim = 0.0
+    for i in range(all_test_data.shape[0]):
+        cur_batch = all_test_data[i]
+        tr_images, ts_images = [], []
+        tr_labels, ts_labels = [], []
+        for image_set in cur_batch:
+            # Train and Test for each set of exposures
+            tr, ts = train_test_split(np.arange(1, cfg.EVAL.NUM_EXPOSURES+1), test_size=1)
+            
+            cur_tr_images, cur_tr_labels = [], []
+            for i in tr:
+                cur_tr_images.append(image_set[i, ...])
+                cur_tr_labels.append(image_set[0, ...])
+            tr_images.append(np.stack(cur_tr_images))
+            tr_labels.append(np.stack(cur_tr_labels))
+            
+            cur_ts_images, cur_ts_labels = [], []
+            for i in ts:
+                cur_ts_images.append(image_set[i, ...])
+                cur_ts_labels.append(image_set[0, ...])
+            ts_images.append(np.stack(cur_ts_images))
+            ts_labels.append(np.stack(cur_ts_labels))
+        
+        tr_images = np.stack(tr_images)
+        tr_labels = np.stack(tr_labels)
+        ts_images = np.stack(ts_images)
+        ts_labels = np.stack(ts_labels)
+        
+        eval_train = np.stack([tr_images, tr_labels])
+        eval_test = np.stack([ts_images, ts_labels])
+
+        import pdb; pdb.set_trace()
+        _, test_ssim = evaluate_maml(meta_model, loss_func, eval_train, eval_test, cfg.EVAL.BATCH_SIZE, cfg.EVAL.NUM_TASK_TR_ITER, device=device, visualize_flag=True, visualize_dir=evaluation_figure_output_dir)
+
+        eval_ssim += test_ssim
+    
+    eval_ssim /= all_test_data.shape[0]
+
+    print("[Evaluation Results] Average Evaluation SSIM : {:.3f}".format(eval_ssim))
+
+    # eval_train, eval_test = dg.sample_batch('meta_test', cfg.EVAL.BATCH_SIZE)
+
 
     return
 
