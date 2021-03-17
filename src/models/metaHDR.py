@@ -16,7 +16,7 @@ from src.models.utils import save_best_model, save_last_model
 
 logger = logging.getLogger(__name__)
 
-@torch.nograd()
+@torch.no_grad()
 def evaluate_single_maml(model, loss_func, image, label, idx, device=None, visualize_flag=False, visualize_dir=None):
     """
     Evaluate 1 test image using meta-params as input
