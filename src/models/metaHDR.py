@@ -7,6 +7,7 @@ from torch.nn import functional as F
 import learn2learn as l2l
 import matplotlib.pyplot as plt
 from piqa import SSIM, PSNR
+from functools import partial
 
 from src.dataset.dataloader import DataGenerator
 from src.dataset.hdr_visualization import visualize_hdr_image
@@ -56,7 +57,7 @@ def evaluate_single_maml(model, loss_func, image, label, idx, device=None, visua
     return test_error, test_ssim, test_psnr
 
 
-def evaluate_maml(model, loss_func, train, test, idx, num_inner_updates, device=None, visualize_flag=False, visualize_dir=None):
+def evaluate_maml(model, loss_func, train, test, idx, num_inner_updates, device=None, model_type=None, visualize_flag=False, visualize_dir=None):
     """
     Evaluate 1 test task using task-specific adaptation.
     """
@@ -77,7 +78,10 @@ def evaluate_maml(model, loss_func, train, test, idx, num_inner_updates, device=
 
         for _ in range(num_inner_updates):
             train_error = loss_func(learner(adaptation_data), torch.clip(adaptation_labels, 0, 1))
-            learner.adapt(train_error)
+            if model_type == 'Resnet':
+                learner.adapt(train_error, allow_nograd=True)
+            else:
+                learner.adapt(train_error)
 
         test_predictions = learner(evaluation_data)
         test_error += loss_func(test_predictions, torch.clip(evaluation_labels, 0, 1))/len(test_predictions)
@@ -192,7 +196,10 @@ def train_maml(cfg, log_dir):
             if not batch_index:
                 first_train_pred = learner(adaptation_data)
                 train_error = loss_func(first_train_pred, torch.clip(adaptation_labels, 0, 1))
-                learner.adapt(train_error)
+                if cfg.TRAIN.MODEL == 'Resnet':
+                    learner.adapt(train_error, allow_nograd=True)
+                else:
+                    learner.adapt(train_error)
                 pre_train_ssim = ssim(first_train_pred, torch.clip(adaptation_labels, 0, 1)).item()
 
                 logger.info('[Pre-Train  {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, train_error.item(), pre_train_ssim))
@@ -201,12 +208,18 @@ def train_maml(cfg, log_dir):
                 # Fast Adaptation -- rest of the iters
                 for step in range(cfg.TRAIN.NUM_TASK_TR_ITER-1):
                     train_error = loss_func(learner(adaptation_data), torch.clip(adaptation_labels, 0, 1))
-                    learner.adapt(train_error)
+                    if cfg.TRAIN.MODEL == 'Resnet':
+                        learner.adapt(train_error, allow_nograd=True)
+                    else:
+                        learner.adapt(train_error)
             else:
                 # Fast Adaptation -- all iters
                 for step in range(cfg.TRAIN.NUM_TASK_TR_ITER):
                     train_error = loss_func(learner(adaptation_data), torch.clip(adaptation_labels, 0, 1))
-                    learner.adapt(train_error)
+                    if cfg.TRAIN.MODEL == 'Resnet':
+                        learner.adapt(train_error, allow_nograd=True)
+                    else:
+                        learner.adapt(train_error)
             # get_GPU_usage(f'post fast adapt {batch_index}')
 
             # Compute validation loss
