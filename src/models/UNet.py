@@ -52,7 +52,7 @@ class UNet(nn.Module):
 
 
 class Resnet(nn.Module):
-    def __init__(self, in_size, out_size, num_filters):
+    def __init__(self, in_size, out_size):
         super(Resnet, self).__init__()
 
         # Define Activation Function
