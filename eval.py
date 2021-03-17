@@ -13,10 +13,10 @@ from src.models.UNet import UNet
 from src.models.metaHDR import evaluate_maml, evaluate_single_maml
 from src.dataset.dataloader import DataGenerator
 from src.core.loss import get_loss_func
+from src.core.utils import create_logger
 
 def main(args):
     print("--- Evaluating on meta-test set ---")
-
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     source_directory = args.model_dir
     use_best_flag = args.use_best
@@ -33,8 +33,13 @@ def main(args):
     os.makedirs(single_dir, exist_ok=True)
     os.makedirs(adapt_debevec_dir, exist_ok=True)
     os.makedirs(adapt_hdrcnn_dir, exist_ok=True)
-
     os.makedirs(evaluation_figure_output_dir, exist_ok=True)
+
+    logger = create_logger(evaluation_figure_output_dir, phase='eval')
+
+    logger.info(f'GPU name -> {torch.cuda.get_device_name()}')
+    logger.info(f'GPU feat -> {torch.cuda.get_device_properties("cuda")}')
+
     # Grab config
     if args.cfg is not None:
         cfg = update_cfg(args.cfg)

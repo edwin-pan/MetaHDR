@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+import os
 import logging
 from torch import nn, optim
 from torch.nn import functional as F
@@ -35,6 +36,8 @@ def evaluate_single_maml(model, loss_func, image, label, idx, device=None, visua
     test_error = loss_func(test_prediction, torch.clip(input_label, 0, 1))
     test_ssim = ssim(test_prediction, torch.clip(input_label, 0, 1)).item()
     test_psnr = psnr(test_prediction, torch.clip(input_label, 0, 1)).item()
+
+    logger.info(f"[Single-Shot {idx:03d}] SSIM: {test_ssim}, PSNR: {test_psnr}")
 
     if visualize_flag:
         fig, ax = plt.subplots(nrows=1,ncols=3)
@@ -80,6 +83,8 @@ def evaluate_maml(model, loss_func, train, test, idx, num_inner_updates, device=
         test_error += loss_func(test_predictions, torch.clip(evaluation_labels, 0, 1))/len(test_predictions)
         test_ssim += ssim(test_predictions, torch.clip(evaluation_labels, 0, 1)).item()
         test_psnr += psnr(test_predictions, torch.clip(evaluation_labels, 0, 1)).item()
+
+        logger.info(f"[{os.path.basename(os.path.normpath(visualize_dir))} {idx:03d}] SSIM: {test_ssim}, PSNR: {test_psnr}")
 
         if visualize_flag:
             fig, ax = plt.subplots(nrows=1,ncols=3)
