@@ -7,6 +7,7 @@ import numpy as np
 import learn2learn as l2l
 from sklearn.model_selection import train_test_split
 import skimage.io as io
+import logging
 
 from src.core.config import update_cfg, get_cfg_defaults
 from src.models.UNet import UNet
