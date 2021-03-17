@@ -10,6 +10,9 @@ import logging
 def convolution_block(in_dim, out_dim):
     return nn.Conv2d(in_dim,out_dim, kernel_size=3, stride=1, padding=1)
 
+# def convolution_block_resnet(in_dim, out_dim):
+#     return nn.Conv2d(in_dim,out_dim, kernel_size=3, stride=2, padding=1)
+
 def transpose_convolution_block(in_dim, out_dim):
     return torch.nn.ConvTranspose2d(in_dim,out_dim,kernel_size=3, stride=2, padding=1,output_padding=1)
 
@@ -90,7 +93,7 @@ def top_block_resnet(in_dim, out_dim, resnet_out_dim, activation):
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
-    
+
 def save_best_model(model, epoch, performance, logdir):
     """
     Save the best model (so-far). 
