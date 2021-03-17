@@ -5,7 +5,7 @@ from torch import nn, optim
 from torch.nn import functional as F
 import learn2learn as l2l
 import matplotlib.pyplot as plt
-from piqa import SSIM
+from piqa import SSIM, PSNR
 
 from src.dataset.dataloader import DataGenerator
 from src.dataset.hdr_visualization import visualize_hdr_image
@@ -27,12 +27,14 @@ def evaluate_single_maml(model, loss_func, image, label, idx, device=None, visua
 
     # Instantiate evaluation metric (ssim)
     ssim = SSIM().double().cuda() if device == 'cuda' else SSIM().double()
+    psnr = PSNR().double().cuda() if device == 'cuda' else PSNR().double()
 
     # Pass through model
     test_prediction = model(input_image)
 
     test_error = loss_func(test_prediction, torch.clip(input_label, 0, 1))
     test_ssim = ssim(test_prediction, torch.clip(input_label, 0, 1)).item()
+    test_psnr = psnr(test_prediction, torch.clip(input_label, 0, 1)).item()
 
     if visualize_flag:
         fig, ax = plt.subplots(nrows=1,ncols=3)
@@ -45,13 +47,13 @@ def evaluate_single_maml(model, loss_func, image, label, idx, device=None, visua
         ax[2].imshow(visualize_hdr_image(torch.clip(input_label[0], 0, 1).detach().cpu().permute(1, 2, 0).numpy()))
         ax[2].axis('off')
         ax[2].set_title('HDR')
-        fig.savefig(f'{visualize_dir}/evaluation_adapt{idx:03d}.png', bbox_inches='tight')
+        fig.savefig(f'{visualize_dir}/evaluation_single{idx:03d}.png', bbox_inches='tight')
         plt.close()
 
-    return test_error, test_ssim
+    return test_error, test_ssim, test_psnr
 
 
-def evaluate_maml(model, loss_func, train, test, batch_size, num_inner_updates, device=None, visualize_flag=False, visualize_dir=None):
+def evaluate_maml(model, loss_func, train, test, idx, num_inner_updates, device=None, visualize_flag=False, visualize_dir=None):
     """
     Evaluate 1 test task using task-specific adaptation.
     """
@@ -61,10 +63,11 @@ def evaluate_maml(model, loss_func, train, test, batch_size, num_inner_updates, 
 
     # Instantiate evaluation metric (ssim)
     ssim = SSIM().double().cuda() if device == 'cuda' else SSIM().double()
+    psnr = PSNR().double().cuda() if device == 'cuda' else PSNR().double()
 
     # Pass each batch through
-    test_error, test_ssim = 0.0, 0.0
-    for batch_index in range(batch_size):
+    test_error, test_ssim, test_psnr = 0.0, 0.0, 0.0
+    for batch_index in range(1):
         learner = model.clone()
         adaptation_data, adaptation_labels = train[0, batch_index, ...].permute(0, 3, 1, 2), train[1, batch_index, ...].permute(0, 3, 1, 2)
         evaluation_data, evaluation_labels = test[0, batch_index, ...].permute(0, 3, 1, 2), test[1, batch_index, ...].permute(0, 3, 1, 2)
@@ -76,6 +79,7 @@ def evaluate_maml(model, loss_func, train, test, batch_size, num_inner_updates, 
         test_predictions = learner(evaluation_data)
         test_error += loss_func(test_predictions, torch.clip(evaluation_labels, 0, 1))/len(test_predictions)
         test_ssim += ssim(test_predictions, torch.clip(evaluation_labels, 0, 1)).item()
+        test_psnr += psnr(test_predictions, torch.clip(evaluation_labels, 0, 1)).item()
 
         if visualize_flag:
             fig, ax = plt.subplots(nrows=1,ncols=3)
@@ -88,13 +92,13 @@ def evaluate_maml(model, loss_func, train, test, batch_size, num_inner_updates, 
             ax[2].imshow(visualize_hdr_image(torch.clip(adaptation_labels[0], 0, 1).detach().cpu().permute(1, 2, 0).numpy()))
             ax[2].axis('off')
             ax[2].set_title('HDR')
-            fig.savefig(f'{visualize_dir}/evaluation_adapt{batch_index:03d}.png', bbox_inches='tight')
+            fig.savefig(f'{visualize_dir}/evaluation_adapt{idx:03d}.png', bbox_inches='tight')
             plt.close()
     test_error /= batch_size
     test_ssim /= batch_size
+    test_psnr /= batch_size
 
-
-    return test_error, test_ssim
+    return test_error, test_ssim, test_psnr
 
 
 

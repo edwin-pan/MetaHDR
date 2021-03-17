@@ -60,22 +60,29 @@ def main(args):
     # Perform single-shot evaluation
     print("Performing Single-Shot Evaluation")
     eval_single_ssim = 0.0
+    eval_single_psnr = 0.0
     idx = 0
     for i in tqdm(range(all_test_data.shape[0])):
         for j in range(1, all_test_data.shape[1]):
+            print(idx)
             input_test_image = all_test_data[np.newaxis, i, j]
             input_test_label = all_test_data[np.newaxis, i, 0]
-            _, test_ssim = evaluate_single_maml(meta_model, loss_func, input_test_image, input_test_label, idx, device=device, visualize_flag=True, visualize_dir=evaluation_figure_output_dir)
+            _, test_ssim, test_psnr = evaluate_single_maml(meta_model, loss_func, input_test_image, input_test_label, idx, device=device, visualize_flag=True, visualize_dir=evaluation_figure_output_dir)
 
             eval_single_ssim+=test_ssim
+            eval_single_psnr+=test_psnr
             idx += 1
     eval_single_ssim /= (all_test_data.shape[0]*(all_test_data.shape[1]-1))
+    eval_single_psnr /= (all_test_data.shape[0]*(all_test_data.shape[1]-1))
     print("[Evaluation Results] Average Single-Shot Evaluation SSIM : {:.3f}".format(eval_single_ssim))
+    print("[Evaluation Results] Average Single-Shot Evaluation PSNR : {:.3f}".format(eval_single_psnr))
 
     # Perform adaptive evaluation
     print("Performing Adaptive Evaluation using Debevec labels")
     eval_adaptive_ssim = 0.0
-    for curr_idx in range(all_test_data.shape[0]):
+    eval_adaptive_psnr = 0.0
+    idx = 0
+    for curr_idx in tqdm(range(all_test_data.shape[0])):
         cur_batch = all_test_data[np.newaxis, curr_idx]
         tr_images, ts_images = [], []
         tr_labels, ts_labels = [], []
@@ -106,16 +113,18 @@ def main(args):
         eval_test = np.stack([ts_images, ts_labels])
 
         # import pdb; pdb.set_trace()
-        _, test_ssim = evaluate_maml(meta_model, loss_func, eval_train, eval_test, 1, cfg.EVAL.NUM_TASK_TR_ITER, device=device, visualize_flag=True, visualize_dir=evaluation_figure_output_dir)
-
+        _, test_ssim, test_psnr = evaluate_maml(meta_model, loss_func, eval_train, eval_test, idx, cfg.EVAL.NUM_TASK_TR_ITER, device=device, visualize_flag=True, visualize_dir=evaluation_figure_output_dir)
+        idx += 1
+        print(idx)
+        
         eval_adaptive_ssim += test_ssim
-    
+        eval_adaptive_psnr += test_psnr
+
     eval_adaptive_ssim /= all_test_data.shape[0]
+    eval_adaptive_psnr /= all_test_data.shape[0]
 
     print("[Evaluation Results] Average Adapted Evaluation SSIM : {:.3f}".format(eval_adaptive_ssim))
-
-    # eval_train, eval_test = dg.sample_batch('meta_test', cfg.EVAL.BATCH_SIZE)
-
+    print("[Evaluation Results] Average Adapted Evaluation PSNR : {:.3f}".format(eval_adaptive_psnr))
 
     return
 
