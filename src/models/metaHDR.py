@@ -89,7 +89,7 @@ def evaluate_maml(model, loss_func, train, test, idx, num_inner_updates, device=
             ax[1].imshow(evaluation_data[0].detach().cpu().permute(1, 2, 0).numpy())
             ax[1].axis('off')
             ax[1].set_title('Original Exposure Shot')
-            ax[2].imshow(visualize_hdr_image(torch.clip(adaptation_labels[0], 0, 1).detach().cpu().permute(1, 2, 0).numpy()))
+            ax[2].imshow(visualize_hdr_image(torch.clip(evaluation_labels[0], 0, 1).detach().cpu().permute(1, 2, 0).numpy()))
             ax[2].axis('off')
             ax[2].set_title('HDR')
             fig.savefig(f'{visualize_dir}/evaluation_adapt{idx:03d}.png', bbox_inches='tight')

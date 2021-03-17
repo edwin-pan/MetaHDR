@@ -37,7 +37,7 @@ class DataGenerator(object):
             random.shuffle(indeces)
         train_indeces = indeces[0:num_train]
         val_indeces = indeces[num_train:num_train+num_val]
-        test_indeces = indeces[num_train+num_val:]
+        test_indeces = np.sort(indeces[num_train+num_val:])
 
         print("SPLITTING DATA INTO TRAIN, VAL, TEST...")
         self.meta_train_data = data[train_indeces]
