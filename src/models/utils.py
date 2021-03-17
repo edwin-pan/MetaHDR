@@ -83,11 +83,12 @@ def top_block_resnet(in_dim, out_dim, resnet_out_dim, activation):
                               nn.BatchNorm2d(out_dim),
                               activation,
                               convolution_block(out_dim, out_dim),
-                              nn.BatchNorm2d(out_dim),
-                              activation,
-                              convolution_block(out_dim,resnet_out_dim),
-                              nn.BatchNorm2d(resnet_out_dim),
-                              activation)
+                            #   nn.BatchNorm2d(out_dim),
+                            #   activation,
+                            #   convolution_block(out_dim,resnet_out_dim),
+                            #   nn.BatchNorm2d(resnet_out_dim),
+                            #   activation
+                              )
     return top
 
 

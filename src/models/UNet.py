@@ -77,7 +77,8 @@ class Resnet(nn.Module):
         self.expand2 = expand_block(128, 64, activation_function)
         self.expand1 = expand_block(64, 32, activation_function)
         self.expand0 = expand_block(32, 16, activation_function)
-        self.top = top_block_resnet(96, 64, out_size, activation_function)
+        # self.top = top_block_resnet(96, 64, out_size, activation_function)
+        self.top = top_block_resnet(96, out_size, out_size, activation_function)
 
         # Define Pooling Operator
         self.pool = torch.nn.MaxPool2d((2,2), stride=2)
