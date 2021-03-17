@@ -105,7 +105,7 @@ def main(args):
         eval_train = np.stack([tr_images, tr_labels])
         eval_test = np.stack([ts_images, ts_labels])
 
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         _, test_ssim = evaluate_maml(meta_model, loss_func, eval_train, eval_test, 1, cfg.EVAL.NUM_TASK_TR_ITER, device=device, visualize_flag=True, visualize_dir=evaluation_figure_output_dir)
 
         eval_adaptive_ssim += test_ssim
