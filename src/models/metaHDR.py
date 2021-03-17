@@ -181,8 +181,8 @@ def train_maml(cfg, log_dir):
             # get_GPU_usage(f'Index {batch_index}')
             learner = meta_model.clone()
             # get_GPU_usage(f'post clone {batch_index}')
-            print("Num trainable parameters: ", count_parameters(learner))
-            
+            # print("Num trainable parameters: ", count_parameters(learner))
+
             # Separate data into adaptation/evalutation sets
             adaptation_data, adaptation_labels = train[0, batch_index, ...].permute(0, 3, 1, 2), train[1, batch_index, ...].permute(0, 3, 1, 2)
             evaluation_data, evaluation_labels = test[0, batch_index, ...].permute(0, 3, 1, 2), test[1, batch_index, ...].permute(0, 3, 1, 2)
