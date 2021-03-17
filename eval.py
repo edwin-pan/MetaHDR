@@ -7,6 +7,7 @@ import numpy as np
 import learn2learn as l2l
 from sklearn.model_selection import train_test_split
 import skimage.io as io
+import logging
 
 from src.core.config import update_cfg, get_cfg_defaults
 from src.models.UNet import UNet
@@ -35,10 +36,10 @@ def main(args):
     os.makedirs(adapt_hdrcnn_dir, exist_ok=True)
     os.makedirs(evaluation_figure_output_dir, exist_ok=True)
 
-    logger = create_logger(evaluation_figure_output_dir, phase='eval')
+    logger = create_logger(evaluation_figure_output_dir, phase='eval', level=logging.CRITICAL)
 
-    logger.info(f'GPU name -> {torch.cuda.get_device_name()}')
-    logger.info(f'GPU feat -> {torch.cuda.get_device_properties("cuda")}')
+    logger.critical(f'GPU name -> {torch.cuda.get_device_name()}')
+    logger.critical(f'GPU feat -> {torch.cuda.get_device_properties("cuda")}')
 
     # Grab config
     if args.cfg is not None:
@@ -193,12 +194,12 @@ def main(args):
     eval_adaptive_hdrcnn_ssim /= all_test_data.shape[0]
     eval_adaptive_hdrcnn_psnr /= all_test_data.shape[0]
 
-    print("[Evaluation Results] Average Single-Shot Evaluation SSIM : {:.3f}".format(eval_single_ssim))
-    print("[Evaluation Results] Average Single-Shot Evaluation PSNR : {:.3f}".format(eval_single_psnr))
-    print("[Evaluation Results] Average Debevec Adapted Evaluation SSIM : {:.3f}".format(eval_adaptive_ssim))
-    print("[Evaluation Results] Average Debevec Adapted Evaluation PSNR : {:.3f}".format(eval_adaptive_psnr))
-    print("[Evaluation Results] Average HDRCNN Adapted Evaluation SSIM : {:.3f}".format(eval_adaptive_hdrcnn_ssim))
-    print("[Evaluation Results] Average HDRCNN Adapted Evaluation PSNR : {:.3f}".format(eval_adaptive_hdrcnn_psnr))
+    logger.critical("[Evaluation Results] Average Single-Shot Evaluation SSIM : {:.3f}".format(eval_single_ssim))
+    logger.critical("[Evaluation Results] Average Single-Shot Evaluation PSNR : {:.3f}".format(eval_single_psnr))
+    logger.critical("[Evaluation Results] Average Debevec Adapted Evaluation SSIM : {:.3f}".format(eval_adaptive_ssim))
+    logger.critical("[Evaluation Results] Average Debevec Adapted Evaluation PSNR : {:.3f}".format(eval_adaptive_psnr))
+    logger.critical("[Evaluation Results] Average HDRCNN Adapted Evaluation SSIM : {:.3f}".format(eval_adaptive_hdrcnn_ssim))
+    logger.critical("[Evaluation Results] Average HDRCNN Adapted Evaluation PSNR : {:.3f}".format(eval_adaptive_hdrcnn_psnr))
 
     return
 
