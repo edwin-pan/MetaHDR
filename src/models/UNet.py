@@ -130,4 +130,5 @@ class Resnet(nn.Module):
         out = self.top(f1)
         # print("[Debug] out.shape: ", out.shape) #
 
+        out = torch.sigmoid(out)
         return out
