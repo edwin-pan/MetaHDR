@@ -16,6 +16,7 @@ from src.models.utils import save_best_model, save_last_model
 
 logger = logging.getLogger(__name__)
 
+@torch.nograd()
 def evaluate_single_maml(model, loss_func, image, label, idx, device=None, visualize_flag=False, visualize_dir=None):
     """
     Evaluate 1 test image using meta-params as input
@@ -64,14 +65,15 @@ def evaluate_maml(model, loss_func, train, test, batch_size, num_inner_updates, 
     # Pass each batch through
     test_error, test_ssim = 0.0, 0.0
     for batch_index in range(batch_size):
+        learner = model.clone()
         adaptation_data, adaptation_labels = train[0, batch_index, ...].permute(0, 3, 1, 2), train[1, batch_index, ...].permute(0, 3, 1, 2)
         evaluation_data, evaluation_labels = test[0, batch_index, ...].permute(0, 3, 1, 2), test[1, batch_index, ...].permute(0, 3, 1, 2)
 
         for _ in range(num_inner_updates):
-            train_error = loss_func(model(adaptation_data), torch.clip(adaptation_labels, 0, 1))
+            train_error = loss_func(learner(adaptation_data), torch.clip(adaptation_labels, 0, 1))
             model.adapt(train_error)
 
-        test_predictions = model(evaluation_data)
+        test_predictions = learner(evaluation_data)
         test_error += loss_func(test_predictions, torch.clip(evaluation_labels, 0, 1))/len(test_predictions)
         test_ssim += ssim(test_predictions, torch.clip(evaluation_labels, 0, 1)).item()
 

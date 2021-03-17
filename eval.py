@@ -75,8 +75,8 @@ def main(args):
     # Perform adaptive evaluation
     print("Performing Adaptive Evaluation using Debevec labels")
     eval_adaptive_ssim = 0.0
-    for i in range(all_test_data.shape[0]):
-        cur_batch = all_test_data[np.newaxis, i]
+    for curr_idx in range(all_test_data.shape[0]):
+        cur_batch = all_test_data[np.newaxis, curr_idx]
         tr_images, ts_images = [], []
         tr_labels, ts_labels = [], []
         for image_set in cur_batch:
