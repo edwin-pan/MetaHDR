@@ -154,9 +154,9 @@ def main(args):
         for image_set in cur_batch:
             # Train and Test for each set of exposures
             tr, ts = train_test_split(np.arange(1, cfg.EVAL.NUM_EXPOSURES+1), test_size=1)
-            image_idx = curr_idx + 1
             cur_tr_images, cur_tr_labels = [], []
             for i in tr:
+                image_idx = curr_idx + 1
                 cur_tr_images.append(image_set[i, ...])
                 if i == 1: # exposure p2
                     image_idx += all_test_data.shape[0]
