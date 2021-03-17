@@ -46,7 +46,7 @@ def get_GPU_usage(print_statement):
     GPUtil.showUtilization(all=True)
     print(" ")
 
-def create_logger(logdir, phase='train', level=logging.INFO):
+def create_logger(logdir, phase='train'):
     os.makedirs(logdir, exist_ok=True)
 
     log_file = osp.join(logdir, f'{phase}_log.txt')
@@ -55,7 +55,7 @@ def create_logger(logdir, phase='train', level=logging.INFO):
     logging.basicConfig(filename=log_file,
                         format=head)
     logger = logging.getLogger()
-    logger.setLevel(level)
+    logger.setLevel(logging.INFO)
     console = logging.StreamHandler()
     logging.getLogger('').addHandler(console)
 
