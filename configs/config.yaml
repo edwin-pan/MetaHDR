@@ -27,7 +27,7 @@ EVAL:
   LOSS_FUNC: 'ExpandNetLoss' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
   NUM_TASK_TR_ITER: 3 # Always keep at 3 for evaluation (since we only want to evaluate on 'real' images)
   NUM_EXPOSURES: 3
-  TASK_LR: 0.1
+  TASK_LR: 0.01
 
 # Utility parameters
 UTILS:
