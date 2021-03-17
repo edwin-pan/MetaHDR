@@ -79,7 +79,7 @@ def evaluate_maml(model, loss_func, train, test, idx, num_inner_updates, device=
         for _ in range(num_inner_updates):
             train_error = loss_func(learner(adaptation_data), torch.clip(adaptation_labels, 0, 1))
             if model_type == 'Resnet':
-                learner.adapt(train_error, allow_nograd=True)
+                learner.adapt(train_error, allow_nograd=True, allow_unused=True)
             else:
                 learner.adapt(train_error)
 
@@ -113,10 +113,6 @@ def validate_maml(learner, loss_func, train, test, batch_size, num_inner_updates
     for batch_idx in range(batch_size):
         adaptation_data, adaptation_labels = train[0, batch_idx, ...], train[1, batch_idx, ...]
         evaluation_data, evaluation_labels = test[0, batch_idx, ...].permute(0, 3, 1, 2), test[1, batch_idx, ...].permute(0, 3, 1, 2)
-
-        # for _ in range(num_inner_updates):
-        #     train_error = loss_func(model(adaptation_data), torch.clip(adaptation_labels, 0, 1))
-        #     model.adapt(train_error)
 
         test_predictions = model(evaluation_data)
         test_error += loss_func(test_predictions, torch.clip(evaluation_labels, 0, 1))/len(test_predictions)
@@ -197,7 +193,7 @@ def train_maml(cfg, log_dir):
                 first_train_pred = learner(adaptation_data)
                 train_error = loss_func(first_train_pred, torch.clip(adaptation_labels, 0, 1))
                 if cfg.TRAIN.MODEL == 'Resnet':
-                    learner.adapt(train_error, allow_nograd=True)
+                    learner.adapt(train_error, allow_nograd=True, allow_unused=True)
                 else:
                     learner.adapt(train_error)
                 pre_train_ssim = ssim(first_train_pred, torch.clip(adaptation_labels, 0, 1)).item()
@@ -209,7 +205,7 @@ def train_maml(cfg, log_dir):
                 for step in range(cfg.TRAIN.NUM_TASK_TR_ITER-1):
                     train_error = loss_func(learner(adaptation_data), torch.clip(adaptation_labels, 0, 1))
                     if cfg.TRAIN.MODEL == 'Resnet':
-                        learner.adapt(train_error, allow_nograd=True)
+                        learner.adapt(train_error, allow_nograd=True, allow_unused=True)
                     else:
                         learner.adapt(train_error)
             else:
@@ -217,7 +213,7 @@ def train_maml(cfg, log_dir):
                 for step in range(cfg.TRAIN.NUM_TASK_TR_ITER):
                     train_error = loss_func(learner(adaptation_data), torch.clip(adaptation_labels, 0, 1))
                     if cfg.TRAIN.MODEL == 'Resnet':
-                        learner.adapt(train_error, allow_nograd=True)
+                        learner.adapt(train_error, allow_nograd=True, allow_unused=True)
                     else:
                         learner.adapt(train_error)
             # get_GPU_usage(f'post fast adapt {batch_index}')

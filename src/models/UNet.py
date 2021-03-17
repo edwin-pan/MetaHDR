@@ -83,53 +83,51 @@ class Resnet(nn.Module):
         self.pool = torch.nn.MaxPool2d((2,2), stride=2)
 
     def forward(self, x):
-        print("[Debug] x.shape: ", x.shape) # [Debug] x.shape:  torch.Size([32, 3, 224, 288])
+        # print("[Debug] x.shape: ", x.shape) # [Debug] x.shape:  torch.Size([32, 3, 224, 288])
         # Contract
         c0 = self.resnet18.relu(self.resnet18.bn1(self.resnet18.conv1(x)))
-        print("[Debug] c0.shape: ", c0.shape) # [Debug] c0.shape:  torch.Size([32, 64, 112, 144])
+        # print("[Debug] c0.shape: ", c0.shape) # [Debug] c0.shape:  torch.Size([32, 64, 112, 144])
         p0 = self.resnet18.maxpool(c0)
 
         c1 = self.resnet18.layer1(p0)
-        print("[Debug] c1.shape: ", c1.shape) # [Debug] c1.shape:  torch.Size([32, 64, 56, 72])
+        # print("[Debug] c1.shape: ", c1.shape) # [Debug] c1.shape:  torch.Size([32, 64, 56, 72])
 
         c2 = self.resnet18.layer2(c1)
-        print("[Debug] c2.shape: ", c2.shape) # [Debug] c2.shape:  torch.Size([32, 128, 28, 36])
+        # print("[Debug] c2.shape: ", c2.shape) # [Debug] c2.shape:  torch.Size([32, 128, 28, 36])
 
         c3 = self.resnet18.layer3(c2)
-        print("[Debug] c3.shape: ", c3.shape) # [Debug] c3.shape:  torch.Size([32, 256, 14, 18])
+        # print("[Debug] c3.shape: ", c3.shape) # [Debug] c3.shape:  torch.Size([32, 256, 14, 18])
 
         c4 = self.resnet18.layer4(c3)
-        print("[Debug] c4.shape: ", c4.shape) # [Debug] c4.shape:  torch.Size([32, 512, 7, 9])
+        # print("[Debug] c4.shape: ", c4.shape) # [Debug] c4.shape:  torch.Size([32, 512, 7, 9])
 
         bb = self.bottom(c4)
-        print("[Debug] bb.shape: ", bb.shape) # [Debug] bb.shape:  torch.Size([32, 512, 14, 18]
+        # print("[Debug] bb.shape: ", bb.shape) # [Debug] bb.shape:  torch.Size([32, 512, 14, 18]
 
 
         # Expand
         f4 = torch.cat([bb,c3],1)
-        print("[Debug] f4.shape: ", f4.shape) # [Debug] f4.shape:  torch.Size([32, 512, 14, 18])
+        # print("[Debug] f4.shape: ", f4.shape) # [Debug] f4.shape:  torch.Size([32, 512, 14, 18])
 
         e4 = self.expand4(f4)
-        print("[Debug] e4.shape: ", e4.shape) # [Debug] e4.shape:  torch.Size([32, 256, 28, 36])
+        # print("[Debug] e4.shape: ", e4.shape) # [Debug] e4.shape:  torch.Size([32, 256, 28, 36])
 
         f3 = torch.cat([e4,c2],1)
-        print("[Debug] f3.shape: ", f3.shape) # [Debug] f3.shape:  torch.Size([32, 384, 28, 36])
+        # print("[Debug] f3.shape: ", f3.shape) # [Debug] f3.shape:  torch.Size([32, 384, 28, 36])
 
         e3 = self.expand3(f3)
-        print("[Debug] e3.shape: ", e3.shape) # [Debug] e3.shape:  torch.Size([32, 64, 56, 72])
+        # print("[Debug] e3.shape: ", e3.shape) # [Debug] e3.shape:  torch.Size([32, 64, 56, 72])
 
         f2 = torch.cat([e3,c1],1)
-        print("[Debug] f2.shape: ", f2.shape) # [Debug] f2.shape:  torch.Size([32, 128, 56, 72])
+        # print("[Debug] f2.shape: ", f2.shape) # [Debug] f2.shape:  torch.Size([32, 128, 56, 72])
 
         e2 = self.expand2(f2)
-        print("[Debug] e2.shape: ", e2.shape) # [Debug] e2.shape:  torch.Size([32, 32, 112, 144])
+        # print("[Debug] e2.shape: ", e2.shape) # [Debug] e2.shape:  torch.Size([32, 32, 112, 144])
 
         f1 = torch.cat([e2,c0],1)
-        print("[Debug] f1.shape: ", f1.shape) # [Debug] f1.shape:  torch.Size([32, 96, 112, 144])
+        # print("[Debug] f1.shape: ", f1.shape) # [Debug] f1.shape:  torch.Size([32, 96, 112, 144])
 
         out = self.top(f1)
-        print("[Debug] out.shape: ", out.shape) #
-
-        import pdb; pdb.set_trace()
+        # print("[Debug] out.shape: ", out.shape) #
 
         return out
