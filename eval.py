@@ -20,7 +20,7 @@ def main(args):
     print("--- Evaluating on meta-test set ---")
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     source_directory = args.model_dir
-    use_best_flag = args.use_best
+    use_best_flag = False # args.use_best
 
     # Make evaluation folder for test images
     evaluation_figure_output_dir = osp.join(source_directory, 'evaluation_output')
