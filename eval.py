@@ -36,7 +36,7 @@ def main(args):
     os.makedirs(adapt_hdrcnn_dir, exist_ok=True)
     os.makedirs(evaluation_figure_output_dir, exist_ok=True)
 
-    logger = create_logger(evaluation_figure_output_dir, phase='eval', level=logging.WARNING)
+    logger = create_logger(evaluation_figure_output_dir, phase='eval', level=logging.INFO)
 
     logger.info(f'GPU name -> {torch.cuda.get_device_name()}')
     logger.info(f'GPU feat -> {torch.cuda.get_device_properties("cuda")}')
@@ -90,8 +90,6 @@ def main(args):
             idx += 1
     eval_single_ssim /= (all_test_data.shape[0]*(all_test_data.shape[1]-1))
     eval_single_psnr /= (all_test_data.shape[0]*(all_test_data.shape[1]-1))
-    print("[Evaluation Results] Average Single-Shot Evaluation SSIM : {:.3f}".format(eval_single_ssim))
-    print("[Evaluation Results] Average Single-Shot Evaluation PSNR : {:.3f}".format(eval_single_psnr))
 
     # Perform adaptive evaluation
     print("Performing Adaptive Evaluation using Debevec labels")
@@ -138,13 +136,10 @@ def main(args):
     eval_adaptive_ssim /= all_test_data.shape[0]
     eval_adaptive_psnr /= all_test_data.shape[0]
 
-    print("[Evaluation Results] Average Debevec Adapted Evaluation SSIM : {:.3f}".format(eval_adaptive_ssim))
-    print("[Evaluation Results] Average Debevec Adapted Evaluation PSNR : {:.3f}".format(eval_adaptive_psnr))
-
     # Perform adaptive evaluation
     print("Performing Adaptive Evaluation using HDRCNN labels")
-    eval_adaptive_ssim = 0.0
-    eval_adaptive_psnr = 0.0
+    eval_adaptive_hdrcnn_ssim = 0.0
+    eval_adaptive_hdrcnn_psnr = 0.0
     # cur_indices = [1,   4,  11,  20,  23,  27,  36,  45,  48,  \
     #                 53,  56,  65,  70, 73,  82,  84, 126, 137, \
     #                 138, 150, 162, 171, 173, 175, 194, 195, 209, \
@@ -193,14 +188,18 @@ def main(args):
         _, test_ssim, test_psnr = evaluate_maml(meta_model, loss_func, eval_train, eval_test, idx, cfg.EVAL.NUM_TASK_TR_ITER, device=device, model_type=cfg.TRAIN.MODEL, visualize_flag=True, visualize_dir=adapt_hdrcnn_dir)
         idx += 1
         
-        eval_adaptive_ssim += test_ssim
-        eval_adaptive_psnr += test_psnr
+        eval_adaptive_hdrcnn_ssim += test_ssim
+        eval_adaptive_hdrcnn_psnr += test_psnr
 
-    eval_adaptive_ssim /= all_test_data.shape[0]
-    eval_adaptive_psnr /= all_test_data.shape[0]
+    eval_adaptive_hdrcnn_ssim /= all_test_data.shape[0]
+    eval_adaptive_hdrcnn_psnr /= all_test_data.shape[0]
 
-    print("[Evaluation Results] Average HDRCNN Adapted Evaluation SSIM : {:.3f}".format(eval_adaptive_ssim))
-    print("[Evaluation Results] Average HDRCNN Adapted Evaluation PSNR : {:.3f}".format(eval_adaptive_psnr))
+    print("[Evaluation Results] Average Single-Shot Evaluation SSIM : {:.3f}".format(eval_single_ssim))
+    print("[Evaluation Results] Average Single-Shot Evaluation PSNR : {:.3f}".format(eval_single_psnr))
+    print("[Evaluation Results] Average Debevec Adapted Evaluation SSIM : {:.3f}".format(eval_adaptive_ssim))
+    print("[Evaluation Results] Average Debevec Adapted Evaluation PSNR : {:.3f}".format(eval_adaptive_psnr))
+    print("[Evaluation Results] Average HDRCNN Adapted Evaluation SSIM : {:.3f}".format(eval_adaptive_hdrcnn_ssim))
+    print("[Evaluation Results] Average HDRCNN Adapted Evaluation PSNR : {:.3f}".format(eval_adaptive_hdrcnn_psnr))
 
     return
 
