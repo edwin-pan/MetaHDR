@@ -16,20 +16,39 @@ from src.models.utils import save_best_model, save_last_model
 
 logger = logging.getLogger(__name__)
 
-def evaluate_single_maml(model, loss_func, image, device=None, visualize_flag=False, visualize_dir=None):
+def evaluate_single_maml(model, loss_func, image, label, idx, device=None, visualize_flag=False, visualize_dir=None):
     """
     Evaluate 1 test image using meta-params as input
     """
-    # # Cast as torch tensor & send data to device
-    # test_image = torch.from_numpy(image).to(device)
+    # Cast as torch tensor & send data to device
+    input_image = torch.from_numpy(image).to(device).permute(0, 3, 1, 2)
+    input_label = torch.from_numpy(label).to(device).permute(0, 3, 1, 2)
 
-    # # Instantiate evaluation metric (ssim)
-    # ssim = SSIM().double().cuda() if device == 'cuda' else SSIM().double()
+    # Instantiate evaluation metric (ssim)
+    ssim = SSIM().double().cuda() if device == 'cuda' else SSIM().double()
 
-    # # Pass through model
-    # input_image = torch.from_numpy(image).to(device)
-    # test_prediction = model(test_prediction)
-    pass
+    # Pass through model
+    test_prediction = model(input_image)
+
+    test_error = loss_func(test_prediction, torch.clip(input_label, 0, 1))
+    test_ssim = ssim(test_prediction, torch.clip(input_label, 0, 1)).item()
+
+    if visualize_flag:
+        fig, ax = plt.subplots(nrows=1,ncols=3)
+        ax[0].imshow(visualize_hdr_image(test_prediction[0].detach().cpu().permute(1, 2, 0).numpy()))
+        ax[0].axis('off')
+        ax[0].set_title('Predicted')
+        ax[1].imshow(input_image[0].detach().cpu().permute(1, 2, 0).numpy())
+        ax[1].axis('off')
+        ax[1].set_title('Original Exposure Shot')
+        ax[2].imshow(visualize_hdr_image(torch.clip(input_label[0], 0, 1).detach().cpu().permute(1, 2, 0).numpy()))
+        ax[2].axis('off')
+        ax[2].set_title('HDR')
+        fig.savefig(f'{visualize_dir}/evaluation_adapt{batch_index:03d}.png', bbox_inches='tight')
+        plt.close()
+
+    return test_error, test_ssim
+
 
 def evaluate_maml(model, loss_func, train, test, batch_size, num_inner_updates, device=None, visualize_flag=False, visualize_dir=None):
     """
@@ -67,7 +86,7 @@ def evaluate_maml(model, loss_func, train, test, batch_size, num_inner_updates, 
             ax[2].imshow(visualize_hdr_image(torch.clip(adaptation_labels[0], 0, 1).detach().cpu().permute(1, 2, 0).numpy()))
             ax[2].axis('off')
             ax[2].set_title('HDR')
-            fig.savefig(f'{visualize_dir}/evaluation{batch_index:03d}.png', bbox_inches='tight')
+            fig.savefig(f'{visualize_dir}/evaluation_adapt{batch_index:03d}.png', bbox_inches='tight')
             plt.close()
     test_error /= batch_size
     test_ssim /= batch_size
