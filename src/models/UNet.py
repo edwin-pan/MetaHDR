@@ -3,7 +3,7 @@ from torch import nn
 import torchvision.models as models
 
 from src.models.utils import convolution_block, transpose_convolution_block, \
-    contract_block, bottom_block, expand_block, top_block
+    contract_block, bottom_block, expand_block, top_block, bottom_block_resnet
     
 class UNet(nn.Module):
     def __init__(self, in_size, out_size, num_filters):
@@ -69,7 +69,7 @@ class Resnet(nn.Module):
         num_feats = self.resnet18.fc.in_features
 
         # Define Contraction layers
-        self.bottom = bottom_block(512, 1024, activation_function)
+        self.bottom = bottom_block_resnet(512, 1024, activation_function)
 
         # Define Expansion layers
         self.expand4 = expand_block(512, 256, activation_function)

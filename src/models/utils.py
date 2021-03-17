@@ -34,6 +34,19 @@ def bottom_block(in_dim, out_dim, activation):
                                  activation)
     return bottom
 
+def bottom_block_resnet(in_dim, out_dim, activation):
+    bottom = torch.nn.Sequential(convolution_block(in_dim, out_dim),
+                                 nn.BatchNorm2d(out_dim),
+                                 activation,
+                                 convolution_block(out_dim, out_dim),
+                                 nn.BatchNorm2d(out_dim),
+                                 activation,
+                                 transpose_convolution_block(out_dim, in_dim//2),
+                                 nn.BatchNorm2d(in_dim//2),
+                                 activation)
+    return bottom
+
+
 def expand_block(in_dim, out_dim, activation):
     expand = torch.nn.Sequential(convolution_block(in_dim, out_dim),
                                  nn.BatchNorm2d(out_dim),
