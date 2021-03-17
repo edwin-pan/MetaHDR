@@ -9,7 +9,7 @@ class DataGenerator(object):
     Data Generator capable of generating batches of data.
     """
 
-    def __init__(self, crop_factor=0.5, num_exposures=3, split=[0.7, 0.2, 0.1], shuffle=True):
+    def __init__(self, crop_factor=0.5, num_exposures=3, split=[0.7, 0.2, 0.1], shuffle=True, include_unet_outputs=False):
         """
         Fetches the data and splits into meta train, test and val
         Args:
@@ -17,12 +17,14 @@ class DataGenerator(object):
           num_exposures: the number of exposures to generate when reading in images
           split: a 3 element array which says the train, val, test split -- elements must add to 1
           shuffle: a boolean variable which tells whether we should shuffle the data
+          include_unet_outputs: whether to use UNET outputs as tr labels
         """
-        # Number of exposures
+        # Number of exposures and bool flag
         self.num_exposures = num_exposures
+        self.include_unet_outputs = include_unet_outputs
         
         # Fetch the data
-        data = get_data(crop_factor=crop_factor, num_exposures=num_exposures)
+        data = get_data(crop_factor=crop_factor, num_exposures=num_exposures, include_unet_outputs=include_unet_outputs)
 
         num_datapoints = data.shape[0]
         num_train = int(split[0] * num_datapoints)
@@ -72,7 +74,8 @@ class DataGenerator(object):
             cur_tr_images, cur_tr_labels = [], []
             for i in tr:
                 cur_tr_images.append(image_set[i, ...])
-                cur_tr_labels.append(image_set[0, ...])
+                cur_index = i + 3 if self.include_unet_outputs else 0
+                cur_tr_labels.append(image_set[cur_index, ...])
             tr_images.append(np.stack(cur_tr_images))
             tr_labels.append(np.stack(cur_tr_labels))
             

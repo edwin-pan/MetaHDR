@@ -17,6 +17,7 @@ cfg.LOSS.LAMBDA = 0.5
 
 # Training parameters
 cfg.TRAIN = CN()
+cfg.TRAIN.INCLUDE_UNET_OUTPUTS = False
 cfg.TRAIN.LOSS_FUNC = 'ExpandNetLoss'
 cfg.TRAIN.NUM_EXPOSURES = 3
 cfg.TRAIN.BATCH_SIZE = 8

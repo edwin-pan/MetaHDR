@@ -97,10 +97,6 @@ def evaluate_maml(model, loss_func, train, test, idx, num_inner_updates, device=
 
     return test_error, test_ssim, test_psnr
 
-
-
-    return
-
 @torch.no_grad()
 def validate_maml(learner, loss_func, train, test, batch_size, num_inner_updates, curr_meta_iter, ssim=None, device=None, log_dir=None):
     model = learner.clone()
@@ -139,7 +135,7 @@ def validate_maml(learner, loss_func, train, test, batch_size, num_inner_updates
 
 
 def train_maml(cfg, log_dir):    
-    dg = DataGenerator(num_exposures=cfg.TRAIN.NUM_EXPOSURES)
+    dg = DataGenerator(num_exposures=cfg.TRAIN.NUM_EXPOSURES, include_unet_outputs=cfg.TRAIN.INCLUDE_UNET_OUTPUTS)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     lr=cfg.TRAIN.META_LR
     maml_lr=cfg.TRAIN.TASK_LR
