@@ -72,6 +72,21 @@ def top_block(in_dim, out_dim, activation):
                               )
     return top
 
+def top_block_resnet(in_dim, out_dim, resnet_out_dim, activation):
+    top = torch.nn.Sequential(convolution_block(in_dim, out_dim),
+                              nn.BatchNorm2d(out_dim),
+                              activation,
+                              transpose_convolution_block(out_dim, out_dim),
+                              nn.BatchNorm2d(out_dim),
+                              activation,
+                              convolution_block(out_dim, out_dim),
+                              nn.BatchNorm2d(out_dim),
+                              activation,
+                              convolution_block(out_dim,resnet_out_dim),
+                              nn.BatchNorm2d(resnet_out_dim),
+                              activation)
+    return top
+
 
 def save_best_model(model, epoch, performance, logdir):
     """

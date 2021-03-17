@@ -3,7 +3,7 @@ from torch import nn
 import torchvision.models as models
 
 from src.models.utils import convolution_block, transpose_convolution_block, \
-    contract_block, bottom_block, expand_block, top_block, bottom_block_resnet
+    contract_block, bottom_block, expand_block, top_block, bottom_block_resnet, top_block_resnet
     
 class UNet(nn.Module):
     def __init__(self, in_size, out_size, num_filters):
@@ -77,7 +77,7 @@ class Resnet(nn.Module):
         self.expand2 = expand_block(128, 64, activation_function)
         self.expand1 = expand_block(64, 32, activation_function)
         self.expand0 = expand_block(32, 16, activation_function)
-        self.top = top_block(96, 64, activation_function)
+        self.top = top_block_resnet(96, 64, out_size, activation_function)
 
         # Define Pooling Operator
         self.pool = torch.nn.MaxPool2d((2,2), stride=2)
