@@ -1,5 +1,5 @@
 OUTPUT_DIR: '/scratch/users/edwinpan/results'
-EXP_NAME: 'b2_ne3_LPIPSLoss_L2'
+EXP_NAME: 'b2_ne3__lr0p01_LPIPSLoss_L2'
 CHECKPOINT_SAVE_PATH: 'checkpoints'
 SUMMARY_INTERVAL: 1
 PRINT_INTERVAL: 2
@@ -19,7 +19,7 @@ TRAIN:
   NUM_META_TR_ITER: 200 # 
   NUM_TASK_TR_ITER: 3 # Number of task-specific inner loops
   META_LR: 0.005
-  TASK_LR: 0.1
+  TASK_LR: 0.01
   
 # Evaluation parameters
 EVAL:
