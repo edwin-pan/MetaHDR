@@ -36,7 +36,7 @@ def main(args):
     os.makedirs(adapt_hdrcnn_dir, exist_ok=True)
     os.makedirs(evaluation_figure_output_dir, exist_ok=True)
 
-    logger = create_logger(evaluation_figure_output_dir, phase='eval', level=logging.DEBUG)
+    logger = create_logger(evaluation_figure_output_dir, phase='eval', level=logging.WARNING)
 
     logger.info(f'GPU name -> {torch.cuda.get_device_name()}')
     logger.info(f'GPU feat -> {torch.cuda.get_device_properties("cuda")}')
