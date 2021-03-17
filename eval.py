@@ -2,13 +2,14 @@ import torch
 import argparse
 from os import path as osp
 import os
+import tqdm
 import numpy as np
 import learn2learn as l2l
 from sklearn.model_selection import train_test_split
 
 from src.core.config import update_cfg, get_cfg_defaults
 from src.models.UNet import UNet
-from src.models.metaHDR import evaluate_maml
+from src.models.metaHDR import evaluate_maml, evaluate_single_maml
 from src.dataset.dataloader import DataGenerator
 from src.core.loss import get_loss_func
 
@@ -56,9 +57,25 @@ def main(args):
 
     all_test_data = dg.meta_test_data
 
-    eval_ssim = 0.0
+    # Perform single-shot evaluation
+    print("Performing Single-Shot Evaluation")
+    eval_single_ssim = 0.0
+
+    import pdb; pdb.set_trace()
+    for i in tqdm(range(all_test_data.shape[0])):
+        for j in range(all_test_data.shape[1]):
+            input_test_image = all_test_data[np.newaxis, i,j]
+            _, test_ssim = evaluate_single_maml(meta_model, loss_func, input_test_image, device=device, visualize_flag=True, visualize_dir=evaluation_figure_output_dir)
+
+
+
+    return
+
+    # Perform adaptive evaluation
+    print("Performing Adaptive Evaluation")
+    eval_adaptive_ssim = 0.0
     for i in range(all_test_data.shape[0]):
-        cur_batch = all_test_data[i]
+        cur_batch = all_test_data[np.newaxis, i]
         tr_images, ts_images = [], []
         tr_labels, ts_labels = [], []
         for image_set in cur_batch:
@@ -90,9 +107,9 @@ def main(args):
         import pdb; pdb.set_trace()
         _, test_ssim = evaluate_maml(meta_model, loss_func, eval_train, eval_test, cfg.EVAL.BATCH_SIZE, cfg.EVAL.NUM_TASK_TR_ITER, device=device, visualize_flag=True, visualize_dir=evaluation_figure_output_dir)
 
-        eval_ssim += test_ssim
+        eval_adaptive_ssim += test_ssim
     
-    eval_ssim /= all_test_data.shape[0]
+    eval_adaptive_ssim /= all_test_data.shape[0]
 
     print("[Evaluation Results] Average Evaluation SSIM : {:.3f}".format(eval_ssim))
 

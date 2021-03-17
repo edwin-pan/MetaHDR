@@ -16,6 +16,21 @@ from src.models.utils import save_best_model, save_last_model
 
 logger = logging.getLogger(__name__)
 
+def evaluate_single_maml(model, loss_func, image, device=None, visualize_flag=False, visualize_dir=None):
+    """
+    Evaluate 1 test image using meta-params as input
+    """
+    # # Cast as torch tensor & send data to device
+    # test_image = torch.from_numpy(image).to(device)
+
+    # # Instantiate evaluation metric (ssim)
+    # ssim = SSIM().double().cuda() if device == 'cuda' else SSIM().double()
+
+    # # Pass through model
+    # input_image = torch.from_numpy(image).to(device)
+    # test_prediction = model(test_prediction)
+    pass
+
 def evaluate_maml(model, loss_func, train, test, batch_size, num_inner_updates, device=None, visualize_flag=False, visualize_dir=None):
     """
     Evaluate 1 test task using task-specific adaptation.
