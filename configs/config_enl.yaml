@@ -24,7 +24,6 @@ TRAIN:
 # Evaluation parameters
 EVAL:
   LOSS_FUNC: 'ExpandNetLoss' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
-  BATCH_SIZE: 3
   NUM_EXPOSURES: 5
   NUM_TASK_TR_ITER: 3
   TASK_LR: 0.1
