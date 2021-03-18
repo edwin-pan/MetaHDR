@@ -3,15 +3,10 @@ from torch import nn
 from os import path as osp
 import shutil
 import logging
-# from src.models.UNet import get_unet
-
 
 # Define Network Blocks
 def convolution_block(in_dim, out_dim):
     return nn.Conv2d(in_dim,out_dim, kernel_size=3, stride=1, padding=1)
-
-# def convolution_block_resnet(in_dim, out_dim):
-#     return nn.Conv2d(in_dim,out_dim, kernel_size=3, stride=2, padding=1)
 
 def transpose_convolution_block(in_dim, out_dim):
     return torch.nn.ConvTranspose2d(in_dim,out_dim,kernel_size=3, stride=2, padding=1,output_padding=1)

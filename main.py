@@ -79,4 +79,4 @@ for i in range(data.shape[0]):
 total_ssim /= (3 * data.shape[0])
 print("SSIM", total_ssim)
 total_psnr /= (3 * data.shape[0])
-print("PSNR", total_ssim)
+print("PSNR", total_psnr)

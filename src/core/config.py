@@ -10,11 +10,6 @@ cfg.PRINT_INTERVAL = 10
 cfg.TEST_PRINT_INTERVAL = 50
 cfg.CHECKPOINT_SAVE_PATH = 'checkpoints'
 
-# Loss parameters
-cfg.LOSS = CN()
-cfg.LOSS.SEP_LOSS = True
-cfg.LOSS.LAMBDA = 0.5
-
 # Training parameters
 cfg.TRAIN = CN()
 cfg.TRAIN.INCLUDE_UNET_OUTPUTS = False

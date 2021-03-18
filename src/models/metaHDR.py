@@ -178,15 +178,11 @@ def train_maml(cfg, log_dir):
         test = torch.from_numpy(test).to(device)
 
         for batch_index in range(cfg.TRAIN.BATCH_SIZE):
-            # get_GPU_usage(f'Index {batch_index}')
             learner = meta_model.clone()
-            # get_GPU_usage(f'post clone {batch_index}')
-            # print("Num trainable parameters: ", count_parameters(learner))
 
             # Separate data into adaptation/evalutation sets
             adaptation_data, adaptation_labels = train[0, batch_index, ...].permute(0, 3, 1, 2), train[1, batch_index, ...].permute(0, 3, 1, 2)
             evaluation_data, evaluation_labels = test[0, batch_index, ...].permute(0, 3, 1, 2), test[1, batch_index, ...].permute(0, 3, 1, 2)
-            # get_GPU_usage(f'post data split {batch_index}')
 
             # If just calling a forward (i.e on adaptation data and don't want gradients to save space
             #, create a new func w decortor @torch.no_grad)            
@@ -219,7 +215,6 @@ def train_maml(cfg, log_dir):
                         learner.adapt(train_error, allow_nograd=True, allow_unused=True)
                     else:
                         learner.adapt(train_error)
-            # get_GPU_usage(f'post fast adapt {batch_index}')
 
             # Compute validation loss
             predictions = learner(evaluation_data)
@@ -246,7 +241,6 @@ def train_maml(cfg, log_dir):
             
             iteration_error += valid_error
             iteration_ssim += valid_ssim
-
     
         iteration_error /= cfg.TRAIN.BATCH_SIZE
         iteration_ssim /= cfg.TRAIN.BATCH_SIZE
@@ -260,7 +254,6 @@ def train_maml(cfg, log_dir):
         if (iteration!=0) and iteration % cfg.TEST_PRINT_INTERVAL == 0:
         # if iteration==0:
             val_train, val_test = dg.sample_batch('meta_val', cfg.TRAIN.VAL_BATCH_SIZE)
-            # val_train = torch.from_numpy(val_train).to(device)
             val_test = torch.from_numpy(val_test).to(device)
 
             _, meta_val_ssim = validate_maml(learner, loss_func, val_train, val_test, cfg.TRAIN.VAL_BATCH_SIZE, cfg.TRAIN.NUM_TASK_TR_ITER, iteration, ssim=ssim, device=device, log_dir=log_dir)
