@@ -1,5 +1,5 @@
 OUTPUT_DIR: '/scratch/users/edwinpan/results'
-EXP_NAME: 'b5_ne3_lr0p01_HDRCNN_Resnet_ExpandNetLoss'
+EXP_NAME: 'b2_ne3_lr0p01_HDRCNN_LPIPS_L2'
 CHECKPOINT_SAVE_PATH: 'checkpoints'
 SUMMARY_INTERVAL: 1
 PRINT_INTERVAL: 2
@@ -7,10 +7,10 @@ TEST_PRINT_INTERVAL: 3
 
 # Training parameters
 TRAIN:
-  LOSS_FUNC: 'ExpandNetLoss' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
-  MODEL: 'Resnet' # [Unet, Resnet]
+  LOSS_FUNC: 'LPIPSLoss_L2' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
+  MODEL: 'Unet' # [Unet, Resnet]
   INCLUDE_UNET_OUTPUTS: True
-  BATCH_SIZE: 5
+  BATCH_SIZE: 2
   VAL_BATCH_SIZE: 3
   NUM_EXPOSURES: 3
   NUM_META_TR_ITER: 200 # 
@@ -20,7 +20,7 @@ TRAIN:
   
 # Evaluation parameters
 EVAL:
-  LOSS_FUNC: 'ExpandNetLoss' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
+  LOSS_FUNC: 'LPIPSLoss_L2' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
   NUM_TASK_TR_ITER: 3 # Always keep at 3 for evaluation (since we only want to evaluate on 'real' images)
   NUM_EXPOSURES: 3
   TASK_LR: 0.1
