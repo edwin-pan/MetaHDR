@@ -1,5 +1,5 @@
 OUTPUT_DIR: '/scratch/users/edwinpan/results'
-EXP_NAME: 'b2_ne3_lr0p01_Debevec_LPIPS'
+EXP_NAME: 'b2_ne3_lr0p01_Debevec_LPIPS_L1'
 CHECKPOINT_SAVE_PATH: 'checkpoints'
 SUMMARY_INTERVAL: 1
 PRINT_INTERVAL: 2
@@ -7,7 +7,7 @@ TEST_PRINT_INTERVAL: 3
 
 # Training parameters
 TRAIN:
-  LOSS_FUNC: 'LPIPSLoss' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L1', 'SSIMLoss']
+  LOSS_FUNC: 'LPIPSLoss_L1' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L1', 'SSIMLoss']
   MODEL: 'Unet' # [Unet, Resnet]
   INCLUDE_UNET_OUTPUTS: False
   BATCH_SIZE: 2
@@ -20,7 +20,7 @@ TRAIN:
   
 # Evaluation parameters
 EVAL:
-  LOSS_FUNC: 'LPIPSLoss_L2' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
+  LOSS_FUNC: 'LPIPSLoss_L1' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
   NUM_TASK_TR_ITER: 3 # Always keep at 3 for evaluation (since we only want to evaluate on 'real' images)
   NUM_EXPOSURES: 3
   TASK_LR: 0.1
