@@ -64,7 +64,7 @@ class LPIPSLoss(nn.Module):
 
     def forward(self, x, y):
         # norm to -1, 1
-        sim = self.similarity((x / 0.5 - 1).float(), (y / 0.5 - 1).float())
+        sim = self.similarity((x / 0.5 - 1).float(), (y / 0.5 - 1).float()).squeeze()
         return sim
 
 class LPIPSLoss_L2(nn.Module):
