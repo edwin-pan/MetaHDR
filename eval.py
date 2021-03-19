@@ -20,7 +20,7 @@ def main(args):
     print("--- Evaluating on meta-test set ---")
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     source_directory = args.model_dir
-    use_best_flag = args.use_best
+    use_last_flag = args.use_last
 
     # Make evaluation folder for test images
     evaluation_figure_output_dir = osp.join(source_directory, 'evaluation_output')
@@ -56,11 +56,11 @@ def main(args):
     logger.critical(f'GPU feat -> {torch.cuda.get_device_properties("cuda")}')
 
     # Grab model checkpoint
-    if use_best_flag:
-        model_path = osp.join(source_directory, 'model_best.pth.tar')
-    else:
+    if use_last_flag:
         model_path = osp.join(source_directory, 'model_last.pth.tar')
-    
+    else:
+        model_path = osp.join(source_directory, 'model_best.pth.tar')
+
     checkpoint = torch.load(model_path)
     best_performance = checkpoint['performance']
     best_epoch = checkpoint['epoch']
@@ -205,8 +205,8 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_dir', type=str, help='Path to directory with outputs from MetaHDR training cycle.')
-    parser.add_argument('--use_best', type=bool, default=True, help='Flag as True if evaluation should be done on the best model from training.')
     parser.add_argument('--cfg', type=str, help='cfg file path')
+    parser.add_argument('--use_last', dest='use_last', action='store_true', help='Use to evaluate the last model in training iters. Default is to evaluate the best model from training.')
 
     args = parser.parse_args()
 

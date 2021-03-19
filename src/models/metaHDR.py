@@ -167,7 +167,6 @@ def train_maml(cfg, log_dir):
     losses = []
     
     best_performance = 0.0 # for tracking model progress
-    # Reference https://github.com/learnables/learn2learn/blob/master/examples/vision/meta_mnist.py
     for iteration in range(cfg.TRAIN.NUM_META_TR_ITER):
         # print("ITERATION #", iteration)
         iteration_error = 0.0
@@ -182,10 +181,7 @@ def train_maml(cfg, log_dir):
 
             # Separate data into adaptation/evalutation sets
             adaptation_data, adaptation_labels = train[0, batch_index, ...].permute(0, 3, 1, 2), train[1, batch_index, ...].permute(0, 3, 1, 2)
-            evaluation_data, evaluation_labels = test[0, batch_index, ...].permute(0, 3, 1, 2), test[1, batch_index, ...].permute(0, 3, 1, 2)
-
-            # If just calling a forward (i.e on adaptation data and don't want gradients to save space
-            #, create a new func w decortor @torch.no_grad)            
+            evaluation_data, evaluation_labels = test[0, batch_index, ...].permute(0, 3, 1, 2), test[1, batch_index, ...].permute(0, 3, 1, 2)          
 
             # Fast Adaptation -- first iter
             if not batch_index:
