@@ -57,7 +57,7 @@ class HaarLoss(nn.Module):
 class LPIPSLoss(nn.Module):
     def __init__(self):
         super(LPIPSLoss, self).__init__()
-        self.similarity = lpips.LPIPS(net='vgg')
+        self.similarity = lpips.LPIPS(net='vgg').cuda()
         # self.similarity = LPIPS(network='vgg').cuda()
         # self.l2_loss = nn.MSELoss()
         # self.loss_lambda = loss_lambda
