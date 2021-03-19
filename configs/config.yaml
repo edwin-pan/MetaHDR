@@ -1,5 +1,5 @@
 OUTPUT_DIR: '/scratch/users/edwinpan/results'
-EXP_NAME: 'b2_ne3_lr0p01_Debevec_LPIPS_L1'
+EXP_NAME: 'b2_ne3_lr0p01_HDRCNN_LPIPS_L1'
 CHECKPOINT_SAVE_PATH: 'checkpoints'
 SUMMARY_INTERVAL: 1
 PRINT_INTERVAL: 2
@@ -9,7 +9,7 @@ TEST_PRINT_INTERVAL: 3
 TRAIN:
   LOSS_FUNC: 'LPIPSLoss_L1' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L1', 'SSIMLoss']
   MODEL: 'Unet' # [Unet, Resnet]
-  INCLUDE_UNET_OUTPUTS: False
+  INCLUDE_UNET_OUTPUTS: True
   BATCH_SIZE: 2
   VAL_BATCH_SIZE: 3
   NUM_EXPOSURES: 3
