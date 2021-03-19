@@ -3,10 +3,14 @@
 
 | Poster Video                                                                                                | Poster PDF                                                                                                |
 |------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|
-| [![PaperVideo](https://img.youtube.com/vi/RvQIZ7aNOc0/0.jpg)](https://www.youtube.com/watch?v=RvQIZ7aNOc0) | [![PosterPDF](Materials/)](https://drive.google.com/file/d/1g1XR3ZRRs6CCAxeiSVdE6fcffyXVxdOh/view?usp=sharing) |
+| [![PaperVideo](https://img.youtube.com/vi/RvQIZ7aNOc0/0.jpg)](https://www.youtube.com/watch?v=RvQIZ7aNOc0) | [![PosterPDF](./materials/MetaHDR_Poster.pdf)](https://drive.google.com/file/d/1g1XR3ZRRs6CCAxeiSVdE6fcffyXVxdOh/view?usp=sharing) |
 
 ## Getting Started
 MetaHDR was implemented and tested on CentOS 7 with python >=3.9.0, and supports GPU and CPU computation. We have also provided a Colab demo for convenience.
+
+First, clone the repository
+`git clone https://github.com/edwin-pan/MetaHDR.git`
+
 
 ## Running the Demo
 
