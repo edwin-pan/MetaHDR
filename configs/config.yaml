@@ -1,5 +1,5 @@
 OUTPUT_DIR: '/scratch/users/edwinpan/results'
-EXP_NAME: 'b2_ne3_lr0p01_HDRCNN_LPIPS'
+EXP_NAME: 'b2_ne3_lr0p01_Debevec_LPIPS'
 CHECKPOINT_SAVE_PATH: 'checkpoints'
 SUMMARY_INTERVAL: 1
 PRINT_INTERVAL: 2
