@@ -43,7 +43,7 @@ def main(args):
         cfg = get_cfg_defaults()
 
     # Make sure loss_func from config is valid, then get it
-    assert cfg.EVAL.LOSS_FUNC in ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss'], f"[CONFIG] evaluation loss function '{cfg.EVAL.LOSS_FUNC}' not valid"
+    assert cfg.EVAL.LOSS_FUNC in ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L1', 'SSIMLoss'], f"[CONFIG] evaluation loss function '{cfg.EVAL.LOSS_FUNC}' not valid"
     loss_func = get_loss_func(cfg.EVAL.LOSS_FUNC)
 
     # Grad test data -- all of it

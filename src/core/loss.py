@@ -9,7 +9,7 @@ import lpips
 def get_loss_func(chosen_loss_name):
     """
     Grab the corresponding loss from below. Valid options: 
-    ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
+    ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L1', 'SSIMLoss']
 
     """
     if chosen_loss_name == 'ExpandNetLoss':
@@ -21,9 +21,9 @@ def get_loss_func(chosen_loss_name):
     elif chosen_loss_name == 'LPIPSLoss':
         print("Using LPIPSLoss")
         return LPIPSLoss()
-    elif chosen_loss_name == 'LPIPSLoss_L2':
-        print("Using LPIPSLoss_L2")
-        return LPIPSLoss_L2()
+    elif chosen_loss_name == 'LPIPSLoss_L1':
+        print("Using LPIPSLoss_L1")
+        return LPIPSLoss_L1()
     elif chosen_loss_name == 'SSIMLoss':
         print("Using SSIMLoss")
         return SSIMLoss()
@@ -67,16 +67,19 @@ class LPIPSLoss(nn.Module):
         sim = self.similarity((x / 0.5 - 1).float(), (y / 0.5 - 1).float()).squeeze().mean()
         return sim
 
-class LPIPSLoss_L2(nn.Module):
+class LPIPSLoss_L1(nn.Module):
     def __init__(self, loss_lambda=0.5):
-        super(LPIPSLoss_L2, self).__init__()
-        self.similarity = LPIPS(network='vgg').cuda()
-        self.l2_loss = nn.MSELoss()
+        super(LPIPSLoss_L1, self).__init__()
+        self.similarity = lpips.LPIPS(net='vgg').cuda()
+        self.l1_loss = nn.L1Loss()
+        # self.similarity = LPIPS(network='vgg').cuda()
+        # self.l2_loss = nn.MSELoss()
         self.loss_lambda = loss_lambda
 
     def forward(self, x, y):
-        sim = self.similarity(x.float(), y.float())
-        return (1 - self.loss_lambda) * self.l2_loss(x, y) + self.loss_lambda * (sim)
+        # sim = self.similarity(x.float(), y.float())
+        sim = self.similarity((x / 0.5 - 1).float(), (y / 0.5 - 1).float()).squeeze().mean()
+        return (1 - self.loss_lambda) * self.l1_loss(x, y) + self.loss_lambda * (sim)
 
 class SSIMLoss(nn.Module):
     def __init__(self, loss_lambda=0.5):
