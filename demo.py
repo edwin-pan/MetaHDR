@@ -40,8 +40,8 @@ def main(args):
         input_HDR_fnames.extend(glob.glob(os.path.join(HDR_input_dir, '*'+ending)))
     
     # Enforce sorted order, so 0-stop exposure isn't used (assuming user orders indices in creasing f-stop)
-    input_LDR_fnames = sorted(input_LDR_fnames, key=lambda x:float(re.findall("(\d+)",x)[0]))
-    input_HDR_fnames = sorted(input_HDR_fnames, key=lambda x:float(re.findall("(\d+)",x)[0]))
+    input_LDR_fnames = sorted(input_LDR_fnames, key=os.path.basename)
+    input_HDR_fnames = sorted(input_HDR_fnames, key=os.path.basename)
 
     # Check that there are the same number of files in LDR and HDR
     assert len(input_HDR_fnames) == len(input_LDR_fnames), "There should be an HDR image for each provided LDR exposure"
