@@ -21,7 +21,8 @@ def main(args):
     # Parse args
     images_dir = args.input_folder
     output_dir = args.output_folder
-    
+    crop_flag = args.crop_flag
+
     # Create output folder if doesn't exist
     os.makedirs(output_dir, exist_ok=True)
     # Parse provided images
@@ -56,6 +57,23 @@ def main(args):
     LDR_inputs = np.array(LDR_inputs)
     HDR_inputs = np.array(HDR_inputs)
     
+    if crop_flag:
+        IMG_HEIGHT = LDR_inputs.shape[1]
+        IMG_WIDTH = LDR_inputs.shape[2]
+        crop_factor = 0.5
+
+        new_height = int(IMG_HEIGHT * crop_factor)
+        new_width = int(IMG_HEIGHT * crop_factor)
+        center_height = IMG_HEIGHT // 2
+        center_width = IMG_WIDTH // 2
+
+        h1, h2 = center_height-(new_height//2), center_height+(new_height//2)
+        w1, w2 = center_width-(new_width//2), center_width+(new_width//2)
+
+        LDR_inputs = LDR_inputs[:,h1:h2, w1:w2, :]
+        HDR_inputs = HDR_inputs[:,h1:h2, w1:w2, :]
+
+
     # Instantiate MetaHDR model
     if args.cfg is not None:
         cfg = update_cfg(args.cfg)
@@ -107,7 +125,7 @@ if __name__ == '__main__':
     parser.add_argument('--input_folder', type=str, help='Path to input images')
     parser.add_argument('--output_folder', type=str, help='Path to output images')
     parser.add_argument('--cfg', type=str, help='cfg file path')
-
+    parser.add_argument('--crop', dest='crop_flag', action='store_true', help='Will half the dimensions by performing centered cropping.')
     args = parser.parse_args()
 
     main(args)
