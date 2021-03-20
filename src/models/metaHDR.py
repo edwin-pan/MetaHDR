@@ -54,7 +54,7 @@ def evaluate_single_maml(model, loss_func, image, label, idx, device=None, visua
         fig.savefig(f'{visualize_dir}/evaluation_single{idx:03d}.png', bbox_inches='tight')
         plt.close()
 
-    return test_error, test_ssim, test_psnr
+    return test_prediction[0].detach().cpu().permute(1, 2, 0).numpy(), test_ssim, test_psnr
 
 
 def evaluate_maml(model, loss_func, train, test, idx, num_inner_updates, device=None, model_type=None, visualize_flag=False, visualize_dir=None):
@@ -104,7 +104,7 @@ def evaluate_maml(model, loss_func, train, test, idx, num_inner_updates, device=
             fig.savefig(f'{visualize_dir}/evaluation_adapt{idx:03d}.png', bbox_inches='tight')
             plt.close()
 
-    return test_error, test_ssim, test_psnr
+    return test_predictions[0].detach().cpu().permute(1, 2, 0).numpy(), test_ssim, test_psnr
 
 @torch.no_grad()
 def validate_maml(learner, loss_func, train, test, batch_size, num_inner_updates, curr_meta_iter, ssim=None, device=None, log_dir=None):

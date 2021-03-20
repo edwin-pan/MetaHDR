@@ -26,7 +26,7 @@ The demo code provided runs MetaHDR on any LDR image input. We have provided a s
 To run the demo,
 
 ```
-python3 demo.py --input_folder ./scene_demo --output_folder ./scene_demo/output
+python3 demo.py --input_folder ./scene_demo --output_folder ./scene_demo/output --cfg configs/config_demo.yaml
 ```
 
 A new directory at `./scene_demo/output/` will contain the output HDR image.
