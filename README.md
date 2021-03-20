@@ -15,7 +15,7 @@
     `── .
         ├── core                # Contains scripts used for configuration as well as the loss metrics used.
         ├── dataset             # Contains scripts used to read in the data, a data generator which will sample batches of data, as well as an hdr visualization script.
-        ├── model               # Contains scripts which define the UNet for the inner model, as well as functions for training, validating, and evaluating our model with MAML.
+        └── model               # Contains scripts which define the UNet for the inner model, as well as functions for training, validating, and evaluating our model with MAML.
     ├── scripts                 # Various setup scripts for mmwavestudio, etc
     ├── .gitignore
     ├── README.md
