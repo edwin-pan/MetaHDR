@@ -26,7 +26,7 @@ The demo code provided runs MetaHDR on any LDR image input.
 To run the demo,
 
 ```
-python3 demo.py
+python3 demo.py --input_folder ./scene_demo --output_folder ./scene_demo/output
 ```
 
 ## Running the Evaluation
