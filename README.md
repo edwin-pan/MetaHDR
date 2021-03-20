@@ -1,10 +1,6 @@
 # MetaHDR: Model-Agnostic Meta-Learning for HDR Image Reconstruction
 [![report](https://img.shields.io/badge/arxiv-report-red)](https://tenor.com/bkNeW.gif) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WeyrYHh2BvRraUz9Xorr99Iy8CGM6_aM?usp=sharing)
 
-### Author Contact:
-Edwin Pan <edwinpan@stanford.edu>
-Anthony Vento <avento@stanford.edu>
-
 | Poster Video                                                                                                | Poster PDF                                                                                                |
 |------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|
 | [![PaperVideo](https://img.youtube.com/vi/RvQIZ7aNOc0/0.jpg)](https://www.youtube.com/watch?v=RvQIZ7aNOc0) | [![PosterPDF](./materials/Mini-Meta-Figure.png)](https://drive.google.com/file/d/1g1XR3ZRRs6CCAxeiSVdE6fcffyXVxdOh/view?usp=sharing) |
@@ -26,6 +22,11 @@ Anthony Vento <avento@stanford.edu>
     ├── eval.py                 # Runs an evaluation of a trained model.
     ├── requirements.txt        # Required dependencies to run this model.
     └── train.py                # Runs training iterations.
+
+### Author Contact:
+Edwin Pan <edwinpan@stanford.edu>
+
+Anthony Vento <avento@stanford.edu>
 
 ## Getting Started
 MetaHDR was implemented and tested on CentOS 7 with python >=3.9.0, and supports GPU and CPU computation. We have also provided a Colab demo for convenience.
@@ -55,7 +56,7 @@ A new directory at `./scene_demo/output/` will contain the output HDR image.
 
 
 ## Running the Evaluation
-Make sure that data is downloaded and formatted correctly (see `data.md`). 
+Make sure that data is downloaded and formatted correctly (see [data.md](data.md)). 
 
 To run evaluation,
 
@@ -64,7 +65,7 @@ python3 eval.py --model_dir <PATH-TO-TRAINING-OUTPUTS> --cfg <PATH-TO-CONFIG>
 ```
 
 ## Running the Training
-Make sure that data is downloaded and formatted correctly (see `data.md`). Training scripts will log the 
+Make sure that data is downloaded and formatted correctly (see [data.md](data.md)). Training scripts will log the results in the output directory specified by the configuration file.
 
 To run training,
 
