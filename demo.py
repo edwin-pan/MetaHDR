@@ -88,10 +88,10 @@ def main(args):
     else:
         # If provided more than 1 LDR image, adapt
         print("[MetaHDR] Multiple exposures provided. Running with adaptation.")
-        train_inp = LDR_inputs[:2]
-        train_lab = HDR_inputs[:2]
-        test_inp = LDR_inputs[np.newaxis, -1]
-        test_lab = HDR_inputs[np.newaxis, -1]
+        train_inp = LDR_inputs[1:]
+        train_lab = HDR_inputs[1:]
+        test_inp = LDR_inputs[np.newaxis, 0]
+        test_lab = HDR_inputs[np.newaxis, 0]
         training = np.stack((train_inp[np.newaxis], train_lab[np.newaxis]))
         testing = np.stack((test_inp[np.newaxis], test_lab[np.newaxis]))
 
