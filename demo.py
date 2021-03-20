@@ -117,7 +117,7 @@ def main(args):
         HDR_reconst, test_ssim, test_psnr = evaluate_maml(meta_model, loss_func, training, testing, 0, cfg.EVAL.NUM_TASK_TR_ITER, device=device, model_type=cfg.TRAIN.MODEL, visualize_flag=True, visualize_dir=output_dir)
 
     # Save gamma corrected output image
-    io.imsave(f"{output_dir}/HDR{0:03d}.png", visualize_hdr_image(HDR_reconst).astype(np.uint8))
+    io.imsave(f"{output_dir}/HDR{0:03d}.png", (255*visualize_hdr_image(HDR_reconst)).astype(np.uint8))
 
     return
 

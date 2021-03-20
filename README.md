@@ -76,6 +76,7 @@ python3 train.py --cfg <PATH-TO-CONFIG>
 
 ## Google Colab
 To quickly get a sense of how MetaHDR performs, we have provided a Google Colab notebook version of the demo that runs out of the box. The demo runs on the cloud for free.
+
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WeyrYHh2BvRraUz9Xorr99Iy8CGM6_aM?usp=sharing)
 
 
