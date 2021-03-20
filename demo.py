@@ -78,10 +78,22 @@ def main(args):
     # ----- FORWARD-PASS -----
     if num_exposures == 1:
         # If only provided 1 LDR image, perform singe-shot
-        pass
+        print("[MetaHDR] Single exposure provided. Running without adaptation.")
+        _, test_ssim, test_psnr = evaluate_single_maml(meta_model, loss_func, LDR_inputs, HDR_inputs, 0, device=device, visualize_flag=True, visualize_dir=output_dir)
+        print(f"[Single-Shot {0:03d}] SSIM: {test_ssim}, PSNR: {test_psnr}")
     else:
         # If provided more than 1 LDR image, adapt
-        pass
+        print("[MetaHDR] Multiple exposures provided. Running with adaptation.")
+        train_inp = LDR_inputs[:2]
+        train_lab = HDR_inputs[:2]
+        test_inp = LDR_inputs[np.newaxis, -1]
+        test_lab = HDR_inputs[np.newaxis, -1]
+        training = np.stack((train_inp, train_lab))
+        testing = np.stack((test_inp, test_lab))
+
+        _, test_ssim, test_psnr = evaluate_maml(meta_model, loss_func, training, testing, 0, cfg.EVAL.NUM_TASK_TR_ITER, device=device, model_type=cfg.TRAIN.MODEL, visualize_flag=True, visualize_dir=output_dir)
+        print(f"[Single-Shot {0:03d}] SSIM: {test_ssim}, PSNR: {test_psnr}")
+        
     return
 
 if __name__ == '__main__':
