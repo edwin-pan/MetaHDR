@@ -85,7 +85,6 @@ def main(args):
         # If only provided 1 LDR image, perform singe-shot
         print("[MetaHDR] Single exposure provided. Running without adaptation.")
         HDR_reconst, test_ssim, test_psnr = evaluate_single_maml(meta_model, loss_func, LDR_inputs, HDR_inputs, 0, device=device, visualize_flag=True, visualize_dir=output_dir)
-        print(f"[Single-Shot {0:03d}] SSIM: {test_ssim}, PSNR: {test_psnr}")
     else:
         # If provided more than 1 LDR image, adapt
         print("[MetaHDR] Multiple exposures provided. Running with adaptation.")
@@ -97,7 +96,6 @@ def main(args):
         testing = np.stack((test_inp[np.newaxis], test_lab[np.newaxis]))
 
         HDR_reconst, test_ssim, test_psnr = evaluate_maml(meta_model, loss_func, training, testing, 0, cfg.EVAL.NUM_TASK_TR_ITER, device=device, model_type=cfg.TRAIN.MODEL, visualize_flag=True, visualize_dir=output_dir)
-        print(f"[Single-Shot {0:03d}] SSIM: {test_ssim}, PSNR: {test_psnr}")
 
     # Save gamma corrected output image
     io.imsave(f"{output_dir}/HDR{0:03d}.png", visualize_hdr_image(HDR_reconst))
