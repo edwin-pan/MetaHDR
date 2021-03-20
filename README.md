@@ -1,5 +1,9 @@
 # MetaHDR: Model-Agnostic Meta-Learning for HDR Image Reconstruction
-[![report](https://img.shields.io/badge/arxiv-report-red)](https://tenor.com/bkNeW.gif) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://tenor.com/bkNeW.gif)
+[![report](https://img.shields.io/badge/arxiv-report-red)](https://tenor.com/bkNeW.gif) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WeyrYHh2BvRraUz9Xorr99Iy8CGM6_aM?usp=sharing)
+
+### Author Contact:
+Edwin Pan <edwinpan@stanford.edu>
+Anthony Vento <avento@stanford.edu>
 
 | Poster Video                                                                                                | Poster PDF                                                                                                |
 |------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|
@@ -11,14 +15,13 @@
     ├── data                    # Directory for data. See data.md for details on getting data.
     ├── materials               # Miscellaneous assets for the report, poster, video, etc.
     ├── scene_demo              # Small sample of input data used to demo adaptive forward-pass.
-    ├── src                     # Jupyter notebook series explaining how apply radar concepts to real data.
-    `── .
+    ├── src                     
         ├── core                # Contains scripts used for configuration as well as the loss metrics used.
         ├── dataset             # Contains scripts used to read in the data, a data generator which will sample batches of data, as well as an hdr visualization script.
         └── model               # Contains scripts which define the UNet for the inner model, as well as functions for training, validating, and evaluating our model with MAML.
-    ├── scripts                 # Various setup scripts for mmwavestudio, etc
     ├── .gitignore
     ├── README.md
+    ├── data.md
     ├── demo.py                 # Runs an adaptive forward pass to demonstrate deployed usage.
     ├── eval.py                 # Runs an evaluation of a trained model.
     ├── requirements.txt        # Required dependencies to run this model.
@@ -36,7 +39,7 @@ git clone https://github.com/edwin-pan/MetaHDR.git
 Next, install the requirements
 
 ```
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
 ## Running the Demo
@@ -71,11 +74,13 @@ python3 train.py --cfg <PATH-TO-CONFIG>
 
 
 ## Google Colab
-
+To quickly get a sense of how MetaHDR performs, we have provided a Google Colab notebook version of the demo that runs out of the box. The demo runs on the cloud for free.
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WeyrYHh2BvRraUz9Xorr99Iy8CGM6_aM?usp=sharing)
 
 
 ## Acknowledgement
 This work was completed as a Final Project for EE 367 / CS 448I: Computational Imaging and Display at Stanford University. We would like to thank our professor, Dr. Gordon Wetzstein, for his valuable instruction throughout the quarter and our project mentor, Cindy Nguyen, for giving us insights into our project.
+
 
 ## Citation
 ```bibtex
