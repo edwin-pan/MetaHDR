@@ -21,13 +21,16 @@ pip install requirements.txt
 ```
 
 ## Running the Demo
-The demo code provided runs MetaHDR on any LDR image input. 
+The demo code provided runs MetaHDR on any LDR image input. We have provided a sample scene input directory at `./scene_demo`. LDR images need to be placed in `./scene_demo/LDR/` and the corresponding HDR labels should go to `./scene_demo/HDR/`. 
 
 To run the demo,
 
 ```
 python3 demo.py --input_folder ./scene_demo --output_folder ./scene_demo/output
 ```
+
+A new directory at `./scene_demo/output/` will contain the output HDR image.
+
 
 ## Running the Evaluation
 Make sure that data is downloaded and formatted correctly (see `data.md`). 

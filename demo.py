@@ -88,12 +88,12 @@ def main(args):
         train_lab = HDR_inputs[:2]
         test_inp = LDR_inputs[np.newaxis, -1]
         test_lab = HDR_inputs[np.newaxis, -1]
-        training = np.stack((train_inp, train_lab))
-        testing = np.stack((test_inp, test_lab))
+        training = np.stack((train_inp[np.newaxis], train_lab[np.newaxis]))
+        testing = np.stack((test_inp[np.newaxis], test_lab[np.newaxis]))
 
         _, test_ssim, test_psnr = evaluate_maml(meta_model, loss_func, training, testing, 0, cfg.EVAL.NUM_TASK_TR_ITER, device=device, model_type=cfg.TRAIN.MODEL, visualize_flag=True, visualize_dir=output_dir)
         print(f"[Single-Shot {0:03d}] SSIM: {test_ssim}, PSNR: {test_psnr}")
-        
+
     return
 
 if __name__ == '__main__':
