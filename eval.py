@@ -125,7 +125,6 @@ def main(args):
         eval_train = np.stack([tr_images, tr_labels])
         eval_test = np.stack([ts_images, ts_labels])
 
-        import pdb; pdb.set_trace()
         _, test_ssim, test_psnr = evaluate_maml(meta_model, loss_func, eval_train, eval_test, idx, cfg.EVAL.NUM_TASK_TR_ITER, device=device, model_type=cfg.TRAIN.MODEL, visualize_flag=True, visualize_dir=adapt_debevec_dir)
         idx += 1
         
@@ -183,7 +182,6 @@ def main(args):
         eval_train = np.stack([tr_images, tr_labels])
         eval_test = np.stack([ts_images, ts_labels])
 
-        # import pdb; pdb.set_trace()
         _, test_ssim, test_psnr = evaluate_maml(meta_model, loss_func, eval_train, eval_test, idx, cfg.EVAL.NUM_TASK_TR_ITER, device=device, model_type=cfg.TRAIN.MODEL, visualize_flag=True, visualize_dir=adapt_hdrcnn_dir)
         idx += 1
         
