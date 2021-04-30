@@ -178,7 +178,7 @@ def train_maml(cfg, log_dir):
         test = torch.from_numpy(test).to(device)
 
         summary_string = ''
-        bar = Bar(f'Epoch {iteration + 1}/{cfg.TRAIN.NUM_META_TR_ITER}', fill='#', max=cfg.TRAIN.NUM_META_TR_ITER)
+        bar = Bar(f'Train Epoch {iteration + 1}/{cfg.TRAIN.NUM_META_TR_ITER}', fill='#', max=cfg.TRAIN.NUM_META_TR_ITER)
 
         for batch_index in range(cfg.TRAIN.BATCH_SIZE):
             learner = meta_model.clone()
@@ -199,7 +199,7 @@ def train_maml(cfg, log_dir):
 
                 # logger.info('[Pre-Train  {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, train_error.item(), pre_train_ssim))
                 summary_string = f'({batch_index + 1}/{cfg.TRAIN.BATCH_SIZE}) | Total: {bar.elapsed_td} | ' \
-                             f'ETA: {bar.eta_td:} | [pre] Train Loss: {train_error.item():.4f} | [pre] Train SSIM: {pre_train_ssim:.4f}'
+                             f'ETA: {bar.eta_td:} | [pre] Loss: {train_error.item():.4f} | [pre] SSIM: {pre_train_ssim:.4f}'
                 pre_ssims.append(pre_train_ssim)
 
                 # Fast Adaptation -- rest of the iters
@@ -218,8 +218,6 @@ def train_maml(cfg, log_dir):
                     else:
                         learner.adapt(train_error)
 
-            bar.suffix = summary_string
-            bar.next()
             # Compute validation loss
             predictions = learner(evaluation_data)
             valid_error = loss_func(predictions, torch.clip(evaluation_labels, 0, 1))
@@ -246,7 +244,10 @@ def train_maml(cfg, log_dir):
             iteration_error += valid_error
             iteration_ssim += valid_ssim
 
-            summary_string += f' | [post] Train Loss: {iteration_error.item()/(batch_index+1):.4f} | [post] Train SSIM: {valid_ssim:.4f}'
+            if batch_index == cfg.TRAIN.NUM_META_TR_ITER-1:
+                summary_string += f' | [post] Loss: {iteration_error.item()/(batch_index+1):.4f} | [post] SSIM: {valid_ssim:.4f}'
+            bar.suffix = summary_string
+            bar.next()
 
         iteration_error /= cfg.TRAIN.BATCH_SIZE
         iteration_ssim /= cfg.TRAIN.BATCH_SIZE
