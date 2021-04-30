@@ -1,5 +1,5 @@
 # MetaHDR: Model-Agnostic Meta-Learning for HDR Image Reconstruction
-[![report](https://img.shields.io/badge/arxiv-report-red)](https://tenor.com/bkNeW.gif) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WeyrYHh2BvRraUz9Xorr99Iy8CGM6_aM?usp=sharing)
+[![report](https://img.shields.io/badge/arxiv-report-red)](https://arxiv.org/abs/2103.12545) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WeyrYHh2BvRraUz9Xorr99Iy8CGM6_aM?usp=sharing)
 
 | Poster Video                                                                                                | Poster PDF                                                                                                |
 |------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|
