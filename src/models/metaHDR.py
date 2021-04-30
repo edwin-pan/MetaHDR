@@ -176,6 +176,10 @@ def train_maml(cfg, log_dir):
         train = torch.from_numpy(train).to(device)
         test = torch.from_numpy(test).to(device)
 
+        start = time.time()
+        summary_string = ''
+        bar = Bar(f'Epoch {iteration + 1}/{cfg.TRAIN.NUM_META_TR_ITER}', fill='#', max=cfg.TRAIN.NUM_META_TR_ITER)
+
         for batch_index in range(cfg.TRAIN.BATCH_SIZE):
             learner = meta_model.clone()
 
@@ -193,7 +197,9 @@ def train_maml(cfg, log_dir):
                     learner.adapt(train_error)
                 pre_train_ssim = ssim(first_train_pred, torch.clip(adaptation_labels, 0, 1)).item()
 
-                logger.info('[Pre-Train  {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, train_error.item(), pre_train_ssim))
+                # logger.info('[Pre-Train  {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, train_error.item(), pre_train_ssim))
+                summary_string = f'({batch_idx + 1}/{cfg.TRAIN.BATCH_SIZE}) | Total: {bar.elapsed_td} | ' \
+                             f'ETA: {bar.eta_td:} | [pre] Train Loss: {train_error.item():.4f} | [pre] Train SSIM: {pre_train_ssim:.4f}'
                 pre_ssims.append(pre_train_ssim)
 
                 # Fast Adaptation -- rest of the iters
@@ -237,15 +243,18 @@ def train_maml(cfg, log_dir):
             
             iteration_error += valid_error
             iteration_ssim += valid_ssim
-    
+
         iteration_error /= cfg.TRAIN.BATCH_SIZE
         iteration_ssim /= cfg.TRAIN.BATCH_SIZE
 
-        logger.info('[Post-Train {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, iteration_error.item(), valid_ssim))
-
+        # logger.info('[Post-Train {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, iteration_error.item(), valid_ssim))
+        summary_string += f' | [post] Train Loss: {iteration_error.item():.4f} | [post] Train SSIM: {valid_ssim:.4f}'
         ssims.append(iteration_ssim)
         losses.append(iteration_error.item())
 
+        bar.suffix = summary_string
+        bar.next()
+        
         # Meta-validation
         if (iteration!=0) and iteration % cfg.TEST_PRINT_INTERVAL == 0:
         # if iteration==0:
@@ -265,6 +274,8 @@ def train_maml(cfg, log_dir):
         opt.step()
         plt.figure()
         
+    bar.finish()
+    
     # Plot losses and ssims
     plt.plot(np.arange(1, len(losses)+1), losses)
     plt.xlabel("Iteration")
