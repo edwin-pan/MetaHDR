@@ -198,7 +198,7 @@ def train_maml(cfg, log_dir):
                 pre_train_ssim = ssim(first_train_pred, torch.clip(adaptation_labels, 0, 1)).item()
 
                 # logger.info('[Pre-Train  {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, train_error.item(), pre_train_ssim))
-                summary_string = f'({batch_idx + 1}/{cfg.TRAIN.BATCH_SIZE}) | Total: {bar.elapsed_td} | ' \
+                summary_string = f'({batch_index + 1}/{cfg.TRAIN.BATCH_SIZE}) | Total: {bar.elapsed_td} | ' \
                              f'ETA: {bar.eta_td:} | [pre] Train Loss: {train_error.item():.4f} | [pre] Train SSIM: {pre_train_ssim:.4f}'
                 pre_ssims.append(pre_train_ssim)
 
