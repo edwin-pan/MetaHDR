@@ -5,11 +5,6 @@ SUMMARY_INTERVAL: 1
 PRINT_INTERVAL: 2
 TEST_PRINT_INTERVAL: 3
 
-# Loss parameters
-LOSS:
-  SEP_LOSS: True
-  LAMBDA: 0.5
-
 # Training parameters
 TRAIN:
   LOSS_FUNC: 'LPIPSLoss_L2' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss', 'VGGLoss']
