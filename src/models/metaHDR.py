@@ -8,6 +8,7 @@ import learn2learn as l2l
 import matplotlib.pyplot as plt
 from piqa import SSIM, PSNR
 from functools import partial
+from progress.bar import Bar
 
 from src.dataset.dataloader import DataGenerator
 from src.dataset.hdr_visualization import visualize_hdr_image
