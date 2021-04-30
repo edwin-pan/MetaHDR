@@ -179,7 +179,7 @@ def train_maml(cfg, log_dir):
         test = torch.from_numpy(test).to(device)
 
         summary_string = ''
-        bar = Bar(f'[Train] Epoch {iteration + 1}/{cfg.TRAIN.NUM_META_TR_ITER}', fill='#', max=cfg.TRAIN.NUM_META_TR_ITER)
+        bar = Bar(f'[Train] Epoch {iteration + 1}/{cfg.TRAIN.NUM_META_TR_ITER}', fill='#', max=cfg.TRAIN.BATCH_SIZE)
 
         for batch_index in range(cfg.TRAIN.BATCH_SIZE):
             learner = meta_model.clone()
