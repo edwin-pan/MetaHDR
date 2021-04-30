@@ -164,6 +164,7 @@ def train_maml(cfg, log_dir):
     ssim = SSIM().double().cuda() if device == 'cuda' else SSIM().double()
     
     pre_ssims = []
+    pre_loss = []
     ssims = []
     losses = []
     
@@ -195,12 +196,10 @@ def train_maml(cfg, log_dir):
                     learner.adapt(train_error, allow_nograd=True, allow_unused=True)
                 else:
                     learner.adapt(train_error)
-                pre_train_ssim = ssim(first_train_pred, torch.clip(adaptation_labels, 0, 1)).item()
 
-                # logger.info('[Pre-Train  {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, train_error.item(), pre_train_ssim))
-                summary_string += f'({batch_index + 1}/{cfg.TRAIN.BATCH_SIZE}) | Total: {bar.elapsed_td} | ' \
-                             f'ETA: {bar.eta_td:} | [pre] Loss: {train_error.item():.4f} | [pre] SSIM: {pre_train_ssim:.4f}'
+                pre_train_ssim = ssim(first_train_pred, torch.clip(adaptation_labels, 0, 1)).item()
                 pre_ssims.append(pre_train_ssim)
+                pre_loss.append(train_error.item())
 
                 # Fast Adaptation -- rest of the iters
                 for step in range(cfg.TRAIN.NUM_TASK_TR_ITER-1):
@@ -217,6 +216,9 @@ def train_maml(cfg, log_dir):
                         learner.adapt(train_error, allow_nograd=True, allow_unused=True)
                     else:
                         learner.adapt(train_error)
+
+            summary_string += f'({batch_index + 1}/{cfg.TRAIN.BATCH_SIZE}) | Total: {bar.elapsed_td} | ' \
+                             f'ETA: {bar.eta_td:} | [pre] Loss: {pre_loss[-1]:.4f} | [pre] SSIM: {pre_train_ssim[-1]:.4f}'
 
             # Compute validation loss
             predictions = learner(evaluation_data)
@@ -244,7 +246,7 @@ def train_maml(cfg, log_dir):
             iteration_error += valid_error
             iteration_ssim += valid_ssim
 
-            if batch_index == cfg.TRAIN.NUM_META_TR_ITER-1:
+            if batch_index == cfg.TRAIN.BATCH_SIZE-1:
                 summary_string += f' | [post] Loss: {iteration_error.item()/(batch_index+1):.4f} | [post] SSIM: {valid_ssim:.4f}'
             bar.suffix = summary_string
             bar.next()
