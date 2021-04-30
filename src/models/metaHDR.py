@@ -176,7 +176,6 @@ def train_maml(cfg, log_dir):
         train = torch.from_numpy(train).to(device)
         test = torch.from_numpy(test).to(device)
 
-        start = time.time()
         summary_string = ''
         bar = Bar(f'Epoch {iteration + 1}/{cfg.TRAIN.NUM_META_TR_ITER}', fill='#', max=cfg.TRAIN.NUM_META_TR_ITER)
 
@@ -254,7 +253,7 @@ def train_maml(cfg, log_dir):
 
         bar.suffix = summary_string
         bar.next()
-        
+
         # Meta-validation
         if (iteration!=0) and iteration % cfg.TEST_PRINT_INTERVAL == 0:
         # if iteration==0:
