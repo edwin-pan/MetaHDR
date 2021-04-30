@@ -217,7 +217,7 @@ def train_maml(cfg, log_dir):
                     else:
                         learner.adapt(train_error)
 
-            summary_string += f'({batch_index + 1}/{cfg.TRAIN.BATCH_SIZE}) | Total: {bar.elapsed_td} | ' \
+            summary_string = f'({batch_index + 1}/{cfg.TRAIN.BATCH_SIZE}) | Total: {bar.elapsed_td} | ' \
                              f'ETA: {bar.eta_td:} | [pre] Loss: {pre_loss[-1]:.4f} | [pre] SSIM: {pre_ssims[-1]:.4f}'
 
             # Compute validation loss
@@ -227,6 +227,7 @@ def train_maml(cfg, log_dir):
             
             # Plot the last batch index
             if batch_index == cfg.TRAIN.BATCH_SIZE-1:
+                summary_string += f' | [post] Loss: {iteration_error.item()/(batch_index+1):.4f} | [post] SSIM: {valid_ssim:.4f}'
                 fig, ax = plt.subplots(nrows=1,ncols=3)
                 ax[0].imshow(visualize_hdr_image(predictions[0].detach().cpu().permute(1, 2, 0).numpy()))
                 ax[0].axis('off')
@@ -246,8 +247,6 @@ def train_maml(cfg, log_dir):
             iteration_error += valid_error
             iteration_ssim += valid_ssim
 
-            if batch_index == cfg.TRAIN.BATCH_SIZE-1:
-                summary_string += f' | [post] Loss: {iteration_error.item()/(batch_index+1):.4f} | [post] SSIM: {valid_ssim:.4f}'
             bar.suffix = summary_string
             bar.next()
 
@@ -262,6 +261,7 @@ def train_maml(cfg, log_dir):
         losses.append(iteration_error.item())
 
         # Meta-validation
+        print("[Running Meta-Validation]")
         if (iteration!=0) and iteration % cfg.TEST_PRINT_INTERVAL == 0:
         # if iteration==0:
             val_train, val_test = dg.sample_batch('meta_val', cfg.TRAIN.VAL_BATCH_SIZE)
