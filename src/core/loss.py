@@ -134,7 +134,7 @@ class VGGLoss(nn.Module):
         self.scale = scale
 
     def forward(self, x, y):
-        x_vgg, y_vgg = self.vgg(x), self.vgg(y)
+        x_vgg, y_vgg = self.vgg(x.float()), self.vgg(y.float())
         sim = 0
         for i in range(len(x_vgg)):
             sim += self.weights[i] * self.l1_loss(x_vgg[i], y_vgg[i].detach())
