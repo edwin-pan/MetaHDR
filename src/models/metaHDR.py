@@ -178,7 +178,7 @@ def train_maml(cfg, log_dir):
         test = torch.from_numpy(test).to(device)
 
         summary_string = ''
-        bar = Bar(f'Train Epoch {iteration + 1}/{cfg.TRAIN.NUM_META_TR_ITER}', fill='#', max=cfg.TRAIN.NUM_META_TR_ITER)
+        bar = Bar(f'[Train] Epoch {iteration + 1}/{cfg.TRAIN.NUM_META_TR_ITER}', fill='#', max=cfg.TRAIN.NUM_META_TR_ITER)
 
         for batch_index in range(cfg.TRAIN.BATCH_SIZE):
             learner = meta_model.clone()
@@ -186,6 +186,9 @@ def train_maml(cfg, log_dir):
             # Separate data into adaptation/evalutation sets
             adaptation_data, adaptation_labels = train[0, batch_index, ...].permute(0, 3, 1, 2), train[1, batch_index, ...].permute(0, 3, 1, 2)
             evaluation_data, evaluation_labels = test[0, batch_index, ...].permute(0, 3, 1, 2), test[1, batch_index, ...].permute(0, 3, 1, 2)          
+
+            summary_string = f'({batch_index + 1}/{cfg.TRAIN.BATCH_SIZE}) | Total: {bar.elapsed_td} | ' \
+                             f'ETA: {bar.eta_td:}'
 
             # Fast Adaptation -- first iter
             if not batch_index:
@@ -198,8 +201,7 @@ def train_maml(cfg, log_dir):
                 pre_train_ssim = ssim(first_train_pred, torch.clip(adaptation_labels, 0, 1)).item()
 
                 # logger.info('[Pre-Train  {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, train_error.item(), pre_train_ssim))
-                summary_string = f'({batch_index + 1}/{cfg.TRAIN.BATCH_SIZE}) | Total: {bar.elapsed_td} | ' \
-                             f'ETA: {bar.eta_td:} | [pre] Loss: {train_error.item():.4f} | [pre] SSIM: {pre_train_ssim:.4f}'
+                summary_string += f' | [pre] Loss: {train_error.item():.4f} | [pre] SSIM: {pre_train_ssim:.4f}'
                 pre_ssims.append(pre_train_ssim)
 
                 # Fast Adaptation -- rest of the iters
