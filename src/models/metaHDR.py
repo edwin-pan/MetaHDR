@@ -218,7 +218,7 @@ def train_maml(cfg, log_dir):
                         learner.adapt(train_error)
 
             summary_string += f'({batch_index + 1}/{cfg.TRAIN.BATCH_SIZE}) | Total: {bar.elapsed_td} | ' \
-                             f'ETA: {bar.eta_td:} | [pre] Loss: {pre_loss[-1]:.4f} | [pre] SSIM: {pre_train_ssim[-1]:.4f}'
+                             f'ETA: {bar.eta_td:} | [pre] Loss: {pre_loss[-1]:.4f} | [pre] SSIM: {pre_ssims[-1]:.4f}'
 
             # Compute validation loss
             predictions = learner(evaluation_data)
