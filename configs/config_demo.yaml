@@ -7,7 +7,7 @@ TEST_PRINT_INTERVAL: 3
 
 # Training parameters
 TRAIN:
-  LOSS_FUNC: 'ExpandNetLoss' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
+  LOSS_FUNC: 'ExpandNetLoss' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss', 'VGGLoss']
   MODEL: 'Resnet' # [Unet, Resnet]
   INCLUDE_UNET_OUTPUTS: True
   BATCH_SIZE: 5
@@ -20,7 +20,7 @@ TRAIN:
   
 # Evaluation parameters
 EVAL:
-  LOSS_FUNC: 'ExpandNetLoss' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
+  LOSS_FUNC: 'ExpandNetLoss' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss', 'VGGLoss']
   NUM_TASK_TR_ITER: 3 # Always keep at 3 for evaluation (since we only want to evaluate on 'real' images)
   NUM_EXPOSURES: 3
   TASK_LR: 0.1

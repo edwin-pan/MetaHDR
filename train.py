@@ -4,6 +4,7 @@ from src.core.config import parse_args
 from src.core.utils import prepare_output_dir
 
 from src.models.metaHDR import train_maml
+from src.core.loss import ACCEPTABLE_LOSS_FUNCTIONS
 from src.core.utils import create_logger
 
 def main(cfg, log_dir):
@@ -13,7 +14,7 @@ def main(cfg, log_dir):
     logger.info(f'GPU feat -> {torch.cuda.get_device_properties("cuda")}')
 
     # Make sure loss_func from config is valid
-    assert cfg.TRAIN.LOSS_FUNC in ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L1', 'SSIMLoss'], f"[CONFIG] training loss function '{cfg.TRAIN.LOSS_FUNC}' not valid"
+    assert cfg.TRAIN.LOSS_FUNC in ACCEPTABLE_LOSS_FUNCTIONS, f"[CONFIG] training loss function '{cfg.TRAIN.LOSS_FUNC}' not valid"
 
     train_maml(cfg, log_dir)
 

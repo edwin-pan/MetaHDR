@@ -12,7 +12,7 @@ LOSS:
 
 # Training parameters
 TRAIN:
-  LOSS_FUNC: 'LPIPSLoss_L2' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
+  LOSS_FUNC: 'LPIPSLoss_L2' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss', 'VGGLoss']
   BATCH_SIZE: 2
   VAL_BATCH_SIZE: 3
   NUM_EXPOSURES: 3
@@ -23,7 +23,7 @@ TRAIN:
   
 # Evaluation parameters
 EVAL:
-  LOSS_FUNC: 'LPIPSLoss_L2' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss']
+  LOSS_FUNC: 'LPIPSLoss_L2' # ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss', 'VGGLoss']
   NUM_EXPOSURES: 3
   NUM_TASK_TR_ITER: 3
   TASK_LR: 0.01

@@ -10,7 +10,7 @@ from src.models.UNet import UNet
 from src.models.metaHDR import evaluate_maml, evaluate_single_maml
 from src.core.config import update_cfg, get_cfg_defaults
 from src.models.UNet import UNet
-from src.core.loss import get_loss_func
+from src.core.loss import get_loss_func, ACCEPTABLE_LOSS_FUNCTIONS
 from src.dataset.hdr_visualization import visualize_hdr_image
 
 def main(args):
@@ -82,7 +82,7 @@ def main(args):
         cfg = get_cfg_defaults()
     
     # Make sure loss_func from config is valid, then get it
-    assert cfg.EVAL.LOSS_FUNC in ['ExpandNetLoss', 'HaarLoss', 'LPIPSLoss', 'LPIPSLoss_L2', 'SSIMLoss'], f"[CONFIG] evaluation loss function '{cfg.EVAL.LOSS_FUNC}' not valid"
+    assert cfg.EVAL.LOSS_FUNC in ACCEPTABLE_LOSS_FUNCTIONS, f"[CONFIG] evaluation loss function '{cfg.EVAL.LOSS_FUNC}' not valid"
     loss_func = get_loss_func(cfg.EVAL.LOSS_FUNC)
     
     # Load weights
