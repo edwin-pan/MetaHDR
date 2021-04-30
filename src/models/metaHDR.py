@@ -218,6 +218,8 @@ def train_maml(cfg, log_dir):
                     else:
                         learner.adapt(train_error)
 
+            bar.suffix = summary_string
+            bar.next()
             # Compute validation loss
             predictions = learner(evaluation_data)
             valid_error = loss_func(predictions, torch.clip(evaluation_labels, 0, 1))
@@ -244,16 +246,15 @@ def train_maml(cfg, log_dir):
             iteration_error += valid_error
             iteration_ssim += valid_ssim
 
+            summary_string += f' | [post] Train Loss: {iteration_error.item()/(batch_index+1):.4f} | [post] Train SSIM: {valid_ssim:.4f}'
+
         iteration_error /= cfg.TRAIN.BATCH_SIZE
         iteration_ssim /= cfg.TRAIN.BATCH_SIZE
 
         # logger.info('[Post-Train {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, iteration_error.item(), valid_ssim))
-        summary_string += f' | [post] Train Loss: {iteration_error.item():.4f} | [post] Train SSIM: {valid_ssim:.4f}'
+
         ssims.append(iteration_ssim)
         losses.append(iteration_error.item())
-
-        bar.suffix = summary_string
-        bar.next()
 
         # Meta-validation
         if (iteration!=0) and iteration % cfg.TEST_PRINT_INTERVAL == 0:
