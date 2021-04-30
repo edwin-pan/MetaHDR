@@ -225,9 +225,12 @@ def train_maml(cfg, log_dir):
             valid_error = loss_func(predictions, torch.clip(evaluation_labels, 0, 1))
             valid_error /= len(evaluation_data)
             
-            # Plot the last batch index
             if batch_index == cfg.TRAIN.BATCH_SIZE-1:
+                # Record train summary string
                 summary_string += f' | [post] Loss: {iteration_error.item()/(batch_index+1):.4f} | [post] SSIM: {valid_ssim:.4f}'
+                logger.info(summary_string)
+                
+                # Plot the last batch index
                 fig, ax = plt.subplots(nrows=1,ncols=3)
                 ax[0].imshow(visualize_hdr_image(predictions[0].detach().cpu().permute(1, 2, 0).numpy()))
                 ax[0].axis('off')
@@ -261,9 +264,8 @@ def train_maml(cfg, log_dir):
         losses.append(iteration_error.item())
 
         # Meta-validation
-        print("[Running Meta-Validation]")
         if (iteration!=0) and iteration % cfg.TEST_PRINT_INTERVAL == 0:
-        # if iteration==0:
+            print("[Running Meta-Validation]")
             val_train, val_test = dg.sample_batch('meta_val', cfg.TRAIN.VAL_BATCH_SIZE)
             val_test = torch.from_numpy(val_test).to(device)
 
