@@ -187,9 +187,6 @@ def train_maml(cfg, log_dir):
             adaptation_data, adaptation_labels = train[0, batch_index, ...].permute(0, 3, 1, 2), train[1, batch_index, ...].permute(0, 3, 1, 2)
             evaluation_data, evaluation_labels = test[0, batch_index, ...].permute(0, 3, 1, 2), test[1, batch_index, ...].permute(0, 3, 1, 2)          
 
-            summary_string = f'({batch_index + 1}/{cfg.TRAIN.BATCH_SIZE}) | Total: {bar.elapsed_td} | ' \
-                             f'ETA: {bar.eta_td:}'
-
             # Fast Adaptation -- first iter
             if not batch_index:
                 first_train_pred = learner(adaptation_data)
@@ -201,7 +198,8 @@ def train_maml(cfg, log_dir):
                 pre_train_ssim = ssim(first_train_pred, torch.clip(adaptation_labels, 0, 1)).item()
 
                 # logger.info('[Pre-Train  {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, train_error.item(), pre_train_ssim))
-                summary_string += f' | [pre] Loss: {train_error.item():.4f} | [pre] SSIM: {pre_train_ssim:.4f}'
+                summary_string += f'({batch_index + 1}/{cfg.TRAIN.BATCH_SIZE}) | Total: {bar.elapsed_td} | ' \
+                             f'ETA: {bar.eta_td:} | [pre] Loss: {train_error.item():.4f} | [pre] SSIM: {pre_train_ssim:.4f}'
                 pre_ssims.append(pre_train_ssim)
 
                 # Fast Adaptation -- rest of the iters
@@ -251,6 +249,8 @@ def train_maml(cfg, log_dir):
             bar.suffix = summary_string
             bar.next()
 
+        bar.finish()
+
         iteration_error /= cfg.TRAIN.BATCH_SIZE
         iteration_ssim /= cfg.TRAIN.BATCH_SIZE
 
@@ -278,7 +278,6 @@ def train_maml(cfg, log_dir):
         opt.step()
         plt.figure()
         
-    bar.finish()
     
     # Plot losses and ssims
     plt.plot(np.arange(1, len(losses)+1), losses)
