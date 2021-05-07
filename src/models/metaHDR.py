@@ -145,9 +145,7 @@ def train_maml(cfg, log_dir):
     # dg = DataGenerator(num_exposures=cfg.TRAIN.NUM_EXPOSURES, include_unet_outputs=cfg.TRAIN.INCLUDE_UNET_OUTPUTS)
     i_dataset_train_posfix_list = _load_pkl('/home/users/edwinpan/MetaHDR/i_dataset_train.pkl')
     i_dataset_test_posfix_list = _load_pkl('/home/users/edwinpan/MetaHDR/i_dataset_test.pkl')
-    hdr_prefix = '/scratch/users/edwinpan/data/SingleHDR_training_data/HDR-Synth'
-
-    print(len(i_dataset_train_posfix_list))
+    hdr_prefix = '/scratch/users/edwinpan/data/SingleHDR_training_data/HDR-Synth/'
     
     dl = PatchHDRDataset(hdr_prefix, i_dataset_train_posfix_list, n_way=cfg.TRAIN.NUM_EXPOSURES, is_training=True)
     val_dl = PatchHDRDataset(hdr_prefix, i_dataset_test_posfix_list, n_way=cfg.TRAIN.NUM_EXPOSURES, is_training=True)
@@ -186,6 +184,7 @@ def train_maml(cfg, log_dir):
         
         # train, test = dg.sample_batch('meta_train', cfg.TRAIN.BATCH_SIZE)
         train, test = next(dl_iter)
+        print("boo")
         curr_n_way = train.shape[1]
         train = torch.from_numpy(train).to(device)
         test = torch.from_numpy(test).to(device)
