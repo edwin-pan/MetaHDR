@@ -10,7 +10,7 @@ from piqa import SSIM, PSNR
 from functools import partial
 from progress.bar import Bar
 
-from src.dataset.dataloader import DataGenerator
+from src.dataset.dataloader import DataGenerator, PatchHDRDataset, load_pkl
 from src.dataset.hdr_visualization import visualize_hdr_image
 from src.core.utils import get_GPU_usage
 from src.core.loss import get_loss_func
@@ -141,7 +141,16 @@ def validate_maml(learner, loss_func, train, test, batch_size, num_inner_updates
 
 
 def train_maml(cfg, log_dir):    
-    dg = DataGenerator(num_exposures=cfg.TRAIN.NUM_EXPOSURES, include_unet_outputs=cfg.TRAIN.INCLUDE_UNET_OUTPUTS)
+    # dg = DataGenerator(num_exposures=cfg.TRAIN.NUM_EXPOSURES, include_unet_outputs=cfg.TRAIN.INCLUDE_UNET_OUTPUTS)
+    i_dataset_train_posfix_list = _load_pkl('i_dataset_train')
+    i_dataset_test_postfix_list = _load_pkl('i_dataset_test')
+    hdr_prefix = '/Users/edwinpan/research/SIGGRAPH_ASIA_2021/SingleHDR_training_data/HDR-Synth'
+
+    dl = PatchHDRDataset(hdr_prefix, i_dataset_train_posfix_list, n_way=cfg.TRAIN.NUM_EXPOSURES, is_training=True)
+    val_dl = PatchHDRDataset(hdr_prefix, i_dataset_test_posfix_list, n_way=cfg.TRAIN.NUM_EXPOSURES, is_training=True)
+    dl_iter = iter(dl)
+    val_dl_iter = iter(val_dl)
+
     print("[DEBUG]: meta_train_data.shape=", dg.meta_train_data.shape)
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -174,14 +183,16 @@ def train_maml(cfg, log_dir):
         iteration_error = 0.0
         iteration_ssim = 0
         
-        train, test = dg.sample_batch('meta_train', cfg.TRAIN.BATCH_SIZE)
+        # train, test = dg.sample_batch('meta_train', cfg.TRAIN.BATCH_SIZE)
+        train, test = next(dl_iter)
+        curr_n_way = train.shape[1]
         train = torch.from_numpy(train).to(device)
         test = torch.from_numpy(test).to(device)
 
         summary_string = ''
         bar = Bar(f'[Train] Epoch {iteration + 1}/{cfg.TRAIN.NUM_META_TR_ITER}', fill='#', max=cfg.TRAIN.BATCH_SIZE)
 
-        for batch_index in range(cfg.TRAIN.BATCH_SIZE):
+        for batch_index in range(curr_n_way):
             learner = meta_model.clone()
 
             # Separate data into adaptation/evalutation sets
@@ -266,10 +277,13 @@ def train_maml(cfg, log_dir):
         # Meta-validation
         if (iteration!=0) and iteration % cfg.TEST_PRINT_INTERVAL == 0:
             print("[Running Meta-Validation]")
-            val_train, val_test = dg.sample_batch('meta_val', cfg.TRAIN.VAL_BATCH_SIZE)
+            # val_train, val_test = dg.sample_batch('meta_val', cfg.TRAIN.VAL_BATCH_SIZE)
+
+            val_train, val_test = next(val_dl_iter)
+            val_n_way = val_train.shape[1]
             val_test = torch.from_numpy(val_test).to(device)
 
-            _, meta_val_ssim = validate_maml(learner, loss_func, val_train, val_test, cfg.TRAIN.VAL_BATCH_SIZE, cfg.TRAIN.NUM_TASK_TR_ITER, iteration, ssim=ssim, device=device, log_dir=log_dir)
+            _, meta_val_ssim = validate_maml(learner, loss_func, val_train, val_test, val_n_way, cfg.TRAIN.NUM_TASK_TR_ITER, iteration, ssim=ssim, device=device, log_dir=log_dir)
 
             if meta_val_ssim > best_performance:
                 logger.info('Best performance achieved, saving it!')
