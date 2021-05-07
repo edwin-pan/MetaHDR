@@ -144,7 +144,7 @@ def train_maml(cfg, log_dir):
     # dg = DataGenerator(num_exposures=cfg.TRAIN.NUM_EXPOSURES, include_unet_outputs=cfg.TRAIN.INCLUDE_UNET_OUTPUTS)
     i_dataset_train_posfix_list = _load_pkl('i_dataset_train')
     i_dataset_test_postfix_list = _load_pkl('i_dataset_test')
-    hdr_prefix = '/Users/edwinpan/research/SIGGRAPH_ASIA_2021/SingleHDR_training_data/HDR-Synth'
+    hdr_prefix = '/scratch/users/edwinpan/data/SingleHDR_training_data/HDR-Synth'
 
     dl = PatchHDRDataset(hdr_prefix, i_dataset_train_posfix_list, n_way=cfg.TRAIN.NUM_EXPOSURES, is_training=True)
     val_dl = PatchHDRDataset(hdr_prefix, i_dataset_test_posfix_list, n_way=cfg.TRAIN.NUM_EXPOSURES, is_training=True)
