@@ -17,8 +17,6 @@ from torch.utils.data import Dataset
 
 np.random.seed(0)
 
-CURR_PATH_PREFIX = os.path.dirname(os.path.abspath(__file__))
-
 # --- crf_list
 
 def _get_crf_list():
