@@ -34,7 +34,7 @@ def _get_crf_list():
     return test_crf_list, train_crf_list
 
 
-test_crf_list, train_crf_list = _get_crf_list()
+# test_crf_list, train_crf_list = _get_crf_list()
 
 
 # --- invcrf_list
@@ -51,13 +51,13 @@ def _inverse_rf(
         np.linspace(0.0, 1.0, num=s),
     )(np.linspace(0.0, 1.0, num=s))
 
-_get_invcrf_list = lambda crf_list: np.array([_inverse_rf(crf) for crf in crf_list])
-test_invcrf_list = _get_invcrf_list(test_crf_list)
-train_invcrf_list = _get_invcrf_list(train_crf_list)
+# _get_invcrf_list = lambda crf_list: np.array([_inverse_rf(crf) for crf in crf_list])
+# test_invcrf_list = _get_invcrf_list(test_crf_list)
+# train_invcrf_list = _get_invcrf_list(train_crf_list)
 
-get_t_list = lambda n: 2 ** np.linspace(-3, 3, n, dtype='float32')
-test_t_list = get_t_list(7)
-train_t_list = get_t_list(600)
+# get_t_list = lambda n: 2 ** np.linspace(-3, 3, n, dtype='float32')
+# test_t_list = get_t_list(7)
+# train_t_list = get_t_list(600)
 
 
 class MemDataset(Dataset):
@@ -83,9 +83,9 @@ def _load_pkl(name):
     return out
 
 
-i_dataset_train_posfix_list = _load_pkl('i_dataset_train')
-i_dataset_test_posfix_list = _load_pkl('i_dataset_test')
-# a_dataset_test_posfix_list = _load_pkl('a_dataset_test')
+# i_dataset_train_posfix_list = _load_pkl('i_dataset_train')
+# i_dataset_test_posfix_list = _load_pkl('i_dataset_test')
+# # a_dataset_test_posfix_list = _load_pkl('a_dataset_test')
 
 
 class HDRDataset(Dataset):
