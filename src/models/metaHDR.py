@@ -183,7 +183,7 @@ def train_maml(cfg, log_dir):
         iteration_ssim = 0
         
         # train, test = dg.sample_batch('meta_train', cfg.TRAIN.BATCH_SIZE)
-        print(len(dl_iter))
+        print(len(dl))
         train, test = next(dl_iter)
         curr_n_way = train.shape[1]
         train = torch.from_numpy(train).to(device)
