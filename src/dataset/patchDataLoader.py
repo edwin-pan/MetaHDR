@@ -130,10 +130,28 @@ class PatchHDRDataset(Dataset):
     def __init__(self, hdr_prefix, hdr_posfix_list, is_training, n_way=7, load_to_mem=False):
         self._hdr_dataset = HDRDataset(hdr_prefix, hdr_posfix_list, is_training)
         self.n_way = n_way
+
+        crf_list = self.mem_get_crf_list('/home/users/edwinpan/MetaHDR/dorfCurves.txt')
+
+        self.train_crf_list = crf_list[0]
+        self.test_crf_list = crf_list[1]
+
         if load_to_mem:
             self._hdr_dataset = MemDataset(self._hdr_dataset)
         self._is_training = is_training
         return
+
+    def mem_get_crf_list(self, path):
+        with open(path, 'r') as f:
+            lines = f.readlines()
+            lines = [line.strip() for line in lines]
+        crf_list = [lines[idx + 5] for idx in range(0, len(lines), 6)]
+        crf_list = np.float32([ele.split() for ele in crf_list])
+        np.random.RandomState(730).shuffle(crf_list)
+        test_crf_list = crf_list[-10:]
+        train_crf_list = crf_list[:-10]
+
+        return test_crf_list, train_crf_list
 
     def __getitem__(self, idx):
         hdr = self._hdr_dataset[idx // 2]
