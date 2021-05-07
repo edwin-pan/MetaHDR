@@ -55,10 +55,6 @@ def _inverse_rf(
 # test_invcrf_list = _get_invcrf_list(test_crf_list)
 # train_invcrf_list = _get_invcrf_list(train_crf_list)
 
-# get_t_list = lambda n: 2 ** np.linspace(-3, 3, n, dtype='float32')
-# test_t_list = get_t_list(7)
-# train_t_list = get_t_list(600)
-
 
 class MemDataset(Dataset):
 
@@ -136,6 +132,11 @@ class PatchHDRDataset(Dataset):
         self.train_crf_list = crf_list[0]
         self.test_crf_list = crf_list[1]
 
+
+        get_t_list = lambda n: 2 ** np.linspace(-3, 3, n, dtype='float32')
+        self.test_t_list = get_t_list(7)
+        self.train_t_list = get_t_list(600)
+
         if load_to_mem:
             self._hdr_dataset = MemDataset(self._hdr_dataset)
         self._is_training = is_training
@@ -192,7 +193,7 @@ class PatchHDRDataset(Dataset):
             # Convert to SETS of LDR -> sample n randomly chosen crfs, without replacement
             n = self.n_way+1
             # Sample n exposure levels
-            chosen_exp = np.random.choice(train_t_list, n, replace=False).reshape(n,1,1,1)
+            chosen_exp = np.random.choice(self.train_t_list, n, replace=False).reshape(n,1,1,1)
             gt_imgs = np.repeat(hdr[np.newaxis, ...], n, axis=0)
             sim_exp_imgs = gt_imgs*chosen_exp
             
