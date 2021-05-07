@@ -77,8 +77,8 @@ class MemDataset(Dataset):
 
 # --- PatchHDRDataset
 
-def _load_pkl(name):
-    with open(os.path.join(CURR_PATH_PREFIX, name + '.pkl'), 'rb') as f:
+def _load_pkl(path):
+    with open(path, 'rb') as f:
         out = pickle.load(f)
     return out
 
