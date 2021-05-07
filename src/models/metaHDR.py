@@ -11,7 +11,7 @@ from functools import partial
 from progress.bar import Bar
 
 from src.dataset.dataloader import DataGenerator
-from src.dataset.patchDataLoader import PatchHDRDataset, load_pkl
+from src.dataset.patchDataLoader import PatchHDRDataset, _load_pkl
 from src.dataset.hdr_visualization import visualize_hdr_image
 from src.core.utils import get_GPU_usage
 from src.core.loss import get_loss_func

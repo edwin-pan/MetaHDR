@@ -198,8 +198,8 @@ class PatchHDRDataset(Dataset):
             
             clipped_hdr = np.clip(sim_exp_imgs, 0, 1)
             
-            chosen_int = np.random.randint(0, train_crf_list.shape[1]-1)
-            ldr = apply_rf(clipped_hdr, train_crf_list[chosen_int])
+            chosen_int = np.random.randint(0, self.train_crf_list.shape[1]-1)
+            ldr = apply_rf(clipped_hdr, self.train_crf_list[chosen_int])
             
             ldr_q = np.round(ldr * 255.0).astype(np.uint8)
             
