@@ -144,11 +144,13 @@ def validate_maml(learner, loss_func, train, test, batch_size, num_inner_updates
 def train_maml(cfg, log_dir):    
     # dg = DataGenerator(num_exposures=cfg.TRAIN.NUM_EXPOSURES, include_unet_outputs=cfg.TRAIN.INCLUDE_UNET_OUTPUTS)
     i_dataset_train_posfix_list = _load_pkl('/home/users/edwinpan/MetaHDR/i_dataset_train.pkl')
-    i_dataset_test_postfix_list = _load_pkl('/home/users/edwinpan/MetaHDR/i_dataset_test.pkl')
+    i_dataset_test_posfix_list = _load_pkl('/home/users/edwinpan/MetaHDR/i_dataset_test.pkl')
     hdr_prefix = '/scratch/users/edwinpan/data/SingleHDR_training_data/HDR-Synth'
 
+    print(len(i_dataset_train_posfix_list))
+    
     dl = PatchHDRDataset(hdr_prefix, i_dataset_train_posfix_list, n_way=cfg.TRAIN.NUM_EXPOSURES, is_training=True)
-    val_dl = PatchHDRDataset(hdr_prefix, i_dataset_test_postfix_list, n_way=cfg.TRAIN.NUM_EXPOSURES, is_training=True)
+    val_dl = PatchHDRDataset(hdr_prefix, i_dataset_test_posfix_list, n_way=cfg.TRAIN.NUM_EXPOSURES, is_training=True)
     dl_iter = iter(dl)
     val_dl_iter = iter(val_dl)
 
