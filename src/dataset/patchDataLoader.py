@@ -226,11 +226,11 @@ class PatchHDRDataset(Dataset):
                 ldr_tasks = np.delete(ldr_q, np.where([the_bad_ones]), axis=0)
                 
             num_in_batch = ldr_tasks.shape[0]
-            train_ldrs = ldr_tasks[:num_in_batch-1]
+            train_ldrs = ldr_tasks[:num_in_batch-1]/255
             train_hdrs = gt_imgs[:num_in_batch-1]
             train = np.stack([train_ldrs, train_hdrs])
             
-            test_ldrs = ldr_tasks[num_in_batch-1]
+            test_ldrs = ldr_tasks[num_in_batch-1]/255
             test_hdrs = gt_imgs[num_in_batch-1]
             test = np.stack([test_ldrs, test_hdrs])
 
