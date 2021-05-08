@@ -152,6 +152,13 @@ class PatchHDRDataset(Dataset):
 
         return test_crf_list, train_crf_list
 
+    def apply_rf(self, img, rf):
+        n, h, w, c = img.shape
+        k = rf.shape[0]
+        interpolator = interp1d(np.arange(k), rf)
+        
+        return interpolator(img.flatten()*(k-1)).reshape((n, h, w, c))
+
     def __getitem__(self, idx):
         print("[DEBUG] we are in __getitem__")
         hdr = self._hdr_dataset[idx // 2]
@@ -201,7 +208,7 @@ class PatchHDRDataset(Dataset):
             
             chosen_int = np.random.randint(0, self.train_crf_list.shape[1]-1)
             print("[DEBUG] apply crf")
-            ldr = apply_rf(clipped_hdr, self.train_crf_list[chosen_int])
+            ldr = self.apply_rf(clipped_hdr, self.train_crf_list[chosen_int])
             
             ldr_q = np.round(ldr * 255.0).astype(np.uint8)
             
@@ -260,14 +267,6 @@ class PatchHDRDataset(Dataset):
         hdr_mean = np.mean(hdr)
         hdr = 0.5 * hdr / (hdr_mean + 1e-6)
         return hdr
-
-
-def apply_rf(img, rf):
-    n, h, w, c = img.shape
-    k = rf.shape[0]
-    interpolator = interp1d(np.arange(k), rf)
-    
-    return interpolator(img.flatten()*(k-1)).reshape((n, h, w, c))
 
 
 if __name__ == '__main__':    
