@@ -178,18 +178,18 @@ def train_maml(cfg, log_dir):
     
     best_performance = 0.0 # for tracking model progress
     for iteration in range(cfg.TRAIN.NUM_META_TR_ITER):
-        # print("ITERATION #", iteration)
         iteration_error = 0.0
         iteration_ssim = 0
         
-        # train, test = dg.sample_batch('meta_train', cfg.TRAIN.BATCH_SIZE)
         print(len(dl))
         try:
             train, test = next(dl_iter)
         except StopIteration:
-            dl_iter = iter(dl)
-            train, test = next(dl_iter)
-            
+            import traceback
+            traceback.print_exc()
+            # dl_iter = iter(dl)
+            # train, test = next(dl_iter)
+        
         curr_n_way = train.shape[1]
         train = torch.from_numpy(train).to(device)
         test = torch.from_numpy(test).to(device)

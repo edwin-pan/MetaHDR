@@ -121,7 +121,7 @@ class HDRDataset(Dataset):
     
 
 class PatchHDRDataset(Dataset):
-    def __init__(self, hdr_prefix, hdr_posfix_list, is_training, n_way=7, load_to_mem=False):
+    def __init__(self, hdr_prefix, hdr_posfix_list, is_training=True, n_way=7, load_to_mem=False):
         self._hdr_dataset = HDRDataset(hdr_prefix, hdr_posfix_list, is_training)
         self.n_way = n_way
 
@@ -153,6 +153,7 @@ class PatchHDRDataset(Dataset):
         return test_crf_list, train_crf_list
 
     def __getitem__(self, idx):
+        print("[DEBUG] we are in __getitem__")
         hdr = self._hdr_dataset[idx // 2]
         h, w, _, = hdr.shape
         if h > w:
@@ -161,6 +162,7 @@ class PatchHDRDataset(Dataset):
             hdr = hdr[:, :512, :] if idx % 2 == 0 else hdr[:, -512:, :]
         hdr = PatchHDRDataset._pre_hdr_p2(hdr)
         if self._is_training:
+            print("[DEBUG] we are training")
             scale = np.random.uniform(0.5, 2.0)
             hdr = cv2.resize(hdr, (np.round(512 * scale).astype(np.int32), np.round(512 * scale).astype(np.int32)), cv2.INTER_AREA)
 
