@@ -189,7 +189,7 @@ class PatchHDRDataset(Dataset):
             if _rand_f_v():
                 hdr = np.flip(hdr, 1)
 
-        
+            print("[DEBUG] we are about to do exposures")
             # Convert to SETS of LDR -> sample n randomly chosen crfs, without replacement
             n = self.n_way+1
             # Sample n exposure levels
@@ -200,10 +200,12 @@ class PatchHDRDataset(Dataset):
             clipped_hdr = np.clip(sim_exp_imgs, 0, 1)
             
             chosen_int = np.random.randint(0, self.train_crf_list.shape[1]-1)
+            print("[DEBUG] apply crf")
             ldr = apply_rf(clipped_hdr, self.train_crf_list[chosen_int])
             
             ldr_q = np.round(ldr * 255.0).astype(np.uint8)
             
+            print("[DEBUG] check")
             # Check to make sure the exposures aren't "illegal"
             upperThresh = 249
             lowerThresh = 6
@@ -238,6 +240,7 @@ class PatchHDRDataset(Dataset):
             test = np.stack([test_ldrs, test_hdrs])
             test = np.expand_dims(test, axis=1)
 
+            print("[DEBUG] end")
         return train, test
 
     def __len__(self):
