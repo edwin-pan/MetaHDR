@@ -233,6 +233,7 @@ class PatchHDRDataset(Dataset):
             test_ldrs = ldr_tasks[num_in_batch-1]
             test_hdrs = gt_imgs[num_in_batch-1]
             test = np.stack([test_ldrs, test_hdrs])
+            
             test = np.expand_dims(test, axis=1)
 
         return train, test

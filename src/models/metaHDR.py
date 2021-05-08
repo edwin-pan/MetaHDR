@@ -180,30 +180,24 @@ def train_maml(cfg, log_dir):
     for iteration in range(cfg.TRAIN.NUM_META_TR_ITER):
         iteration_error = 0.0
         iteration_ssim = 0
-        
-        print(len(dl))
-        try:
-            train, test = next(dl_iter)
-        except StopIteration:
-            import traceback
-            traceback.print_exc()
-            # dl_iter = iter(dl)
-            # train, test = next(dl_iter)
-        
-        curr_n_way = train.shape[1]
-        train = torch.from_numpy(train).to(device)
-        test = torch.from_numpy(test).to(device)
-
+    
         summary_string = ''
         bar = Bar(f'[Train] Epoch {iteration + 1}/{cfg.TRAIN.NUM_META_TR_ITER}', fill='#', max=cfg.TRAIN.BATCH_SIZE)
 
-        for batch_index in range(curr_n_way):
+        for batch_index in range(cfg.TRAIN.BATCH_SIZE):
             learner = meta_model.clone()
 
-            import pdb; pdb.set_trace()
+            try:
+                train, test = next(dl_iter)
+            except StopIteration:
+                dl_iter = iter(dl)
+                train, test = next(dl_iter)
+            train = torch.from_numpy(train).to(device)
+            test = torch.from_numpy(test).to(device)
+
             # Separate data into adaptation/evalutation sets
-            adaptation_data, adaptation_labels = train[0, batch_index, ...].permute(0, 3, 1, 2), train[1, batch_index, ...].permute(0, 3, 1, 2)
-            evaluation_data, evaluation_labels = test[0, batch_index, ...].permute(0, 3, 1, 2), test[1, batch_index, ...].permute(0, 3, 1, 2)          
+            adaptation_data, adaptation_labels = train[0, ...].permute(0, 3, 1, 2), train[1, ...].permute(0, 3, 1, 2)
+            evaluation_data, evaluation_labels = test[0, ...].permute(0, 3, 1, 2), test[1, ...].permute(0, 3, 1, 2)          
 
             # Fast Adaptation -- first iter
             if not batch_index:
@@ -286,10 +280,9 @@ def train_maml(cfg, log_dir):
             # val_train, val_test = dg.sample_batch('meta_val', cfg.TRAIN.VAL_BATCH_SIZE)
 
             val_train, val_test = next(val_dl_iter)
-            val_n_way = val_train.shape[1]
             val_test = torch.from_numpy(val_test).to(device)
 
-            _, meta_val_ssim = validate_maml(learner, loss_func, val_train, val_test, val_n_way, cfg.TRAIN.NUM_TASK_TR_ITER, iteration, ssim=ssim, device=device, log_dir=log_dir)
+            _, meta_val_ssim = validate_maml(learner, loss_func, val_train, val_test, cfg.TRAIN.VAL_BATCH_SIZE, cfg.TRAIN.NUM_TASK_TR_ITER, iteration, ssim=ssim, device=device, log_dir=log_dir)
 
             if meta_val_ssim > best_performance:
                 logger.info('Best performance achieved, saving it!')
