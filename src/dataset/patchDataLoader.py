@@ -152,15 +152,6 @@ class PatchHDRDataset(Dataset):
 
         return test_crf_list, train_crf_list
 
-    def apply_rf(self, img, rf):
-        print("[DEBUG] Inside rf")
-        n, h, w, c = img.shape
-        k = rf.shape[0]
-        print("[DEBUG] Inside rf")
-        interpolator = interp1d(np.arange(k), rf)
-        print("[DEBUG] Inside rf")
-        return interpolator(img.flatten()*(k-1)).reshape((n, h, w, c))
-
     def __getitem__(self, idx):
         print("[DEBUG] we are in __getitem__")
         hdr = self._hdr_dataset[idx // 2]
@@ -210,7 +201,7 @@ class PatchHDRDataset(Dataset):
             
             chosen_int = np.random.randint(0, self.train_crf_list.shape[1]-1)
             print("[DEBUG] apply crf")
-            ldr = self.apply_rf(clipped_hdr, self.train_crf_list[chosen_int])
+            ldr = PatchHDRDataset.apply_rf(clipped_hdr, self.train_crf_list[chosen_int])
             
             ldr_q = np.round(ldr * 255.0).astype(np.uint8)
             
@@ -254,6 +245,16 @@ class PatchHDRDataset(Dataset):
 
     def __len__(self):
         return 2 * len(self._hdr_dataset)
+
+    @staticmethod
+    def apply_rf(img, rf):
+        print("[DEBUG] Inside rf")
+        n, h, w, c = img.shape
+        k = rf.shape[0]
+        print("[DEBUG] Inside rf")
+        interpolator = interp1d(np.arange(k), rf)
+        print("[DEBUG] Inside rf")
+        return interpolator(img.flatten()*(k-1)).reshape((n, h, w, c))
 
     @staticmethod
     def _hdr_rand_flip(hdr):
