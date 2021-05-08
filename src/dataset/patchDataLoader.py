@@ -156,7 +156,7 @@ class PatchHDRDataset(Dataset):
         n, h, w, c = img.shape
         k = rf.shape[0]
         interpolator = interp1d(np.arange(k), rf)
-        
+        print("[DEBUG] Inside rf")
         return interpolator(img.flatten()*(k-1)).reshape((n, h, w, c))
 
     def __getitem__(self, idx):
