@@ -199,7 +199,7 @@ class PatchHDRDataset(Dataset):
             chosen_int = np.random.randint(0, self.train_crf_list.shape[0]-1)
             ldr = PatchHDRDataset.apply_rf(clipped_hdr, self.train_crf_list[chosen_int])
             
-            ldr_q = np.round(ldr * 255.0).astype(np.uint8)
+            ldr_q = np.round(ldr * 255.0).astype(np.uint8).astype(np.float64)
             
             # Check to make sure the exposures aren't "illegal"
             upperThresh = 249
@@ -233,7 +233,7 @@ class PatchHDRDataset(Dataset):
             test_ldrs = ldr_tasks[num_in_batch-1]
             test_hdrs = gt_imgs[num_in_batch-1]
             test = np.stack([test_ldrs, test_hdrs])
-            
+
             test = np.expand_dims(test, axis=1)
 
         return train, test
