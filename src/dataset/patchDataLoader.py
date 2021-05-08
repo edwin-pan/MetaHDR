@@ -155,12 +155,16 @@ class PatchHDRDataset(Dataset):
     def __getitem__(self, idx):
         print("[DEBUG] netered")
         hdr = self._hdr_dataset[idx // 2]
+        print("[DEBUG] read data")
         h, w, _, = hdr.shape
         if h > w:
             hdr = hdr[:512, :, :] if idx % 2 == 0 else hdr[-512:, :, :]
         else:
             hdr = hdr[:, :512, :] if idx % 2 == 0 else hdr[:, -512:, :]
+        print("[DEBUG] cropped data")
         hdr = PatchHDRDataset._pre_hdr_p2(hdr)
+        print("[DEBUG] prepped")
+        
         if self._is_training:
             print("[DEBUG] in train entered")
             scale = np.random.uniform(0.5, 2.0)
