@@ -200,6 +200,7 @@ def train_maml(cfg, log_dir):
         for batch_index in range(curr_n_way):
             learner = meta_model.clone()
 
+            import pdb; pdb.set_trace()
             # Separate data into adaptation/evalutation sets
             adaptation_data, adaptation_labels = train[0, batch_index, ...].permute(0, 3, 1, 2), train[1, batch_index, ...].permute(0, 3, 1, 2)
             evaluation_data, evaluation_labels = test[0, batch_index, ...].permute(0, 3, 1, 2), test[1, batch_index, ...].permute(0, 3, 1, 2)          

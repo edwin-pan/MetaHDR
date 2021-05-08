@@ -153,7 +153,6 @@ class PatchHDRDataset(Dataset):
         return test_crf_list, train_crf_list
 
     def __getitem__(self, idx):
-        print("[DEBUG] we are in __getitem__")
         hdr = self._hdr_dataset[idx // 2]
         h, w, _, = hdr.shape
         if h > w:
@@ -162,7 +161,6 @@ class PatchHDRDataset(Dataset):
             hdr = hdr[:, :512, :] if idx % 2 == 0 else hdr[:, -512:, :]
         hdr = PatchHDRDataset._pre_hdr_p2(hdr)
         if self._is_training:
-            print("[DEBUG] we are training")
             scale = np.random.uniform(0.5, 2.0)
             hdr = cv2.resize(hdr, (np.round(512 * scale).astype(np.int32), np.round(512 * scale).astype(np.int32)), cv2.INTER_AREA)
 
@@ -189,7 +187,6 @@ class PatchHDRDataset(Dataset):
             if _rand_f_v():
                 hdr = np.flip(hdr, 1)
 
-            print("[DEBUG] we are about to do exposures")
             # Convert to SETS of LDR -> sample n randomly chosen crfs, without replacement
             n = self.n_way+1
             # Sample n exposure levels
@@ -200,12 +197,10 @@ class PatchHDRDataset(Dataset):
             clipped_hdr = np.clip(sim_exp_imgs, 0, 1)
             
             chosen_int = np.random.randint(0, self.train_crf_list.shape[0]-1)
-            print("[DEBUG] apply crf")
             ldr = PatchHDRDataset.apply_rf(clipped_hdr, self.train_crf_list[chosen_int])
             
             ldr_q = np.round(ldr * 255.0).astype(np.uint8)
             
-            print("[DEBUG] check")
             # Check to make sure the exposures aren't "illegal"
             upperThresh = 249
             lowerThresh = 6
@@ -240,7 +235,6 @@ class PatchHDRDataset(Dataset):
             test = np.stack([test_ldrs, test_hdrs])
             test = np.expand_dims(test, axis=1)
 
-            print("[DEBUG] end")
         return train, test
 
     def __len__(self):
@@ -248,12 +242,9 @@ class PatchHDRDataset(Dataset):
 
     @staticmethod
     def apply_rf(img, rf):
-        print("[DEBUG] Inside rf")
         n, h, w, c = img.shape
         k = rf.shape[0]
-        print("[DEBUG] Inside rf")
         interpolator = interp1d(np.arange(k), rf)
-        print("[DEBUG] Inside rf")
         return interpolator(img.flatten()*(k-1)).reshape((n, h, w, c))
 
     @staticmethod
