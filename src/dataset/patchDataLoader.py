@@ -153,6 +153,7 @@ class PatchHDRDataset(Dataset):
         return test_crf_list, train_crf_list
 
     def __getitem__(self, idx):
+        print("[DEBUG] netered")
         hdr = self._hdr_dataset[idx // 2]
         h, w, _, = hdr.shape
         if h > w:
@@ -161,9 +162,9 @@ class PatchHDRDataset(Dataset):
             hdr = hdr[:, :512, :] if idx % 2 == 0 else hdr[:, -512:, :]
         hdr = PatchHDRDataset._pre_hdr_p2(hdr)
         if self._is_training:
+            print("[DEBUG] in train entered")
             scale = np.random.uniform(0.5, 2.0)
             hdr = cv2.resize(hdr, (np.round(512 * scale).astype(np.int32), np.round(512 * scale).astype(np.int32)), cv2.INTER_AREA)
-
 
             def randomCrop(img, width, height):
                 assert img.shape[0] >= height
@@ -187,6 +188,7 @@ class PatchHDRDataset(Dataset):
             if _rand_f_v():
                 hdr = np.flip(hdr, 1)
 
+            print("[DEBUG] doing exposures")
             # Convert to SETS of LDR -> sample n randomly chosen crfs, without replacement
             n = self.n_way+1
             # Sample n exposure levels
@@ -236,6 +238,7 @@ class PatchHDRDataset(Dataset):
 
             test = np.expand_dims(test, axis=1)
 
+            print("[DEBUG] doing exposures")
         return train, test
 
     def __len__(self):
