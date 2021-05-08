@@ -153,8 +153,10 @@ class PatchHDRDataset(Dataset):
         return test_crf_list, train_crf_list
 
     def apply_rf(self, img, rf):
+        print("[DEBUG] Inside rf")
         n, h, w, c = img.shape
         k = rf.shape[0]
+        print("[DEBUG] Inside rf")
         interpolator = interp1d(np.arange(k), rf)
         print("[DEBUG] Inside rf")
         return interpolator(img.flatten()*(k-1)).reshape((n, h, w, c))
