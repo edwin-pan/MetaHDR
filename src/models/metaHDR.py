@@ -165,6 +165,8 @@ def train_maml(cfg, log_dir):
     dl_iter = iter(dl)
     val_dl_iter = iter(val_dl)
 
+    dummy = next(val_dl_iter)
+
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     lr=cfg.TRAIN.META_LR
     maml_lr=cfg.TRAIN.TASK_LR
