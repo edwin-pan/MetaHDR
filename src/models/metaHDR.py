@@ -109,13 +109,26 @@ def evaluate_maml(model, loss_func, train, test, idx, num_inner_updates, device=
     return test_predictions[0].detach().cpu().permute(1, 2, 0).numpy(), test_ssim, test_psnr
 
 @torch.no_grad()
-def validate_maml(learner, loss_func, train, test, batch_size, num_inner_updates, curr_meta_iter, ssim=None, device=None, log_dir=None):
+def validate_maml(learner, loss_func, val_dl, val_dl_iter, batch_size, num_inner_updates, curr_meta_iter, ssim=None, device=None, log_dir=None):
     model = learner.clone()
+
+
     test_error, test_ssim = 0, 0
     for batch_idx in range(batch_size):
-        adaptation_data, adaptation_labels = train[0, batch_idx, ...], train[1, batch_idx, ...]
-        evaluation_data, evaluation_labels = test[0, batch_idx, ...].permute(0, 3, 1, 2), test[1, batch_idx, ...].permute(0, 3, 1, 2)
 
+        try:
+            train, test = next(val_dl_iter)
+        except StopIteration:
+            val_dl_iter = iter(val_dl)
+            train, test = next(val_dl_iter)
+
+        test = torch.from_numpy(test).to(device)
+
+        adaptation_data, adaptation_labels = train[0, ...], train[1, ...]
+        evaluation_data, evaluation_labels = test[0, ...].permute(0, 3, 1, 2), test[1, ...].permute(0, 3, 1, 2)
+
+        # TODO: Wrap all these functions in 1 Trainer class
+        # TODO: Enable adaptation for validation
         test_predictions = model(evaluation_data)
         test_error += loss_func(test_predictions, torch.clip(evaluation_labels, 0, 1))/len(test_predictions)
         test_ssim += ssim(test_predictions, torch.clip(evaluation_labels, 0, 1)).item()
@@ -279,10 +292,7 @@ def train_maml(cfg, log_dir):
             print("[Running Meta-Validation]")
             # val_train, val_test = dg.sample_batch('meta_val', cfg.TRAIN.VAL_BATCH_SIZE)
 
-            val_train, val_test = next(val_dl_iter)
-            val_test = torch.from_numpy(val_test).to(device)
-
-            _, meta_val_ssim = validate_maml(learner, loss_func, val_train, val_test, cfg.TRAIN.VAL_BATCH_SIZE, cfg.TRAIN.NUM_TASK_TR_ITER, iteration, ssim=ssim, device=device, log_dir=log_dir)
+            _, meta_val_ssim = validate_maml(learner, loss_func, val_dl, val_dl_iter, cfg.TRAIN.VAL_BATCH_SIZE, cfg.TRAIN.NUM_TASK_TR_ITER, iteration, ssim=ssim, device=device, log_dir=log_dir)
 
             if meta_val_ssim > best_performance:
                 logger.info('Best performance achieved, saving it!')
