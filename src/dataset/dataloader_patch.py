@@ -195,84 +195,83 @@ class PatchHDRDataset(Dataset):
         hdr = PatchHDRDataset._pre_hdr_p2(hdr)
         print("[DEBUG] prepped")
         
-        if self._is_training:
-            print("[DEBUG] in train entered")
-            scale = np.random.uniform(0.5, 2.0)
-            hdr = cv2.resize(hdr, (np.round(512 * scale).astype(np.int32), np.round(512 * scale).astype(np.int32)), cv2.INTER_AREA)
+        # HDR image grabbed, begin processing
+        scale = np.random.uniform(0.5, 2.0)
+        hdr = cv2.resize(hdr, (np.round(512 * scale).astype(np.int32), np.round(512 * scale).astype(np.int32)), cv2.INTER_AREA)
 
-            def randomCrop(img, width, height):
-                assert img.shape[0] >= height
-                assert img.shape[1] >= width
-                if img.shape[1] == width or img.shape[0] == height:
-                    return img
-                x = np.random.randint(0, img.shape[1] - width)
-                y = np.random.randint(0, img.shape[0] - height)
-                img = img[y:y + height, x:x + width]
+        def randomCrop(img, width, height):
+            assert img.shape[0] >= height
+            assert img.shape[1] >= width
+            if img.shape[1] == width or img.shape[0] == height:
                 return img
+            x = np.random.randint(0, img.shape[1] - width)
+            y = np.random.randint(0, img.shape[0] - height)
+            img = img[y:y + height, x:x + width]
+            return img
 
-            hdr = randomCrop(hdr, 256, 256)
+        hdr = randomCrop(hdr, 256, 256)
 
-            hdr = np.rot90(hdr, np.random.randint(4))
+        hdr = np.rot90(hdr, np.random.randint(4))
 
-            _rand_f_h = lambda: np.random.choice([True, False])
-            if _rand_f_h():
-                hdr = np.flip(hdr, 0)
+        _rand_f_h = lambda: np.random.choice([True, False])
+        if _rand_f_h():
+            hdr = np.flip(hdr, 0)
 
-            _rand_f_v = lambda: np.random.choice([True, False])
-            if _rand_f_v():
-                hdr = np.flip(hdr, 1)
+        _rand_f_v = lambda: np.random.choice([True, False])
+        if _rand_f_v():
+            hdr = np.flip(hdr, 1)
 
-            print("[DEBUG] doing exposures")
-            # Convert to SETS of LDR -> sample n randomly chosen crfs, without replacement
-            n = self.n_way+1
-            # Sample n exposure levels
-            chosen_exp = np.random.choice(self.train_t_list, n, replace=False).reshape(n,1,1,1)
-            gt_imgs = np.repeat(hdr[np.newaxis, ...], n, axis=0)
-            sim_exp_imgs = gt_imgs*chosen_exp
+        print("[DEBUG] doing exposures")
+        # Convert to SETS of LDR -> sample n randomly chosen crfs, without replacement
+        n = self.n_way+1
+        # Sample n exposure levels
+        chosen_exp = np.random.choice(self.train_t_list, n, replace=False).reshape(n,1,1,1)
+        gt_imgs = np.repeat(hdr[np.newaxis, ...], n, axis=0)
+        sim_exp_imgs = gt_imgs*chosen_exp
+        
+        clipped_hdr = np.clip(sim_exp_imgs, 0, 1)
+        
+        chosen_int = np.random.randint(0, self.train_crf_list.shape[0]-1)
+        ldr = PatchHDRDataset.apply_rf(clipped_hdr, self.train_crf_list[chosen_int])
+        
+        ldr_q = np.round(ldr * 255.0).astype(np.uint8).astype(np.float64)
+        
+        # Check to make sure the exposures aren't "illegal"
+        upperThresh = 249
+        lowerThresh = 6
+        limit = 256*256*0.5
+        grayscale = color.rgb2gray(ldr_q)*255.0
+        
+        over_exp = np.greater_equal(grayscale, upperThresh)
+        over_count = np.sum(over_exp, axis=(1,2))
+        over_bools = over_count > limit
+        
+        under_exp = np.less_equal(grayscale, lowerThresh)
+        under_count = np.sum(under_exp, axis=(1,2))
+        under_bools = under_count > limit
+        
+        score = under_count + over_count
+        best_of_the_worst = np.argsort(score)[-2:]
+        
+        the_bad_ones = under_bools | over_bools
+        
+        if np.sum(the_bad_ones) >= n-1:
+            ldr_tasks = ldr_q[best_of_the_worst]
+        else:
+            ldr_tasks = np.delete(ldr_q, np.where([the_bad_ones]), axis=0)
             
-            clipped_hdr = np.clip(sim_exp_imgs, 0, 1)
-            
-            chosen_int = np.random.randint(0, self.train_crf_list.shape[0]-1)
-            ldr = PatchHDRDataset.apply_rf(clipped_hdr, self.train_crf_list[chosen_int])
-            
-            ldr_q = np.round(ldr * 255.0).astype(np.uint8).astype(np.float64)
-            
-            # Check to make sure the exposures aren't "illegal"
-            upperThresh = 249
-            lowerThresh = 6
-            limit = 256*256*0.5
-            grayscale = color.rgb2gray(ldr_q)*255.0
-            
-            over_exp = np.greater_equal(grayscale, upperThresh)
-            over_count = np.sum(over_exp, axis=(1,2))
-            over_bools = over_count > limit
-            
-            under_exp = np.less_equal(grayscale, lowerThresh)
-            under_count = np.sum(under_exp, axis=(1,2))
-            under_bools = under_count > limit
-            
-            score = under_count + over_count
-            best_of_the_worst = np.argsort(score)[-2:]
-            
-            the_bad_ones = under_bools | over_bools
-            
-            if np.sum(the_bad_ones) >= n-1:
-                ldr_tasks = ldr_q[best_of_the_worst]
-            else:
-                ldr_tasks = np.delete(ldr_q, np.where([the_bad_ones]), axis=0)
-                
-            num_in_batch = ldr_tasks.shape[0]
-            train_ldrs = ldr_tasks[:num_in_batch-1]/255
-            train_hdrs = gt_imgs[:num_in_batch-1]
-            train = np.stack([train_ldrs, train_hdrs])
-            
-            test_ldrs = ldr_tasks[num_in_batch-1]/255
-            test_hdrs = gt_imgs[num_in_batch-1]
-            test = np.stack([test_ldrs, test_hdrs])
+        num_in_batch = ldr_tasks.shape[0]
+        train_ldrs = ldr_tasks[:num_in_batch-1]/255
+        train_hdrs = gt_imgs[:num_in_batch-1]
+        train = np.stack([train_ldrs, train_hdrs])
+        
+        test_ldrs = ldr_tasks[num_in_batch-1]/255
+        test_hdrs = gt_imgs[num_in_batch-1]
+        test = np.stack([test_ldrs, test_hdrs])
 
-            test = np.expand_dims(test, axis=1)
+        test = np.expand_dims(test, axis=1)
 
-            print("[DEBUG] doing exposures")
+        print("[DEBUG] doing exposures")
         return train, test
 
     def __len__(self):
