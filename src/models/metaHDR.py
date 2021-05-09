@@ -11,7 +11,7 @@ from functools import partial
 from progress.bar import Bar
 
 from src.dataset.dataloader import DataGenerator
-from src.dataset.patchDataLoader import PatchHDRDataset, _load_pkl
+from src.dataset.dataloader_patch import PatchHDRDataset, _load_pkl
 from src.dataset.hdr_visualization import visualize_hdr_image
 from src.core.utils import get_GPU_usage
 from src.core.loss import get_loss_func
@@ -158,7 +158,7 @@ def train_maml(cfg, log_dir):
     # dg = DataGenerator(num_exposures=cfg.TRAIN.NUM_EXPOSURES, include_unet_outputs=cfg.TRAIN.INCLUDE_UNET_OUTPUTS)
     i_dataset_train_posfix_list = _load_pkl('/home/users/edwinpan/MetaHDR/i_dataset_train.pkl')
     i_dataset_test_posfix_list = _load_pkl('/home/users/edwinpan/MetaHDR/i_dataset_test.pkl')
-    hdr_prefix = '/scratch/users/edwinpan/data/SingleHDR_training_data/HDR-Synth/'
+    hdr_prefix = '/scratch/users/edwinpan/data/SingleHDR_training_data/'
     
     dl = PatchHDRDataset(hdr_prefix, i_dataset_train_posfix_list, n_way=cfg.TRAIN.NUM_EXPOSURES, is_training=True)
     val_dl = PatchHDRDataset(hdr_prefix, i_dataset_test_posfix_list, n_way=cfg.TRAIN.NUM_EXPOSURES, is_training=True)
