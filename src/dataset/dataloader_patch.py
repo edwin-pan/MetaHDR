@@ -191,9 +191,7 @@ class PatchHDRDataset(Dataset):
             hdr = hdr[:512, :, :] if idx % 2 == 0 else hdr[-512:, :, :]
         else:
             hdr = hdr[:, :512, :] if idx % 2 == 0 else hdr[:, -512:, :]
-        print("[DEBUG] cropped data")
         hdr = PatchHDRDataset._pre_hdr_p2(hdr)
-        print("[DEBUG] prepped")
         
         # HDR image grabbed, begin processing
         scale = np.random.uniform(0.5, 2.0)
@@ -221,7 +219,6 @@ class PatchHDRDataset(Dataset):
         if _rand_f_v():
             hdr = np.flip(hdr, 1)
 
-        print("[DEBUG] doing exposures")
         # Convert to SETS of LDR -> sample n randomly chosen crfs, without replacement
         n = self.n_way+1
         # Sample n exposure levels
@@ -271,7 +268,6 @@ class PatchHDRDataset(Dataset):
 
         test = np.expand_dims(test, axis=1)
 
-        print("[DEBUG] doing exposures")
         return train, test
 
     def __len__(self):
