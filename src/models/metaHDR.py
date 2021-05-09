@@ -161,7 +161,7 @@ def train_maml(cfg, log_dir):
     hdr_prefix = '/scratch/users/edwinpan/data/SingleHDR_training_data/'
     
     dl = PatchHDRDataset(hdr_prefix, i_dataset_train_posfix_list, n_way=cfg.TRAIN.NUM_EXPOSURES, is_training=True)
-    val_dl = PatchHDRDataset(hdr_prefix, i_dataset_test_posfix_list, n_way=cfg.TRAIN.NUM_EXPOSURES, is_training=True)
+    val_dl = PatchHDRDataset(hdr_prefix, i_dataset_test_posfix_list, n_way=cfg.TRAIN.NUM_EXPOSURES, is_training=False)
     dl_iter = iter(dl)
     val_dl_iter = iter(val_dl)
 
