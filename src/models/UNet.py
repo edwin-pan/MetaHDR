@@ -61,11 +61,14 @@ class UNet(nn.Module):
 
         # Tone mapping
         if apply_tone_mapping:
-            rec = rec**(1/2.2)
+            rec_tm = rec**(1/2.2)
 
         # Constrain to [0,1]
-        rec = (rec - torch.min(rec)) / (torch.max(rec) - torch.min(rec))
-        return rec
+        rec_n = (rec_tm - torch.min(rec_tm)) / (torch.max(rec_tm) - torch.min(rec_tm))
+
+        if rec_n.isnan().any():
+            import pdb; pdb.set_trace()
+        return rec_n
 
 
 class Resnet(nn.Module):
