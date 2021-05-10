@@ -251,7 +251,7 @@ def train_maml(cfg, log_dir):
             
             if batch_index == cfg.TRAIN.BATCH_SIZE-1:
                 # Record train summary string
-                summary_string += f' | [post] Loss: {iteration_error.item()/(batch_index+1):.4f} | [post] SSIM: {valid_ssim:.4f}'
+                summary_string += f' | [post] Loss: {iteration_error/(batch_index+1):.4f} | [post] SSIM: {valid_ssim:.4f}'
                 logger.debug(summary_string)
                 
                 # Plot the last batch index
