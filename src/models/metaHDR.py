@@ -269,13 +269,10 @@ def train_maml(cfg, log_dir):
                 plt.close()
             
             # Will return avg ssim 
-            valid_ssim = ssim(predictions, torch.clip(evaluation_labels, 0, 1)).item()
+            valid_ssim = ssim(predictions, torch.clip(evaluation_labels, 0, 1)).item().item()
             
             iteration_error += valid_error
             iteration_ssim += valid_ssim
-
-            import pdb; pdb.set_trace()
-
 
             bar.suffix = summary_string
             bar.next()
