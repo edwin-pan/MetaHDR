@@ -33,7 +33,7 @@ class UNet(nn.Module):
         alpha = alpha.expand(-1, 3, -1, -1)
         return alpha
 
-    def forward(self, x):
+    def forward(self, x, apply_tone_mapping=True):
         # Apply Contracting Layers
         c1 = self.contract1(x)
         p1 = self.pool(c1)
@@ -58,6 +58,13 @@ class UNet(nn.Module):
         res = torch.relu(out)
 
         rec = res*self.get_alpha_mask(x) + x
+
+        # Tone mapping
+        if apply_tone_mapping:
+            rec = rec**(1/2.2)
+
+        # Constrain to [0,1]
+        rec = (rec - torch.min(rec)) / (torch.max(rec) - torch.min(rec))
         return rec
 
 
