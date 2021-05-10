@@ -57,7 +57,7 @@ class UNet(nn.Module):
         # out = torch.sigmoid(out)
         res = torch.relu(out)
 
-        rec = res*get_alpha_mask(x) + x
+        rec = res*self.get_alpha_mask(x) + x
         return rec
 
 
