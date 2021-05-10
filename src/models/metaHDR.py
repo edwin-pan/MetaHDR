@@ -87,6 +87,7 @@ def evaluate_maml(model, loss_func, train, test, idx, num_inner_updates, device=
 
         test_predictions = learner(evaluation_data)
         test_error += loss_func(test_predictions, torch.clip(evaluation_labels, 0, 1))/len(test_predictions)
+        import pdb; pdb.set_trace()
         test_ssim += ssim(test_predictions, torch.clip(evaluation_labels, 0, 1)).item()
         test_psnr += psnr(test_predictions, torch.clip(evaluation_labels, 0, 1)).item()
 
@@ -164,8 +165,6 @@ def train_maml(cfg, log_dir):
     val_dl = PatchHDRDataset(hdr_prefix, i_dataset_test_posfix_list, n_way=cfg.TRAIN.NUM_EXPOSURES, is_training=False)
     dl_iter = iter(dl)
     val_dl_iter = iter(val_dl)
-
-    dummy = next(val_dl_iter)
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     lr=cfg.TRAIN.META_LR
