@@ -33,7 +33,7 @@ class UNet(nn.Module):
         alpha = alpha.expand(-1, 3, -1, -1)
         return alpha
 
-    def forward(self, x, apply_tone_mapping=True):
+    def forward(self, x, apply_tone_mapping=False):
         # Apply Contracting Layers
         c1 = self.contract1(x)
         p1 = self.pool(c1)
