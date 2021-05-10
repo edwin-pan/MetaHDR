@@ -28,7 +28,7 @@ class UNet(nn.Module):
     def get_alpha_mask(self, x, threshold=0.12):
         # Highlight mask
         alpha, _ = torch.max(x, dim=1) # Find max, per channel
-        alpha = torch.minimum(torch.ones(1), torch.maximum(torch.zeros(1), alpha-1.0 + threshold)/threshold)
+        alpha = torch.minimum(torch.ones(1).to(x.device()), torch.maximum(torch.zeros(1).to(x.device()), alpha-1.0 + threshold)/threshold)
         alpha = alpha.reshape((-1, 1, x.shape[2], x.shape[3]))
         alpha = alpha.expand(-1, 3, -1, -1)
         return alpha
