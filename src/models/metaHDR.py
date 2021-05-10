@@ -247,7 +247,7 @@ def train_maml(cfg, log_dir):
             # Compute validation loss
             predictions = learner(evaluation_data)
             valid_error = loss_func(predictions, torch.clip(evaluation_labels, 0, 1))
-            valid_error /= len(evaluation_data)
+            valid_error.backward()
             
             if batch_index == cfg.TRAIN.BATCH_SIZE-1:
                 # Record train summary string
@@ -269,10 +269,10 @@ def train_maml(cfg, log_dir):
                 plt.close()
             
             # Will return avg ssim 
-            valid_ssim = ssim(predictions, torch.clip(evaluation_labels, 0, 1)).item().item()
+            valid_ssim = ssim(predictions, torch.clip(evaluation_labels, 0, 1))
             
-            iteration_error += valid_error
-            iteration_ssim += valid_ssim
+            iteration_error += valid_error.item()
+            iteration_ssim += valid_ssim.item()
 
             bar.suffix = summary_string
             bar.next()
@@ -299,14 +299,15 @@ def train_maml(cfg, log_dir):
                 save_best_model(learner, iteration, meta_val_ssim, log_dir)
                 best_performance = meta_val_ssim
 
-        # Take the meta-learning step
+        # Average accumulated gradients and optimize
         opt.zero_grad()
-        iteration_error.backward()
+        for param in meta_model.parameters():
+            param.grad.data.mul_(1.0 / cfg.TRAIN.BATCH_SIZE)
         opt.step()
-        plt.figure()
         
     
     # Plot losses and ssims
+    plt.figure()
     plt.plot(np.arange(1, len(losses)+1), losses)
     plt.xlabel("Iteration")
     plt.ylabel("Loss")
