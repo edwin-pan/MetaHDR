@@ -25,6 +25,9 @@ class UNet(nn.Module):
         # Define Pooling Operator
         self.pool = torch.nn.MaxPool2d((2,2), stride=2)
 
+    def get_alpha_mask(self, x, threshold=0.12):
+        pass
+
     def forward(self, x):
         # Apply Contracting Layers
         c1 = self.contract1(x)
@@ -46,7 +49,8 @@ class UNet(nn.Module):
         e2 = self.expand2(f2)
         f1 = torch.cat([e2,c1],1)
         out = self.top(f1)
-        out = torch.sigmoid(out)
+        # out = torch.sigmoid(out)
+        out = torch.relu(out)
 
         return out
 
