@@ -87,7 +87,6 @@ def evaluate_maml(model, loss_func, train, test, idx, num_inner_updates, device=
 
         test_predictions = learner(evaluation_data)
         test_error += loss_func(test_predictions, torch.clip(evaluation_labels, 0, 1))/len(test_predictions)
-        import pdb; pdb.set_trace()
         test_ssim += ssim(test_predictions, torch.clip(evaluation_labels, 0, 1)).item()
         test_psnr += psnr(test_predictions, torch.clip(evaluation_labels, 0, 1)).item()
 
@@ -274,6 +273,9 @@ def train_maml(cfg, log_dir):
             
             iteration_error += valid_error
             iteration_ssim += valid_ssim
+
+            import pdb; pdb.set_trace()
+
 
             bar.suffix = summary_string
             bar.next()
