@@ -285,7 +285,7 @@ def train_maml(cfg, log_dir):
         # logger.info('[Post-Train {}] Train Loss : {:.3f} Train SSIM : {:.3f}'.format(iteration, iteration_error.item(), valid_ssim))
 
         ssims.append(iteration_ssim)
-        losses.append(iteration_error.item())
+        losses.append(iteration_error)
 
         # Meta-validation
         if (iteration!=0) and iteration % cfg.TEST_PRINT_INTERVAL == 0:
