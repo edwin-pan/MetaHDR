@@ -26,7 +26,12 @@ class UNet(nn.Module):
         self.pool = torch.nn.MaxPool2d((2,2), stride=2)
 
     def get_alpha_mask(self, x, threshold=0.12):
-        pass
+        # Highlight mask
+        alpha, _ = torch.max(adaptation_data, dim=1) # Find max, per channel
+        alpha = torch.minimum(torch.ones(1), torch.maximum(torch.zeros(1), alpha-1.0 + threshold)/threshold)
+        alpha = alpha.reshape((-1, 1, adaptation_data.shape[2], adaptation_data.shape[3]))
+        alpha = alpha.expand(-1, 3, -1, -1)
+        return alpha
 
     def forward(self, x):
         # Apply Contracting Layers
@@ -50,9 +55,10 @@ class UNet(nn.Module):
         f1 = torch.cat([e2,c1],1)
         out = self.top(f1)
         # out = torch.sigmoid(out)
-        out = torch.relu(out)
+        res = torch.relu(out)
 
-        return out
+        rec = res*get_alpha_mask(x) + x
+        return rec
 
 
 class Resnet(nn.Module):
