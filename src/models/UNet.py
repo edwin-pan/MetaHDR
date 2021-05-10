@@ -64,7 +64,7 @@ class UNet(nn.Module):
             rec_tm = rec**(1/2.2)
 
         # Constrain to [0,1]
-        rec_n = (rec_tm - torch.min(rec_tm)) / (torch.max(rec_tm) - torch.min(rec_tm))
+        rec_n = (rec - torch.min(rec)) / (torch.max(rec) - torch.min(rec))
 
         if rec_n.isnan().any():
             import pdb; pdb.set_trace()
